@@ -1,0 +1,3 @@
+# Standardfilurval för ripgrep. Namnge filen uttryckligen för en riktad granskning.
+/studio/package-lock.json
+/test/**/visare.mall.html

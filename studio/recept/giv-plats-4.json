@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "giv-plats-4",
+  "title": "Ett kort till plats 4",
+  "targetSeat": 4,
+  "reviewSeats": [4, 1],
+  "keyframes": ["redo", "grepp-i-skon", "kort-pa-kant", "slapp", "kortet-ligger-kvar"],
+  "promptDraft": "Dealern tar ett kort från skon, håller kortet mellan tumme och pekfinger, lägger det framför spelaren på plats 4 och drar tillbaka handen.",
+  "reviewCriteria": [
+    "Tumme och pekfinger ligger på var sin sida om kortet under greppet.",
+    "Det synliga kortlagret tar över vid samma bildruta som handen släpper.",
+    "Kortet landar på vald punkt och ligger kvar när handen lämnar bordet.",
+    "Båda stolarna visar samma kort, tidpunkt och landningspunkt."
+  ]
+}

@@ -1,0 +1,29 @@
+<!doctype html><html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ljus och bakgrund · Ultimate Reality</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f2eb;color:#20372e;font:16px/1.5 "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:22px clamp(14px,3vw,42px) 34px}header,.group,nav{display:flex;align-items:center;flex-wrap:wrap;gap:8px}header{justify-content:space-between;margin-bottom:12px}h1{font:normal clamp(26px,4vw,40px)/1.14 Georgia,serif;margin:0}.group{font-size:14px}button{font:600 14px "Segoe UI",Arial,sans-serif;background:#e4e7dd;color:inherit;border:0;border-radius:5px;padding:9px 12px;cursor:pointer}button[aria-pressed=true]{background:#244738;color:white}button:focus-visible{outline:3px solid #ad7530}nav{margin:10px 0}figure{margin:0}img{display:block;width:100%;height:auto;border-radius:7px;background:#26332c}figcaption{padding:9px 0;font-weight:600}p{max-width:77ch;margin:5px 0}footer{margin-top:15px;border-top:1px solid #ccd2c7;padding-top:9px;font-size:14px}a{color:#265840}@media(max-width:650px){header{gap:12px}nav{gap:5px}button{padding:8px;font-size:13px}}
+</style>
+<main><header><h1>Ljus och bakgrund</h1><div class="group" role="group" aria-label="Spelarkamera">Spelarkamera <button data-seat="4">Stol 4</button><button data-seat="1">Stol 1</button></div></header>
+<nav aria-label="Scenprov"><button data-mode="salong">Salongens eget ljus</button><button data-mode="studioljus">Salong med studioljus</button><button data-mode="studiofond">Studiofotot som rum</button><button data-mode="lounge">Fotograferad lounge</button></nav>
+<figure><img id="render" width="1600" height="900" alt=""><figcaption id="caption" aria-live="polite"></figcaption></figure>
+<p id="note"></p><footer>Samma bord, sko, kortmål och kameror i alla åtta bilder. Bordet är 160 × 108 cm. Kamerorna är 124 respektive 116 cm över provgolvet. Samma tonkurva och exponering används genom hela provet.
+<p>Källor · <a href="https://polyhaven.com/a/studio_kontrast_04">Studio Kontrast 04</a> · <a href="https://polyhaven.com/a/lythwood_lounge">Lythwood Lounge</a> · <a href="https://polyhaven.com/license">CC0</a></p></footer></main>
+<script type="application/json" id="bilder">__IMAGES__</script><script>
+const samples=JSON.parse(document.getElementById("bilder").textContent);
+const notes={
+salong:"Den byggda salongen ger bordet sina reflexer. Följ den räfflade pelaren mot bakväggen vid kamerabytet.",
+studioljus:"Samma salong, lampor och skuggor. Enda ändringen är miljöljuset på materialen. Studio Kontrast 04 ger andra reflexer längs läderrelingen.",
+studiofond:"Studio Kontrast 04 används både som synligt panoramafoto och som miljöljus. Fotots golv är projicerat till en golvyta. Bord och sko är 3D.",
+lounge:"Lythwood Lounge används både som bakgrund och miljöljus. Golvlampan intill bordet är byggd i 3D och förskjuts framför möblerna vid kamerabytet. Soffor och väggar ingår i panoramafotot."
+};
+let mode="lounge",seat="4";
+function show(){
+ for(const b of document.querySelectorAll("[data-mode]")) b.setAttribute("aria-pressed",String(b.dataset.mode===mode));
+ for(const b of document.querySelectorAll("[data-seat]")) b.setAttribute("aria-pressed",String(b.dataset.seat===seat));
+ const label=document.querySelector('[data-mode="'+mode+'"]').textContent+" · Stol "+seat;
+ const img=document.getElementById("render");img.alt=label;img.src=samples[mode][seat];
+ document.getElementById("caption").textContent=label;document.getElementById("note").textContent=notes[mode];
+}
+for(const b of document.querySelectorAll("button")) b.onclick=()=>{if(b.dataset.mode)mode=b.dataset.mode;if(b.dataset.seat)seat=b.dataset.seat;show()};
+show();
+</script></html>

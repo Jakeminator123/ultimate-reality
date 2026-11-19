@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bordsdjup · Ultimate Reality</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f2eb;color:#20372e;font:16px/1.5 "Segoe UI",Arial,sans-serif}
+main{max-width:1320px;margin:auto;padding:26px clamp(14px,3vw,42px) 48px}
+header,.controls,.set{display:flex;align-items:center;flex-wrap:wrap;gap:10px}header{justify-content:space-between;gap:14px;margin-bottom:18px}
+h1{font:normal clamp(25px,4vw,40px)/1.15 Georgia,serif;margin:0;letter-spacing:-.025em}
+.set{gap:2px;background:#e6e7dd;border-radius:7px;padding:3px}.set button{border:0;background:transparent;color:inherit;border-radius:5px;font:600 14px "Segoe UI",Arial,sans-serif;padding:8px 11px;cursor:pointer}
+button[aria-pressed="true"]{background:#254638;color:white}button:focus-visible,summary:focus-visible{outline:3px solid #b48339}
+figure{margin:0}figure img{display:block;width:100%;height:auto;border-radius:9px;background:#252d28}
+figcaption{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:11px 0;color:#42584b;font-size:14px}a{color:#215640}
+details{border-top:1px solid #c6cec1;margin-top:12px;padding:12px 0}summary{cursor:pointer;font-weight:650}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;margin:16px 0;font-size:14px}dt{color:#536458}dd{margin:0}
+@media(max-width:620px){main{padding-top:16px}.controls{gap:8px}.set button{font-size:13px;padding:8px}dl{grid-template-columns:1fr;gap:2px}dd{margin-bottom:6px}}
+</style>
+<main>
+<header><h1>Bordsdjup</h1><div class="controls">
+<span id="kameravy">Kamera vid spelarplats</span><div class="set" aria-labelledby="kameravy" role="group"><button data-seat="4" aria-pressed="true">Stol 4</button><button data-seat="1" aria-pressed="false">Stol 1</button></div>
+<div class="set" aria-label="Ytterdjup" role="group"><button data-depth="grund" aria-pressed="true">108 cm</button><button data-depth="kort" aria-pressed="false">96 cm</button></div>
+</div></header>
+<figure><img id="bild" src="grund-stol-4.png" width="1600" height="900" alt="Tomt blackjackbord från stol 4">
+<figcaption><span id="caption" aria-live="polite"></span><a id="download" download href="grund-stol-4.png">Hämta PNG</a></figcaption></figure>
+<details open><summary>Mått och fasta punkter</summary>
+<dl><dt>Bord</dt><dd id="table"></dd><dt>Kamera</dt><dd id="camera"></dd>
+<dt>Riktning</dt><dd id="direction"></dd><dt>Mittkryss, kortmål och sko</dt><dd id="anchors"></dd>
+<dt>Dealerkant och Paulinas sittpose</dt><dd id="dealer"></dd><dt>Rum</dt><dd id="parallax"></dd></dl>
+</details>
+<details><summary>Vad jämförs?</summary><p>Grundprovet använder Ultimate Realitys nominella ytterkontur på 160 × 108 cm och en ny blackjackform med urtag för dealern. Det korta provet drar in spelarbågen 12 cm. Växla djup från samma stol för att bedöma filten mellan kortmålet och armstödet. Växla sedan stol för att se hur pelaren förskjuts mot väggpanelerna.</p>
+<p>Bilagans GLB på 210 × 159 cm, lutning på 5° och förslag på 140 cm gäller det separata projektet <b>3d-dealer</b>. Båda Ultimate Reality-proven använder plan filt och eget scenmaterial.</p></details>
+<small>Scenprov filtdjup-v1. Alla rumsmått, bordsmått och kameror är antagna modellmått. X går åt höger från stol 4, Y uppåt och +Z mot stol 4. Filten ligger på Y = 0.</small>
+</main>
+<script type="application/json" id="measurements">__METADATA__</script>
+<script>
+const data = JSON.parse(document.getElementById("measurements").textContent);
+const el = id => document.getElementById(id);
+const num = (v, places=1) => v.toLocaleString("sv-SE",{maximumFractionDigits:places});
+const cm = v => num(v*100,2);
+const xyz = v => "(" + v.map(cm).join(" / ") + ") cm";
+let seat = "4", depth = "grund";
+function show() {
+  const camera = data.cameras[seat], bounds = data.bounds[depth];
+  const src = depth+"-stol-"+seat+".png";
+  el("bild").src = src;
+  el("bild").alt = "Tomt blackjackbord i salongen från stol "+seat+", ytterdjup "+cm(bounds.max[2]-bounds.min[2])+" cm";
+  el("download").href = src;
+  el("caption").textContent = "Stol "+seat+" · "+data.width+" × "+data.height+" px · "+(depth === "kort" ? "framkant indragen 12 cm" : "grunddjup");
+  el("table").textContent = cm(bounds.max[0]-bounds.min[0])+" × "+cm(bounds.max[2]-bounds.min[2])+" cm, plan filt 75 cm över golvet. Framkant vid Z = "+cm(bounds.max[2])+" cm.";
+  el("camera").textContent = xyz(camera.eye)+", "+num(camera.floorHeightCm)+" cm över golvet. Synfält "+num(camera.fovVertical)+"° vertikalt och "+num(camera.fovHorizontal)+"° horisontellt.";
+  el("direction").textContent = "Siktpunkt "+xyz(camera.aim)+", "+num(camera.downDegrees)+"° nedåt. Enhetsvektor ("+camera.direction.map(x=>num(x,3)).join(" / ")+").";
+  el("anchors").textContent = "Kryss "+xyz(data.points.mittkryss)+", mål "+xyz(data.points.kortmal)+", skons bas "+xyz(data.points.sko)+". Krysset markerar grundbordets mitt och ligger kvar i det kortare provet.";
+  el("dealer").textContent = "Dealerkant vid X = 0 och Z = −28 cm. För Paulinas första sittprov låg stödytans mitt vid Z = −39 cm, 59,25 cm över provgolvet.";
+  const wall = camera.wallBehindColumn;
+  el("parallax").textContent = "Siktlinjen genom pelarens mitt träffar "+(wall.wall === "bakvägg" ? "bakväggen" : "höger vägg")+" vid "+xyz(wall.xyz)+".";
+  for (const b of document.querySelectorAll("[data-seat]")) b.setAttribute("aria-pressed",String(b.dataset.seat === seat));
+  for (const b of document.querySelectorAll("[data-depth]")) b.setAttribute("aria-pressed",String(b.dataset.depth === depth));
+}
+for (const b of document.querySelectorAll("button")) b.onclick = () => {
+  if (b.dataset.seat) seat = b.dataset.seat;
+  if (b.dataset.depth) depth = b.dataset.depth;
+  show();
+};
+show();
+</script></html>

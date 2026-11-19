@@ -1,0 +1,29 @@
+<!doctype html><html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kortskons placering · Ultimate Reality</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f2eb;color:#20382e;font:16px/1.5 "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:22px clamp(14px,3vw,42px) 36px}header,nav,.cameras{display:flex;gap:8px;align-items:center;flex-wrap:wrap}header{justify-content:space-between;margin-bottom:12px}nav{margin:10px 0}h1{font:normal clamp(25px,4vw,40px)/1.15 Georgia,serif;margin:0}
+button{font:600 14px "Segoe UI",Arial,sans-serif;background:#e2e7db;color:inherit;border:0;border-radius:5px;padding:9px 12px;cursor:pointer}button[aria-pressed=true]{background:#254738;color:white}button:focus-visible{outline:3px solid #ac783f}img{width:100%;height:auto;display:block;border-radius:9px;background:#24372d}p{margin:8px 0}#caption{font-weight:650}small{color:#486053}
+</style>
+<main><header><h1>Kortskons placering</h1><div class="cameras" role="group" aria-label="Spelarkamera">Spelarkamera <button data-seat="4">Stol 4</button><button data-seat="1">Stol 1</button></div></header>
+<nav aria-label="Prov"><button data-mode="original">Original</button><button data-mode="flyttad">Flyttad sko</button><button data-mode="sankt">Sänkt armbåge</button><button data-mode="rackvidd">Vänster hand vid öppningen</button></nav>
+<img id="bild" width="1600" height="900" alt=""><p id="caption" aria-live="polite"></p><p id="note"></p><small>Alla mått gäller Paulinas digitala provpose i samma bordsscen. Hennes vänster syns till höger i bilden från Stol 4. Öppningen är vänd mot spelarsidan i båda placeringarna.</small></main>
+<script id="resultat" type="application/json">__RESULT__</script><script>
+const data=JSON.parse(document.getElementById("resultat").textContent);
+const num = x=>x.toLocaleString("sv-SE",{maximumFractionDigits:1});
+const notes={
+original:"Skons centrum ligger vid X = −23,7 cm, Z = −21 cm. Paulinas högra armbåge ligger 14,2 cm över filten.",
+flyttad:"Skons centrum ligger vid X = +42 cm, Z = −21 cm. Paulina har originalposen. Avståndet i sidled är minst "+num(data.metrics.whole_body_lateral_gap_lower_bound_cm)+" cm till hennes kropp.",
+sankt:"Med skon på Paulinas vänstra sida har höger armbåge sänkts till "+num(data.metrics.new_right_elbow_xyz_cm[1])+" cm över filten. Vilohanden ligger kvar. Hela kroppen går fri från både skiva och sko.",
+rackvidd:"I detta stilla räckprov kommer vänster pekfingers yta inom "+num(data.reach.left_index_surface_sample_to_opening_mm)+" mm från öppningens mitt. Kroppen går fri från skivan och skon. Kortutdragning behöver provas i rörelse."
+};
+let mode="sankt", seat="4";
+function show(){
+ for(const b of document.querySelectorAll("[data-mode]")) b.setAttribute("aria-pressed",String(b.dataset.mode===mode));
+ for(const b of document.querySelectorAll("[data-seat]")) b.setAttribute("aria-pressed",String(b.dataset.seat===seat));
+ const label=document.querySelector('[data-mode="'+mode+'"]').textContent+" · Stol "+seat;
+ const img=document.getElementById("bild");img.alt=label;img.src=data.images[mode][seat];
+ document.getElementById("caption").textContent=label;document.getElementById("note").textContent=notes[mode];
+}
+for(const b of document.querySelectorAll("button")) b.onclick=()=>{if(b.dataset.mode)mode=b.dataset.mode;if(b.dataset.seat)seat=b.dataset.seat;show()};
+show();
+</script></html>

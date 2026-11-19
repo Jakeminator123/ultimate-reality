@@ -1,0 +1,3 @@
+# Inläsning på begäran. Git behåller låsfilen och de reproducerbara provskripten.
+/studio/package-lock.json
+/test/**/visare.mall.html
