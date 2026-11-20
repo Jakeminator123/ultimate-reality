@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
     if (!room || extra.length) return new Response("Okänd panoramavy.", { status: 404 });
     const root = path.resolve(process.cwd(), "..");
     if (!asset) {
-      const html = await readFile(/* turbopackIgnore: true */ path.join(root, "test/bakgrund/panorama/visare.mall.html"), "utf8");
+      const html = await readFile(/* turbopackIgnore: true */ path.join(root, "test/bakgrund/panorama/visare.html.tmpl"), "utf8");
       const query = new URL(request.url).searchParams;
       const selectedSeat = query.get("stol");
       const seat = selectedSeat === "4" || selectedSeat === "1" ? selectedSeat : "";

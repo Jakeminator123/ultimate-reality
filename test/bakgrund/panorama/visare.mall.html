@@ -1,67 +1,24 @@
 <!doctype html>
 <html lang="sv">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{title}} · Panorama</title><link rel="icon" href="data:,">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Granska bord och miljöer · Ultimate Reality</title>
   <style>
-    :root {color-scheme:dark; font:16px "DM Sans",system-ui,sans-serif; background:#17201d; color:#f6f0e6}
-    * {box-sizing:border-box} body {margin:0}
-    main {width:min(100%,112rem);margin:auto;padding:clamp(.85rem,2vw,2rem)}
-    header, nav, footer {display:flex;gap:.5rem 1.1rem;align-items:center;flex-wrap:wrap}
-    header {justify-content:space-between;margin-bottom:1rem}
-    h1 {font:normal clamp(1.8rem,4vw,3rem) Georgia,serif;margin:0}
-    nav a,footer a,button {font:inherit; color:inherit; background:transparent; border:1px solid #6d7b74; padding:.4rem .7rem; border-radius:.35rem; cursor:pointer; text-decoration:none}
-    nav a[aria-current="page"] {background:#e1cda9; border-color:#e1cda9; color:#1d2621}
-    :focus-visible {outline:2px solid #f2d4a3;outline-offset:2px}
-    canvas {display:block; width:100%; height:clamp(15rem,70svh,65rem); background:#242e29; border-radius:.5rem; touch-action:none; cursor:grab}
-    canvas:active {cursor:grabbing}
-    footer {margin:.65rem 0;color:#d5dbd4}
-    .return {display:inline-block; color:#e1cda9; margin-bottom:.7rem}
-    select {font:inherit; color:inherit; background:#202e29; border:1px solid #6d7b74; border-radius:.35rem; padding:.3rem}
-    #status {margin:0} #status:empty {display:none}
-    main:fullscreen {background:#17201d; display:flex; flex-direction:column; height:100%; max-width:none}
-    main:fullscreen canvas {height:0;min-height:0;flex:1}
+    :root { color-scheme: dark; font: 17px/1.5 "DM Sans", system-ui, sans-serif; background: #17201d; color: #f6f0e6 }
+    main { max-width: 38rem; margin: 12vh auto; padding: 0 1.25rem }
+    h1 { font: normal clamp(2rem, 5vw, 3rem)/1.1 Georgia, serif }
+    a { color: #f2d4a3 }
+    a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px }
   </style>
-  <script type="importmap">{"imports":{"three":"/bordsprov/rum3d/three.module.js","three/addons/":"/bordsprov/rum3d/addons/"}}</script>
 </head>
 <body>
   <main>
-    <a class="return" href="/scenmiljo/bakgrund/fotopanorama">Till fotopanoraman</a>
-    <header><h1>{{title}}</h1>
-      {{platser}}
-      <nav aria-label="Panoramamiljö">
-        {{rumslankar}}
-      </nav>
-    </header>
-    <canvas id="panorama" data-eye="{{blick}}" data-seat="{{plats}}" data-view="{{vy}}" data-mat="{{matta}}" tabindex="0" aria-label="Se dig omkring i {{rum}}"></canvas>
-    <footer aria-label="Blickriktning">
-      <button id="left">Vrid åt vänster</button><button id="right">Vrid åt höger</button>
-      <button id="reset">Till utgångsvyn</button><button id="full" hidden>Helskärm</button>
-      <label>Vertikalt synfält <select id="synfalt">
-        <option value="">Standard · {{standardsynfalt}}°</option>
-        <option value="40">Snävare · 40°</option>
-        <option value="75">Vidvinkel · 75°</option>
-      </select></label>
-      {{kontroller}}
-      <span>Dra för att se dig omkring.</span>
-    </footer>
-    <p id="status" role="status">Läser panoramat…</p>
+    <h1>Granska bord och miljöer</h1>
+    <p><a href="http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4&amp;vy=paulina&amp;matta=gras">Öppna bordet med gräsmatta</a></p>
+    <p>Välj <strong>Visa grön filt</strong> under bilden för att jämföra mattorna. Ovanför bilden kan du byta miljö och växla mellan Stol 4 och Stol 1.</p>
+    <p><a href="http://127.0.0.1:4317/scenmiljo/bakgrund/fotopanorama">Visa alla fem miljöer</a></p>
+    <p>Länkarna öppnar dealerstudion när den körs på den här datorn.</p>
   </main>
-  <script>
-    document.querySelector('[data-room="{{id}}"]').setAttribute("aria-current","page");
-    document.querySelector('[data-seat="{{plats}}"][href]')?.setAttribute("aria-current","page");
-    const full = document.getElementById("full");
-    if (document.fullscreenEnabled) {
-      full.hidden = false;
-      full.onclick = async () => {
-        try {
-          if (document.fullscreenElement) await document.exitFullscreen();
-          else await document.querySelector("main").requestFullscreen();
-        } catch { document.querySelector("#status").textContent = "Webbläsaren kunde inte öppna helskärmen."; }
-      };
-      document.addEventListener("fullscreenchange", () => { full.textContent = document.fullscreenElement ? "Lämna helskärm" : "Helskärm"; });
-    }
-  </script>
-  <script type="module" src="/bordsprov/panorama/{{id}}/visare.mjs"></script>
 </body>
 </html>
