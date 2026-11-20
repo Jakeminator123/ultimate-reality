@@ -50,6 +50,27 @@ async function start() {
     camera.quaternion.copy(orbitEye.quaternion);
     renderer.render(scene, camera);
   };
+  const fovControl = document.querySelector("#synfalt");
+  if (fovControl) {
+    const defaultFov = camera.fov;
+    const requested = new URL(location.href).searchParams.get("synfalt");
+    fovControl.value = requested === "40" || requested === "75" ? requested : "";
+    function setFov() {
+      camera.fov = fovControl.value ? Number(fovControl.value) : defaultFov;
+      camera.updateProjectionMatrix();
+      function updateUrl(href) {
+        const url = new URL(href, location.href);
+        if (fovControl.value) url.searchParams.set("synfalt", fovControl.value);
+        else url.searchParams.delete("synfalt");
+        return url;
+      }
+      for (const link of document.querySelectorAll("nav a, footer a")) link.href = updateUrl(link.href).href;
+      history.replaceState(history.state, "", updateUrl(location.href));
+      render();
+    }
+    fovControl.addEventListener("change", setFov);
+    setFov();
+  }
   controls.addEventListener("change", render);
   function reset() {
     orbitEye.position.copy(home);

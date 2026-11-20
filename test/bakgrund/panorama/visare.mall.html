@@ -16,6 +16,8 @@
     canvas {display:block; width:100%; height:clamp(15rem,70svh,65rem); background:#242e29; border-radius:.5rem; touch-action:none; cursor:grab}
     canvas:active {cursor:grabbing}
     footer {margin:.65rem 0;color:#d5dbd4}
+    .return {display:inline-block; color:#e1cda9; margin-bottom:.7rem}
+    select {font:inherit; color:inherit; background:#202e29; border:1px solid #6d7b74; border-radius:.35rem; padding:.3rem}
     #status {margin:0} #status:empty {display:none}
     main:fullscreen {background:#17201d; display:flex; flex-direction:column; height:100%; max-width:none}
     main:fullscreen canvas {height:0;min-height:0;flex:1}
@@ -24,17 +26,22 @@
 </head>
 <body>
   <main>
+    <a class="return" href="/scenmiljo/bakgrund/fotopanorama">Till fotopanoraman</a>
     <header><h1>{{title}}</h1>
       {{platser}}
       <nav aria-label="Panoramamiljö">
-        <a data-room="fotostudio" href="/bordsprov/panorama/fotostudio">Fotostudion</a>
-        <a data-room="lounge" href="/bordsprov/panorama/lounge">Loungen</a>
+        {{rumslankar}}
       </nav>
     </header>
     <canvas id="panorama" data-eye="{{blick}}" data-seat="{{plats}}" data-view="{{vy}}" data-mat="{{matta}}" tabindex="0" aria-label="Se dig omkring i {{rum}}"></canvas>
     <footer aria-label="Blickriktning">
       <button id="left">Vrid åt vänster</button><button id="right">Vrid åt höger</button>
       <button id="reset">Till utgångsvyn</button><button id="full" hidden>Helskärm</button>
+      <label>Vertikalt synfält <select id="synfalt">
+        <option value="">Standard · {{standardsynfalt}}°</option>
+        <option value="40">Snävare · 40°</option>
+        <option value="75">Vidvinkel · 75°</option>
+      </select></label>
       {{kontroller}}
       <span>Dra för att se dig omkring.</span>
     </footer>

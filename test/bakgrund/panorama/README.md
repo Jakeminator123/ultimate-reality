@@ -1,4 +1,10 @@
-# Panorama v1 · fotograferade rum i 360°
+# Fotopanorama · fotograferade miljöer i 360°
+
+[Välj bland fem miljöer i studion](http://127.0.0.1:4317/scenmiljo/bakgrund/fotopanorama). `rum-v2` utökar `panorama-v1` med en softboxstudio, en herrgård utomhus och en övergiven fabriksmatsal. Byt rum medan du tittar från Stol 4 eller Stol 1 för att jämföra samma bord, rigg och kort under olika ljus. Val av stol, matta, rörelseprov och synfält följer med vid rumsbyte. [Poly Havens filer, lokala bildversioner och startvyer](rum-v2/README.md)
+
+Källan täcker 360° runt kameran och 180° från golv till tak. Visaren projicerar en del av panoramat på en plan bild. I tomt rum används normalt 63° vertikalt synfält, vid bordet 48°. **Vertikalt synfält** ger även 40° och 75° i båda lägena. Vid bildformatet 16:9 motsvarar dessa fyra val cirka 95°, 77°, 66° respektive 108° horisontellt. När visningsytans bredd ändras följer det horisontella utsnittet med.
+
+## De ursprungliga två miljöerna
 
 [Öppna fotostudion](http://127.0.0.1:4317/bordsprov/panorama) · [Bordet från Stol 4](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4) · [Bordet från Stol 1](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=1) · [Lythwood Lounge](http://127.0.0.1:4317/bordsprov/panorama/lounge)
 

@@ -1,31 +1,31 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { LocalError, requireLocal } from "../../../../lib/storage";
-
-const rooms = new Map([
-  ["lounge", { name: "Lythwood Lounge", photo: "test/bakgrund/polyhaven/lythwood_lounge_4k.hdr", eye: "-0.87,0.04,-0.5" }],
-  ["fotostudio", { name: "Brown Photostudio 01", photo: "test/bakgrund/polyhaven/brown-photostudio-01/brown_photostudio_01_4k.hdr", eye: "1,0.13,-1.05" }],
-]);
+import { panoramaRooms } from "../../../../lib/panorama-rooms";
 
 export async function GET(request: Request, { params }: { params: Promise<{ asset?: string[] }> }) {
   try {
     requireLocal(request);
     const [key = "fotostudio", asset = "", ...extra] = (await params).asset ?? [];
-    const room = rooms.get(key);
+    const room = panoramaRooms.find(candidate => candidate.id === key);
     if (!room || extra.length) return new Response("Okänd panoramavy.", { status: 404 });
     const root = path.resolve(process.cwd(), "..");
     if (!asset) {
       const html = await readFile(/* turbopackIgnore: true */ path.join(root, "test/bakgrund/panorama/visare.mall.html"), "utf8");
       const query = new URL(request.url).searchParams;
       const selectedSeat = query.get("stol");
-      const seat = key === "fotostudio" && (selectedSeat === "4" || selectedSeat === "1") ? selectedSeat : "";
+      const seat = selectedSeat === "4" || selectedSeat === "1" ? selectedSeat : "";
       const requestedView = query.get("vy");
       const view = seat && (requestedView === "golv" || requestedView === "paulina") ? requestedView : "";
       const viewQuery = view ? "&amp;vy=" + view : "";
       const grass = Boolean(seat && query.get("matta") === "gras");
       const matQuery = grass ? "&amp;matta=gras" : "";
       const seatLinks = ["4", "1"].map(id => `<a data-seat="${id}" href="?stol=${id}${viewQuery}${matQuery}">Stol ${id}</a>`).join("");
-      const seatMenu = key === "fotostudio" ? `<nav aria-label="Utsnitt i fotostudion"><a data-seat="" href="/bordsprov/panorama/fotostudio">Tomt rum</a>${seatLinks}</nav>` : "";
+      const seatMenu = `<nav aria-label="Kameraplats"><a data-seat="" href="/bordsprov/panorama/${room.id}">Tomt rum</a>${seatLinks}</nav>`;
+      const roomQuery = seat ? `?stol=${seat}${viewQuery}${matQuery}` : "";
+      const roomLinks = panoramaRooms.map(candidate =>
+        `<a data-room="${candidate.id}" href="/bordsprov/panorama/${candidate.id}${roomQuery}">${candidate.label}</a>`
+      ).join("");
       let controls = "";
       if (seat) {
         controls = view === "golv"
@@ -39,7 +39,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
           : `<a href="?stol=${seat}${viewQuery}&amp;matta=gras">Prova gräsmattan</a>`;
       }
       const title = view === "paulina" ? "Placeringsprov · Paulina v2 · pose 17" : room.name;
-      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{matta}}", grass ? "gras" : "filt").replace("{{platser}}", seatMenu).replace("{{kontroller}}", controls), {
+      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye.join(",")).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{matta}}", grass ? "gras" : "filt").replace("{{platser}}", seatMenu).replace("{{rumslankar}}", roomLinks).replace("{{standardsynfalt}}", seat ? "48" : "63").replace("{{kontroller}}", controls), {
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-cache" },
       });
     }
@@ -50,6 +50,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       ["placering.mjs", ["test/bakgrund/panorama/paulina-placering-v1/placering.mjs", "text/javascript"]],
       ["grasmatta.mjs", ["test/bakgrund/polyhaven/grass-ground-v1/grasmatta.mjs", "text/javascript"]],
       ["studio.hdr", [room.photo, "application/octet-stream"]],
+      ["forhandsvisning.jpg", [`test/bakgrund/panorama/rum-v2/${room.id}.jpg`, "image/jpeg"]],
       ["HDRLoader.js", ["studio/node_modules/three/examples/jsm/loaders/HDRLoader.js", "text/javascript"]],
     ]);
     for (const kind of ["diff", "nor_gl", "rough"]) {
