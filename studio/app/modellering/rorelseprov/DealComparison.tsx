@@ -6,7 +6,7 @@ import type { DealerMaterial } from "../../../lib/material-types";
 import styles from "./comparison.module.css";
 
 type Film = DealerMaterial["films"][number];
-type ModelTimes = { draw: number; push?: number; handover: number; turn?: number; release: number };
+type ModelTimes = Pick<DealReference, "draw" | "push" | "handover" | "turn" | "release" | "rest">;
 export type TakeComparison = { clips: readonly DealReference[]; times: ModelTimes };
 const speedKey = "rorelseprov:hastighet";
 const playbackSpeeds = [0.25, 0.5, 0.75, 1];
@@ -37,6 +37,7 @@ export default function DealComparison({ film, modelPlayer, clips, times, viewGu
   const pair = clips.length === 1;
   const hasPush = times.push !== undefined && clips.every(clip => clip.push !== undefined);
   const hasTurn = times.turn !== undefined && clips.every(clip => clip.turn !== undefined);
+  const hasRest = times.rest !== undefined && clips.every(clip => clip.rest !== undefined);
 
   useEffect(() => {
     try {
@@ -96,6 +97,7 @@ export default function DealComparison({ film, modelPlayer, clips, times, viewGu
       <button type="button" onClick={() => position("handover")}>Handbyte</button>
       {hasTurn && <button type="button" onClick={() => position("turn")}>Vändning</button>}
       <button type="button" onClick={() => position("release")}>Släpp</button>
+      {hasRest && <button type="button" onClick={() => position("rest")}>Händernas slutläge</button>}
       <button type="button" onClick={playDeal}>Spela från uttaget</button>
       <button type="button" onClick={() => {
         modelPlayer.current?.pause();

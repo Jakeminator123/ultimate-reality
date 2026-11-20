@@ -21,6 +21,8 @@ För Fas 1 jämför `tools/seated_photo_scale.py` de tre PNG-filerna med bildreg
 
 Registrerade foton, GLB-filer och filmer ligger under avatarens lokala `3d/versioner`. Källrelationer och tidigare val följer med en lokal säkerhetskopia av avatarens mapp. Projektkoden kan återskapa visningen från den kopian. [Versionshantering och köranvisning](MATERIALVERSIONER.md)
 
+Bildserie, kropp och tagning har egna versionsnummer. Paulinas `fas-1/v1` är fortfarande den valda bildserien. Dess `bildregister.json` anger `fotounderlag-v2.json` som källa, och det underlaget länkar vidare till `fotounderlag-v1.json`. I `test/artefakter` namnges varje försök efter frågan det undersöker. `skolage-v1` mäter platsen för skon medan `skolage-vilohand-v1` jämför handen med skon i två givfilmer. Vid städning kan en förkastad arbetsfil tas bort när registren, proven och deras källhänvisningar har kontrollerats mot filens exakta version. [Paulinas lokala mappguide](../avatars/paulina/README.md)
+
 - Versionshantera källkod, delade agentinstruktioner, tester, generella recept, beroendelåsfil, exempelfält utan hemligheter och korta textbeslut. Dela reproducerbara anvisningar och anonyma testdata.
 - Håll källfoton, filmer, mesh, modellvikter, råa Runway-beställningar och svar, leverantörslänkar, tokens, arbetskopior, byggresultat, cache och lokala IDE-inställningar på datorn. Git-reglerna finns i rotens `.gitignore`.
 - Inför en push, kontrollera `git remote -v`, aktuell branch och de commits som ska överföras. Granska ändringarna med `git diff --cached --name-status` före commit. Kontrollera ett tveksamt filnamn med `git check-ignore -v -- <fil>`. En ignore-regel omfattar bara ospårade filer. En push omfattar även redan committad historik.

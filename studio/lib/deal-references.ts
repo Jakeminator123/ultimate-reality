@@ -1,6 +1,6 @@
 export type DealReference = {
   title: string; view: string; file: string; sha256: string; source?: string;
-  draw: number; handover: number; release: number; push?: number; turn?: number;
+  draw: number; handover: number; release: number; push?: number; turn?: number; rest?: number;
 };
 
 // Times are relative to the local excerpts, whose cuts start at Howcast frame 4248 and VIP time 78.2 s.
@@ -32,7 +32,7 @@ export const placedCardReference: DealReference = {
   title: "Jakobs giv till plats 4", view: "Framifrån · pos4-v.mp4",
   file: "desk-v2-rorelsereferenser/material/pos4-v.mp4",
   sha256: "fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883",
-  draw: 0, push: 5 / 24, handover: 9 / 24, turn: 16 / 24, release: 25 / 24,
+  draw: 0, push: 5 / 24, handover: 9 / 24, turn: 16 / 24, release: 25 / 24, rest: 38 / 24,
 };
 
 export function referencesForTake(timingSha?: string): readonly DealReference[] {

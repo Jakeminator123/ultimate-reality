@@ -48,18 +48,18 @@ export default function ProfileComparison({ trial, front, previous, model, candi
         reference={photo} guides={guides} onGuides={setGuides}/></div>
       <div className={styles.sourceNote}>
         {candidate && <div className={styles.archiveLinks} role="group" aria-label="Välj kroppsmodell">
-          <button aria-pressed={body === "candidate"} onClick={() => setBody("candidate")}>SAM-kropp med ny sittprofil</button>
-          <button aria-pressed={body === "films"} onClick={() => setBody("films")}>{candidate.film ? "De tidigare givfilmernas kropp" : "Givfilmernas kropp"}</button>
+          <button aria-pressed={body === "candidate"} onClick={() => setBody("candidate")}>{candidate.name}</button>
+          <button aria-pressed={body === "films"} onClick={() => setBody("films")}>{model.name}</button>
         </div>}
         {body === "candidate" && candidate ? <>
           <p>Sittfronten ger kroppsformen. Trekvarten och den nya sittprofilen ligger till grund för hållningen.
             {candidate.appearanceUrl && " Växla mellan Kroppsform och Fotoutseende under modellen för att jämföra samma kameravy."}
             {!candidate.appearanceUrl && !candidate.appearanceError && " Kroppsprovet visas med neutral yta."}
-            {" "}De tidigare givfilmerna använder {model.name}.</p>
+            {" "}Bildutgåvans grundmodell i 3D-modellering är {model.name}.</p>
           {candidate.appearanceError && <p role="status">{candidate.appearanceError}</p>}
           {candidate.film && <p><a href="#givfilm">Se given på den här SAM-kroppen från stol 4 och stol 1</a></p>}
           {candidate.run && <small>SAM-körning <code>{candidate.run}</code></small>}
-        </> : <p>Den här kroppen och dess tidigare sittprofil hör till de registrerade givfilmerna.</p>}
+        </> : <p>Den här kroppen använder bildutgåvans sittprofil. Samma kropp visas i bildutgåvans rörelseprov.</p>}
         {candidateError && <p role="status">{candidateError}</p>}
         {openCandidate && !candidate && !candidateError && <p role="status">SAM-provet med den nya sittprofilen saknas för den här utgåvan.</p>}
       </div>

@@ -25,7 +25,8 @@ function viewGuide(material: DealerMaterial, film: Film, audit?: DealingStudy) {
   if (layout !== "two-seats-with-details") return;
   const [left, right] = film.cameras;
   const details = film.card && film.marks.some(mark => /ögonlock/i.test(mark.label)) ? ", först av kortet och sedan av ögonlocken" : "";
-  return `Alla fyra bilderna visar samma Paulina och samma rigg med ${material.geometry.joints} leder. Överst visas ${left.id} till vänster och ${right.id} till höger. Nederst ser du detaljutsnitt från samma kameror i samma bildruta${details}.`;
+  const description = `Alla fyra bilderna visar samma Paulina och samma rigg med ${material.geometry.joints} leder. Överst visas ${left.id} till vänster och ${right.id} till höger. Nederst ser du detaljutsnitt från samma kameror i samma bildruta${details}.`;
+  return audit.frameLayoutNote ? description + " " + audit.frameLayoutNote : description;
 }
 
 function elbowHeight(mm: number) {
@@ -55,7 +56,7 @@ function Trial({ id, title, description, films, material, audits, comparedMovie,
       const release = film.marks.find(m => /lämnar kortet|släpp/i.test(m.label))?.seconds;
       const comparison = audit && clips.length > 0 && film.sha256 === comparedMovie && handover !== undefined && release !== undefined ? {
         clips: compareHowcastVip ? dealReferences : clips, times: { draw: secondsAt(audit.draw.frames[0]) ?? 0, push: secondsAt(audit.draw.pressFrame),
-          handover, turn: secondsAt(audit.turn?.frame), release },
+          handover, turn: secondsAt(audit.turn?.frame), release, rest: secondsAt(audit.rest?.frame) },
       } : undefined;
       const selected = film.sha256 === selectedMovie;
       const v1 = film.take === "samspel-v2-v1" || film.take === "tvahandsgiv-v2-v1";

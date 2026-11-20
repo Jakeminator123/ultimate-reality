@@ -205,7 +205,10 @@
 .rig-layer-tools button { padding: 5px 9px; font-size: 13px; border-radius: 6px; background: white; }
 .rig-layer-tools button[aria-pressed=true] { background: #ddebdc; border-color: #6e8c73; color: #244433; }
 .rig-legend { width: 100%; color: #46564b; font-size: 12px; }
-.rig-face-note { flex-basis: 100%; margin: 0; line-height: 1.45; }
+.rig-legend p { flex-basis: 100%; margin: 0; line-height: 1.45; }
+.rig-landmarks { width: 100%; overflow-wrap: anywhere; }
+.rig-landmarks summary { width: fit-content; cursor: pointer; }
+.rig-landmarks ul { margin: 6px 0; padding-left: 20px; }
 .rig-legend label { display: inline-flex; align-items: center; gap: 4px; }
 .rig-legend input, .rig-camera input { accent-color: #365b45; }
 .rig-left::before, .rig-right::before, .rig-centre::before { content: ""; display: inline-block; width: .65em; height: .65em; border-radius: 50%; margin-right: 4px; }

@@ -18,7 +18,7 @@ const PoseReview = dynamic(() => import("./PoseReview"), {
 const gallery = "/fotomall.html/fas-1/v1";
 const shortNames: Record<string, string> = {
   front: "Front", trekvart: "Trekvart", profil: "Profil",
-  handryggar: "Handryggar", "kortdrag-vanster": "Kortdrag", "kortvandning-hoger": "Vändning",
+  handryggar: "Handryggar", "kortdrag-vanster": "På kortets rygg", "kortvandning-hoger": "Vändning",
 };
 
 function latestReviewedDeal(material: DealerMaterial | null) {
@@ -99,7 +99,7 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
             <a href={source} target="_blank" rel="noreferrer">Visa original <ArrowUpRight size={14}/></a>}
         </figcaption>
       </figure>
-      {selected && inventory && <PhotoEvidence photo={selected} project={inventory}/>}
+      {selected && inventory && <PhotoEvidence photo={selected} project={inventory} reviewedDeal={reviewedDeal}/>}
     </section>
 
     <section className={styles.modelPanel} aria-labelledby="current-model">

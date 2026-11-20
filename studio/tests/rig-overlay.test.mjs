@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Bone, BufferGeometry, Group, Matrix4, MeshBasicMaterial, Skeleton, SkinnedMesh } from "three";
-import { makeRigOverlay } from "../lib/rig-overlay.ts";
+import { makeRigOverlay, measureRestCentres } from "../lib/rig-overlay.ts";
 
 test("handledens kedja syns även när vridleden döljs och markörstorleken följer visningsskalan", () => {
   const body = new Group();
@@ -22,6 +22,9 @@ test("handledens kedja syns även när vridleden döljs och markörstorleken fö
   mesh.bind(new Skeleton(bones));
   const overlay = makeRigOverlay(body);
   try {
+    assert.deepEqual(measureRestCentres(body), {
+      main: { distinct: 2, shared: 0 }, all: { distinct: 4, shared: 0 },
+    });
     for (const all of [false, true]) {
       overlay.show({ skeleton: true, joints: true, surface: true, all });
       overlay.refresh(0.001);
@@ -46,6 +49,10 @@ test("handledens kedja syns även när vridleden döljs och markörstorleken fö
       markers.getMatrixAt(0, matrix);
       assert.ok(Math.abs(matrix.elements[0] - firstRadius / 2) < 1e-8);
     }
+    bones[3].position.set(0, 0, 0.000009);
+    assert.deepEqual(measureRestCentres(body).all, { distinct: 3, shared: 1 });
+    bones[3].position.z = 0.03;
+    assert.deepEqual(measureRestCentres(body).all, { distinct: 4, shared: 0 });
   } finally {
     overlay.dispose();
     mesh.skeleton.dispose();

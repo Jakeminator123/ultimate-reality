@@ -9,7 +9,7 @@ test("fingerreferens och tidsreferens kan vara olika filmer i samma tagning", as
   assert.deepEqual(referencesForTake(previous.timing.referenceSha256), dealReferences);
   const [original] = referencesForTake(placedCardReference.sha256);
   assert.equal(original.file.split("/").pop(), "pos4-v.mp4");
-  assert.deepEqual([original.draw, original.push, original.handover, original.turn, original.release].map(t => t * 24), [0, 5, 9, 16, 25]);
+  assert.deepEqual([original.draw, original.push, original.handover, original.turn, original.release, original.rest].map(t => t * 24), [0, 5, 9, 16, 25, 38]);
   assert.equal(referencesForTake(placedCardReference.sha256).length, 1);
   assert.deepEqual(referencesForTake(), []);
   assert.deepEqual(referencesForTake("0".repeat(64)), []);

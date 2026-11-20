@@ -4,7 +4,7 @@ import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } fro
 import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-review";
 import { modelPhotoRoles } from "../lib/photo-review";
 import DealComparison, { pauseAtMark, PlaybackSpeed, type TakeComparison } from "./modellering/rorelseprov/DealComparison";
-import { MotionComponents, takeLabel } from "./MotionTake";
+import { MotionComponents, takeLabel, takeLink } from "./MotionTake";
 import styles from "./modeling.module.css";
 
 export function PhotoCameraGuides({ photo }: { photo: Photo }) {
@@ -17,9 +17,10 @@ export function PhotoCameraGuides({ photo }: { photo: Photo }) {
   </svg>;
 }
 
-export function PhotoEvidence({ photo, project }: { photo: Photo; project: DealerMaterial }) {
+export function PhotoEvidence({ photo, project, reviewedDeal }: { photo: Photo; project: DealerMaterial; reviewedDeal?: DealerMaterial["films"][number] }) {
   const roles = modelPhotoRoles(photo, project);
   const front = project.photos.find(p => p.id === "sittande/front");
+  const push = reviewedDeal?.marks.find(mark => mark.label === "Utskjut ur skon");
   const check = photo.seated && front?.seated ? checkSeatedFrame({ ...photo, seated: photo.seated }, { ...front, seated: front.seated }) : null;
   const contacts = floorSpread(photo.seated?.marks, 2);
   const edition = new URLSearchParams({ dealer: project.dealer, edition: project.edition });
@@ -39,7 +40,8 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
       {check.centreDiffers && "Kroppens mitt ligger på en annan bildhöjd. "}{check.formatDiffers && "Originalens pixelmått skiljer sig."}</p>}
     {roles.includes("surface") && photo.group === "Ansikte" && <p>De tre porträtten ger hud, drag och tatueringar till samma huvud. Vyn bredvid följer porträttets målvinkel. Käkleden öppnar munnen. En blinkning kräver att själva ögonlocken rör sig över ögat.</p>}
     {roles.includes("surface") && photo.id === "hander/handryggar" && <p>Handryggarna ger hud, naglar och tatueringar till modellens händer. Vyn bredvid visar händerna i den sittande grundposen.</p>}
-    {photo.id === "hander/kortdrag-vanster" && <p>Bilden ger ett referensläge för vänsterhandens grepp vid skon. I rörelseprovet styrs handled och fingerleder så att fingertopparna följer kortets kant under utdraget.</p>}
+    {photo.id === "hander/kortdrag-vanster" && <p>På stillbilden vilar pek- och långfingrets fingerblommor på ett plant kort. Den visar kontakten inför utskjutet. I given skjuter vänstern kortet ur skon mot filten och högern tar emot kanten för att vända kortet. Modellen bredvid visar händerna i sittande vila.
+      {reviewedDeal && push && <> <a href={takeLink(project, reviewedDeal.take, "original")}>Se utskjutet i filmen · ruta {push.frame}</a></>}</p>}
     {photo.id === "rorelsereferens/kortvandning-hoger" && <p>Bilden ger ett referensläge för högerhandens grepp när kortet är på kant. Filmen ger ordningen för handbyte, vändning och släpp. Här visas riggens händer i vila.</p>}
     {photo.observed && <><p>{photo.observed.kalla}</p><details>
       <summary>Fotots riktning och ljus</summary><p>{photo.observed.observation.riktning} {photo.observed.observation.ljus}</p>

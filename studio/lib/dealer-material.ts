@@ -334,8 +334,10 @@ export async function materialFile(query: URLSearchParams, range: string | null)
 export type DealingStudy = typeof dealingStudy & {
   draw: { pressFrame?: number };
   turn?: { frame: number };
+  rest?: { frame: number };
   handover: { note?: string };
   frameLayout?: "two-seats-with-details";
+  frameLayoutNote?: string;
   handReference?: { file: string; sha256: string; frames: number[] };
 };
 export async function readDealingStudies(dealer: string): Promise<DealingStudy[]> {

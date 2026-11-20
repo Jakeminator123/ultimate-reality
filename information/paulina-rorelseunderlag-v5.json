@@ -9,6 +9,7 @@
     }
   ],
   "frameLayout": "two-seats-with-details",
+  "frameLayoutNote": "Mellan ruta 43 och 51 lyfter Paulina huvudet 2,49° på väg tillbaka till viloposen. Ögonlocken sluts i ruta 46. Båda stolkamerorna står stilla och närbilden följer ögonen.",
   "timing": {
     "source": "pos4-v.mp4",
     "url": "/api/givreferens?film=fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883",
@@ -45,7 +46,7 @@
       "l_lowarm",
       "l_uparm"
     ],
-    "note": "Stol 4 och stol 1 visar samma utskjut i ruta 4, låga handbyte i 9, vändning i 16, landning på plats 4 i 22 och släpp i 25. Blicken är öppen i 43, sluten i 46 och åter öppen i 51. Stol 1 ruta 53 visar en sammanhängande näsöppning och en kvarvarande lodrät skugga mot överläppen. Höger lillfinger spretar i ruta 16 och sminket sträcks i ruta 46."
+    "note": "Stol 4 och stol 1 visar samma utskjut i ruta 4, låga handbyte i 9, vändning i 16, landning på plats 4 i 22 och släpp i 25. Modellens vänsterhand stannar vid skon i slutruta 53. I referensfilmens slutruta 38 vilar båda händerna på filten. Stol 1 ruta 53 visar en sammanhängande näsöppning och en kvarvarande lodrät skugga mot överläppen. Höger lillfinger spretar i ruta 16 och sminket sträcks i ruta 46."
   },
   "handReference": {
     "file": "pos4-v.mp4",
@@ -184,6 +185,9 @@
   },
   "release": {
     "frame": 25
+  },
+  "rest": {
+    "frame": 53
   },
   "contact": {
     "leftMaxPadDistanceToMarkedBackMm": {

@@ -4,7 +4,7 @@ import * as T from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { resultUrl, type ActiveDealerModel, type SamPose, type PoseVersion as Version } from "../lib/modeling";
-import { jawHinge, makeRigOverlay, measureRigJoint, initialRigLayers, type RigLayers } from "../lib/rig-overlay";
+import { jawHinge, makeRigOverlay, measureRestCentres, measureRigJoint, measureRigLandmarks, initialRigLayers, type RigLayers } from "../lib/rig-overlay";
 import type { Photo } from "../lib/material-types";
 import { angleDifference, seatedStandard } from "../lib/seated-review";
 import RigCamera, { eyeRows, frontCamera, type CameraAdjustment, type CameraValues } from "./RigCamera";
@@ -13,6 +13,7 @@ const poseJoints = [["l_lowarm", "Vänster armbåge"], ["r_lowarm", "Höger armb
   ["l_index1", "Vänster pekfinger"], ["l_middle1", "Vänster långfinger"],
   ["r_index1", "Höger pekfinger"], ["r_middle1", "Höger långfinger"]] as const;
 type CameraDetail = "ansikte" | "händer";
+type RigMeasurements = { rest: ReturnType<typeof measureRestCentres>; landmarks: ReturnType<typeof measureRigLandmarks> };
 type Viewport = {
   changePose: (version: Version) => void;
   showGrid: (visible: boolean) => void;
@@ -53,7 +54,7 @@ export default function PoseReview(props: ReviewProps) {
   const [canPose, setCanPose] = useState(false);
   const [jawVersions, setJawVersions] = useState<Version[]>([]);
   const [layers, setLayers] = useState<RigLayers>(initialRigLayers);
-  const [rigCount, setRigCount] = useState<{ main: number; total: number; hasFaceRig: boolean } | null>(null);
+  const [rigCount, setRigCount] = useState<({ main: number; total: number; hasFaceRig: boolean } & RigMeasurements) | null>(null);
   const [cameraDetail, setCameraDetail] = useState<CameraDetail | null>(null);
   const [cameraValues, setCameraValues] = useState<CameraValues>(frontCamera);
   const frontUrl = pose ? resultUrl(pose, "front") : model.url;
@@ -185,6 +186,7 @@ export default function PoseReview(props: ReviewProps) {
     }
     const loader = new GLTFLoader();
     const bodies = new Map<Version, T.Group>();
+    const measurements = new Map<Version, RigMeasurements>();
     function detail(part: CameraDetail, degrees = 0) {
       const body = [...bodies.values()].find(model => model.visible);
       if (!body) return;
@@ -263,6 +265,7 @@ export default function PoseReview(props: ReviewProps) {
       bodies.set(version, body);
       body.visible = false;
       scene.add(body);
+      if (activeRig) measurements.set(version, { rest: measureRestCentres(body), landmarks: measureRigLandmarks(body) });
     }
     function changePose(selected: Version) {
       for (const [key, body] of bodies) body.visible = key === selected;
@@ -277,7 +280,8 @@ export default function PoseReview(props: ReviewProps) {
           scene.add(overlay.group);
           overlay.show(currentLayers);
         }
-        setRigCount(overlay ? { main: overlay.mainCount, total: overlay.total, hasFaceRig: overlay.hasFaceRig } : null);
+        const measured = measurements.get(selected);
+        setRigCount(overlay && measured ? { main: overlay.mainCount, total: overlay.total, hasFaceRig: overlay.hasFaceRig, ...measured } : null);
       }
       measureJoint();
       draw();
@@ -374,6 +378,8 @@ export default function PoseReview(props: ReviewProps) {
   }
   const eye = props.cameraAngle !== undefined && angleDifference(cameraValues.azimuth, props.cameraAngle) <= seatedStandard.cameraDegrees
     ? eyeRows(cameraValues, props.reference) : null;
+  const centres = layers.all ? rigCount?.rest.all : rigCount?.rest.main;
+  const landmarks = rigCount?.landmarks;
   return <div className="pose-review">
     <div className="pose-tools" aria-label="Kontroller för kroppsprov">
       {(activeRig || tableUrl || lookUrl || uprightUrl) && <span className="view-switch" role="group" aria-label={activeRig ? "Kroppsyta" : "Pose"}>
@@ -406,6 +412,28 @@ export default function PoseReview(props: ReviewProps) {
           Alla {rigCount.total} leder</label>
         <span>{layers.all ? rigCount.total : rigCount.main} visas</span>
         <span className="rig-left">Vänster</span><span className="rig-right">Höger</span><span className="rig-centre">Mittlinje</span>
+        {centres && <p className="rig-layer-note">
+          {centres.distinct} skilda ledcentrum i vila (tolerans 0,01 mm).{" "}
+          {centres.shared > 0 && <>{centres.shared} centrum delas av flera leder. </>}
+          I sidovy kan även skilda centrum täcka varandra.</p>}
+        {layers.joints && landmarks && <>
+          <p><b>Bäckenets två gröna punkter.</b> <code>root</code> är bäckenroten där låren fäster i riggen.
+            {" "}<code>c_spine0</code> är ryggradens första led. I vila ligger deras centrum{" "}
+            {landmarks.pelvisDistanceMm.toLocaleString("sv-SE", { maximumFractionDigits: 1 })} mm från varandra.</p>
+          <p><b>Underarmen.</b> Standardvyn visar armbåge och handled. Med alla {rigCount.total} leder syns även{" "}
+            {landmarks.arms[0].forearm.length} vridpunkter på vänster underarm och {landmarks.arms[1].forearm.length} på höger.</p>
+          <details className="rig-landmarks"><summary>Armarnas lednamn och de {rigCount.total - rigCount.main} extra punkterna</summary>
+            <ul>{landmarks.arms.map(arm => <li key={arm.side}><strong>{arm.side === "l" ? "Vänster" : "Höger"} arm.</strong>{" "}
+              Armbåge <code>{arm.elbow}</code> och handled <code>{arm.wrist}</code>. Mellan dem ligger{" "}
+              {arm.forearm.map((name, i) => <span key={name}>{i > 0 && ", "}<code>{name}</code></span>)}.
+              {arm.sharedEnds && <> I vila delar <code>{arm.upperTwist}</code> centrum med armbågen och <code>{arm.wristTwist}</code> med handleden.</>}
+            </li>)}</ul>
+            <p>{landmarks.twistCount} av de extra punkterna är vridleder.
+              {landmarks.hasWorld && <> <code>body_world</code> visar riggens koordinatursprung.</>}
+              {landmarks.remaining.length > 0 && <> De övriga {landmarks.remaining.length} hör till {landmarks.faceOnly ? "ansiktsriggen" : "den valda riggen"}{" "}
+                ({landmarks.remaining.map((name, i) => <span key={name}>{i > 0 && ", "}<code>{name}</code></span>)}).</>}</p>
+          </details>
+        </>}
         {cameraDetail === "ansikte" && rigCount.hasFaceRig && <p className="rig-face-note">
           Den gröna linjen går från huvudleden till riggens ändpunkt i skallen. Käkleden och ögonens rotationscentrum ligger inne i huvudet.
           Pupillerna syns i fotoytan. Nästippen saknar egen led.</p>}
