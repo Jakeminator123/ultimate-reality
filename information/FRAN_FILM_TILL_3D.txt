@@ -1,0 +1,26 @@
+﻿Paulina i 3D – från ett foto till en giv sedd från 70°
+20 november 2026
+
+En film kan visa exakt när en fingerblomma släpper ett kort. För att se andra sidan av handen behöver spelarkameran också något tredimensionellt att titta på. I vårt prov har filmen och kroppen därför olika uppgifter.
+
+1. Film för rörelsens tid och rytm
+Runway kan animera en startbild med en rörelsebeskrivning. En fast kamera, synliga händer och jämnt grön bakgrund gör resultatet lättare att mäta. Vi följer handled, armbåge och fingrar genom rutorna. En trovärdig filmbild kan fortfarande visa ett kort som hoppar mellan händerna.
+https://docs.dev.runwayml.com/assets/inputs/
+https://docs.dev.runwayml.com/guides/pricing/
+
+2. En kropp som faktiskt har djup
+Metas SAM 3D Body uppskattar kroppsform och ledpose ur en bild. MHR beskriver hur samma kroppsyta böjs med skelettet. För video behåller vi Paulinas proportioner och överför rörelsens ledvinklar med filmens tidsstämplar. Utan den låsningen kan kroppen växa eller krympa mellan rutor. När handen skyms av kortet behöver djup och kontakt kontrolleras från sidan.
+https://github.com/facebookresearch/sam-3d-body
+https://github.com/facebookresearch/MHR
+
+3. Hud, hår och kläder från flera håll
+En fototextur fäster bildens färger på kroppsytan. Varje fotografi beskriver de ytor som kameran faktiskt såg. Dream, Lift, Animate skapar kompletterande vyer och fäster små tredimensionella färgfördelningar, så kallade gaussiska splats, vid en poserbar kropp. Modellen kan ge en rimlig baksida även när dess verkliga detaljer är okända. Relightable Full-body Gaussian Codec Avatars använder i stället flerkamerainspelning med styrd belysning för att lära hur hud, ansikte och händer ser ut i nya poser och nytt ljus.
+https://research.nvidia.com/labs/dair/dream-lift-animate/
+https://neuralbodies.github.io/RFGCA/
+
+4. Grönt blir genomskinligt
+Chroma key ger pixlar nära bakgrundens gröna färg en låg opacitet. En mjuk övergång vid hår och fingerspetsar bevarar fina kanter. Den frilagda filmen visar rörelsen framifrån och hjälper oss kontrollera kroppens kontur. I blackjackmiljön renderar vi själva 3D-kroppen. Kameran kan då röra sig runt den medan hand, kort och bord skymmer varandra i rätt ordning.
+https://ffmpeg.org/ffmpeg-filters.html#chromakey
+
+Så avgör vi om det fungerar
+Frys ett grepp. Visa exakt samma kropp och kort först framifrån och sedan vid 70°. Kontrollera att överarmen får en ny silhuett, bortre fingrar skyms och kortet behåller sin plats. Spela därefter upp rörelsen bredvid Runway-filmen i normal hastighet. Då ser vi både om Paulina har volym och om dockan verkligen följer handen.

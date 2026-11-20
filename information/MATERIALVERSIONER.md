@@ -1,75 +1,43 @@
 # Materialversioner för en dealer
 
-Paulinas aktiva material på 4317 är nu bildutgåvan `fas-1/v1`. Hennes tidigare kropps-, yt- och filmversioner finns i [återställningsarkivet](HANDOFF.md#arkivet-från-20-november-2026). Exemplen med tagningar nedan beskriver den tidigare modellomgången.
+Paulinas fotoomstart utgår från bildutgåvan `fas-1/v1` och valt profilprov v3. Den tidigare sittmodellen v2, v4 och givfilmerna tillhör den arkiverade modellomgången. [Fotounderlag och mätningar](PAULINAS_STILLBILDER.md) · [Äldre kroppar och tagningar](PAULINAS_PROV.md)
 
-Studion visar den valda bildutgåvan, kroppsmodellen, fotoytan och filmerna som faktiskt hör till dem. Öppna **Modellens underlag** för pixelmått, bildkällor och granskningsrutor. Markdownrapporten och JSON-vyn läser samma lokala material som sidan. [Modellering](http://127.0.0.1:4317/#modellering) · [Paulinas aktuella materialrapport](http://127.0.0.1:4317/api/material?dealer=paulina&report=md)
+| Material | Det som identifierar versionen |
+| --- | --- |
+| Grundfoto | Ursprung, filväg, SHA-256 och pixelmått. Bildregistrets poster anger källbild och utgåva. En ny beskärning eller ändring får egen fil och referens till originalet. |
+| Kropp | SHA-256 för en GLB, SAM-körning, pose och källbilder. Behåll körningens `run.json`, bilder och skattningar. Registrera kroppskällan och eventuell separat referens för hållning. |
+| Fotoyta | Egen GLB och SHA-256, grundkroppens SHA-256 och källbilder. Registrera om hud, hår eller material ändras. |
+| Rörelse | Animerad GLB med egen SHA-256, tagning, kropp, fotoyta, tidslinje och eventuellt kort-ID och kortbana. Samma rörelse kan renderas från flera kameror. |
+| Rendering | Filmens SHA-256 och `capture.json` med rörelse, kamera, bildrutor, bildfrekvens och eventuellt kort. Granskningen binder observationen till filmkvitto, kamera och nollbaserad bildruta. |
+| Givsekvens | Ordning, filmkvitto och animerad GLB för varje klipp. För en kortgiv anges dessutom kortinstans, målplats, landningsruta och släppruta. |
 
-| Material | Det som följer med versionen | Hur vi använder uppgiften |
-| --- | --- | --- |
-| Foto | SHA-256 för originalet, bildutgåva, filformat och pixelmått. En granskning hör till exakt samma bildbytes. | Receptets 0°, 45° eller 90° beskriver önskad kamera. Granskaren beskriver synlig riktning, ljus och osäkerhet. Verkligt avstånd och objektiv kräver mätning. |
-| Kroppsmodell | GLB-version, leder, SAM-körning och bildkällor för geometri respektive hållning. | Originalbildens mått, SAM:s inlästa bild och modellens kropps- och handutsnitt är separata uppgifter. Nya körningar sparar utsnitten som faktiskt konfigurerades. För äldre körningar anges när den lokala modellkonfigurationen har lästs i efterhand. |
-| Fotoyta | Egen GLB-version, den rigg den byggdes på, källbilder och kroppstexturens inbäddade pixelmått. | Ett nytt porträtt, en ombakad textur eller en ny basrigg kan ge en ny version. De tidigare filerna går att granska vidare. |
-| Animerad modell | GLB med tidslägen från animationsspåren, exakt grundrigg och fotoyta, tagning, kort-ID och kortbanans SHA-256. | Samma arm, fingrar och kortbana kan spelas från båda stolarna. Filmexporten anger den animerade GLB-filens SHA-256. |
-| Renderad film | Filmens SHA-256, tagning, rigg, vald fotoyta, eventuellt kort, kamera och uppmätta fil- och bildrutetider. | Återanvänd samma rörelse och samma kort från olika stolar. Koppla varje iakttagelse till filmversion, kamera och nollbaserade rutor. |
-| Fotoyta i rörelse | `photoLayer` anger källfilmens kvitto, källrörelsens SHA-256 och de justerade delarna. | Växla mellan källfilmen och den korrigerade ytan på samma ruta. Registreringen kontrollerar källkropp, kort, antal rutor och bildfrekvens. [Granska fotoytan](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#fotoyta) |
-| Givsekvens | Varje steg har eget filmkvitto, animationsfil, målplats, kortinstans, landningsruta och släppruta. | En giv som slutar i REDO kan följas av nästa giv från REDO. Spelaren verifierar källorna när en sparad sekvens öppnas. Varje landat kort behåller sitt läge när kameran byts. [Arkiverad tvåkortsgiv](PAULINAS_PROV.md) |
+## Från prov till registrerad utgåva
 
-## Automatisk registrering
+1. Lägg pågående prov i sin privata versionsmapp, till exempel `avatars/paulina/prov-70/v1/`. Spara källväg och SHA-256 för varje bild, beställningsrevision och mottaget original när de finns, SAM-körningens ID och filväg samt mätningar och kameror i provets egen dokumentation. [Arbetsytor och arkiv](STUDIOSTRUKTUR.md)
+2. Flytta en färdig källkörning från labbets `runs` till `saved` med `lab.ps1 keep <körnings-id>` innan den används för ett bestående prov. När kropp och fotoyta har versionsbundna källor i GLB-filerna, registrera dem genom det befintliga verktyget. Registreringen återanvänder redan sparade bytes med samma SHA-256.
+3. Välj utgåva när den ska synas automatiskt. `activate` verifierar grundkropp, fotoyta och källornas SHA-256 mot utgåvans `bildregister.json`. Det valda profilprovet v3 ligger under `fas-1/v1/granskning/`. Om dess bytes ingår som modellkälla behövs en bildutgåva som faktiskt registrerar dem, till exempel `fas-1/v2`. [Bildregister, upplaga 1](../avatars/paulina/fas-1/v1/bildregister.json) · [Registerverktyget](../tools/material_versions.py)
 
-Den första versionssiffran i `ansiktsrigg-v2-v2` anger kroppens version och den andra anger blinkprovets version. Studion visar **Blinkning · prov 2** och anger kroppen separat. En sammansatt giv använder ett skelett och en tidslinje. GLB-filen anger SHA-256 för de hand- och ögonlocksrörelser som ingår. Registret matchar deras geometri och fotoyta. Under filmen går det att öppna källrörelser och granskade bildrutor. [Rörelseprov](http://127.0.0.1:4317/modellering/rorelseprov)
-
-När en spelbar giv tar över en granskad korrigering av kropp eller hår anger `appearanceStudy` det exakta fotoyteprovets filmkvitto. Registreringen läser de inbäddade färgtexturerna i båda GLB-filerna och jämför dem del för del. En sparad sekvens med fler kort använder samma fotoyteprov genom hela given.
-
-När en tagning får korrigerad fotoyta anger den grundtexturens SHA-256, den inbäddade nya texturens SHA-256 och vilka porträtt som använts. Vid registrering verifieras båda texturerna och porträttens koppling till grundmodellens bildserie. Den spelbara given behåller kroppens ursprungliga leder och bindning. [Prov 2 med korrigerad yta](paulina-rorelseunderlag-v2.json)
-
-I **Giv med blinkning · prov 3** kombineras handprov 3 och blinkprov 2 på samma sittmodell v2. Handprov 3 anger exakt vilka rutor i `pos4-v.mp4` som användes för fingerformen. I studion visas dessa källrutor under den giv där rörelsen ingår. [Givprov 3 med källor och mätning](paulina-rorelseunderlag-v3.json)
-
-Givprov 4 och 5 använder fortfarande sittmodell v2. Prov 4 ändrar utskjut, handbyte och placering. Prov 5 ändrar ytan vid näsan och har samma rörelsespår som prov 4. När rörelsen flyttas till sittmodell v4 används den nya kroppens viloform, hudbindning och fotoyta. Den exporterade animationen får ett eget fingeravtryck och kortkontakterna mäts om på den kroppen. Varje film registreras med sina egna granskningar från båda stolarna. [Givprov 4](paulina-rorelseunderlag-v4.json) · [Givprov 5](paulina-rorelseunderlag-v5.json) · [Mätning på SAM-sittmodell v4](../test/dealer/paulina/giv-sam-v4-v1/matning.json)
-
-För en giv med utskjut ur skon granskar vi fingerblommornas läge på den synliga kortsidan, kortets väg längs mynningen och mottagarhandens avstånd från filten vid bytet. Källfilmen visar ordning och form. Avstånd i millimeter mäts i den animerade modellen. Kontaktkraft kräver en fysisk mätning.
-
-Skons läge väljs för dealerns sittpose och hand som skjuter ut kortet. För Paulina på BORD-02 ligger SKO-03:s mitt 460 mm åt hennes vänster och 80 mm fram mot spelarna, räknat från sitsens mitt. Jämför räckvidden under utskjutet och var handen vilar efter släppet. Spara skons plats och riktning med tagningen när en annan dealer eller ett annat bord används. [Paulinas utskjut och slutpose jämförda med originalfilmen](../test/artefakter/skolage-vilohand-v1/README.md)
-
-Ange om tagningen ska sluta i **A1/VILA** eller **A2.3/REDO för nästa kort**. I prov 4 jämfördes handvilan med ruta 38 i `pos4-v.mp4`, där händerna syns framför dealern med fingrarna mot filten. För nästa giv vill Jakob använda tidigare filmer främst som exempel på REDO. Den valda förebilden för A2.3 i `dealer` har vänster fingrar på kortets rygg vid skon och högern lågt intill. Spara startpose, landning och slutpose tillsammans med versionen så att nästa kort kan börja i rätt läge. [Planen för REDO och vila](../studio/PLAN.md#nästa-giv-till-plats-4) · [Rörelsegranskning av de lokala originalen](random/desk-v2-rorelsereferenser/GRANSKNING.md)
-
-I den exporterade filmens `capture.json` anger `poses.start` och `poses.end` ankaret i första respektive sista rutan. Filmregistreringen binder dessa fält till filmens och rörelsens version. För två givar med samma kort jämför vi samma bildrutor fram till släppet och visar sedan båda slutposerna från samma stol. I REDO står vänsterhanden beredd på nästa kortrygg i skon medan det redan lagda kortet ska ligga kvar på filten. [Materialrapport med valt prov och granskade tagningar](http://127.0.0.1:4317/api/material?dealer=paulina&report=md)
-
-I samma original återvänder vänstern till skon medan högern placerar kortet i ruta 18–25. Efter släppet för vänstern in handen framför kroppen. Jämför tidpunkten då handen lämnar skon och hur båda armbågarna rör sig på vägen till vila. Spara gärna både en frontal vy och en sned vy av hela återgången. I givprov 4 på sittmodell v4 gick hudytan fri från skon och bordet i 84 mellanlägen. Bildgranskningen visade ändå en bredare armbågsställning än i källfilmen. [Vändning och släpp i ruta 15–26](random/desk-v2-rorelsereferenser/bildkartor/detalj-pos4-v-r15-26.jpg) · [Källfilmens återgång i ruta 24–38](random/desk-v2-rorelsereferenser/bildkartor/pos4-v-r24-38.jpg) · [Vilan i filmen och på v4](../test/dealer/paulina/giv-sam-v4-v4/vila-fore-efter-original.jpg)
-
-**Leder mot fotoyta.** I både sittmodell v2 och v4 har den neutrala kroppen och dess fotoyta identiska vilopositioner för alla 127 leder. Vid byte av yta läser visaren den valda GLB-filens skelett. Ögonpunkterna markerar ögonens rotationscentrum och pupillerna ligger i texturen. Den gröna huvudlinjen binder samman huvudleden och dess ändpunkt inne i skallen. I v2 ligger huvudleden 79,8 mm bakom ögonens mittpunkt i modellens framåtriktning. Markörerna har fast visningsstorlek vid zoomning. Urvalet med 77 leder ritar förbindelsen till handleden genom dess dolda vridled. [Överlägg i 3D-modelleringen](http://127.0.0.1:4317/#modellering) · [Hur ledpunkterna ritas](../studio/lib/rig-overlay.ts)
-
-**Vad som ändras när du väljer Fotoutseende.** I utgåvan v2 gav alla 18 439 kroppshörn samma position i grå och fotograferad yta. I v4:s korrigerade fotoyta är 209 hörn förskjutna lokalt kring näsan, som mest 1,70 mm. Kroppens totala bredd, höjd och djup är identiska inom respektive utgåva. Håret har ett eget skal. Porträttet i vänstra panelen visas med originalets utsnitt. När vi växlade mellan kroppsform och fotoyta i samma högra panel bevarades riktpunkt, zoom och kamera. [Båda ytorna på v2 med samma kamera](../test/dealer/paulina/fas1-sittande-v2/kroppsform-fotoyta-samma-kamera-front.jpg)
-
-I båda sittmodellerna har de 77 leder som visas normalt skilda centrum i viloposen. De 127 lederna har totalt 116 skilda centrum inom 0,01 mm. Elva par delar nästan samma position. Exempel är handledens vridled och själva handleden. Deras rotationer fyller olika funktioner i hudbindningen. Två leder på olika djup kan dessutom projiceras på samma bildpunkt från en stol.
-
-I sittmodell v2 ligger bäckenroten `root` och ryggradens första led `c_spine0` 8,1 mm isär i höjd och 37,4 mm i djup. De två höftlederna ligger till höger och vänster om roten. Armbågens rotationscentrum hör till `lowarm`. Vid 20, 40, 60 och 80 % av varje underarm fördelar fyra hjälpleder vridningen till huden. Visarens **Alla 127 leder** tar med dessa punkter.
-
-På v4 mättes det målade ögats läge mot mitten mellan den övre och nedre lockkanten i en frontvy med låst kamera. I filmprov 3 justerades irisen och ytan för slutna lock var för sig. Fotots kamerakalibrering och personens verkliga ansiktsmått är okända. [Front, trekvart och profil bredvid porträtten](../test/dealer/paulina/fas1-sittande-v4/ogonpassning/ogonpassning-tre-vinklar.jpg) · [Mätning av ögonöppningen i modellen](../test/dealer/paulina/fas1-sittande-v4/ogonpassning/iris-fore-efter.json)
-
-En arm med rätt benlängder kan ändå vrida huden tvärt mellan två rutor. Kontrollera den verkliga GLB-filens lokala rotation i handleds- och underarmslederna och ange led, första ruta, andra ruta och vinkel. I prov 3 vrids vänster underarmsled `l_lowarm_twist3_proc` 178,07° mellan ruta 11 och 12. Det skiljer sig från vinkeln mellan underarm och handflata i en stillbild. [Mät rotationen mellan filmrutor](../tools/arm_rotation_check.py)
-
-Kropps- och fotoyteverktygen registrerar färdiga avatarfiler automatiskt. Modellens inbäddade fingeravtryck bestämmer källrelationerna. Vid ny export till ett upptaget arbetsnamn får den ändrade filen ett eget versionsnamn. Återkörning av samma innehåll återanvänder det sparade objektet. En öppen studio hämtar nya uppgifter när en modellutgåva, animation, film eller granskning registreras.
-
-När en modell och en bildserie hör ihop väljer man den kombination som studion ska visa. Då kontrolleras fotoytans grundrigg och varje källbild. Valet sparar också bildoriginalen och bildregistret för senare granskning. Tidigare val finns kvar i versionsväljaren. Original, modeller, tagningar och granskningar ligger lokalt under `avatars/<dealer>/3d/versioner/`. [Verktyget](../tools/material_versions.py)
-
-Exempel från projektroten med labbets Python. Ange dealer, bildutgåva och filer för det aktuella försöket.
+Kör från projektroten med labbets Python om registreringen behöver NumPy eller Pillow. Ersätt platshållarna med provets faktiska filer och kontrollerade utgåva.
 
 ```powershell
-$labPython = '..\sam-3d-body\.venv\Scripts\python.exe'
-$modelRoot = 'avatars/paulina/3d/fas1-v2'
-$savedRun = 'D:\ultimate-reality-lab\saved\sam-20261120T015406Z-f427a95156b7'
-$rigId = & $labPython tools/material_versions.py --dealer paulina model "$modelRoot/paulina-fas1-v2.glb" --run $savedRun
-$lookId = & $labPython tools/material_versions.py --dealer paulina model "$modelRoot/utseende/paulina-fas1-v2-utseende.glb"
-& $labPython tools/material_versions.py --dealer paulina activate --id paulina-fas1-v2 --name 'Paulina · sittmodell v2' --edition fas-1/v1 --geometry $rigId --appearance $lookId
+$geometry = python -B tools/material_versions.py --dealer paulina model '<kropp.glb>' --run '<sparad SAM-körning>'
+$appearance = python -B tools/material_versions.py --dealer paulina model '<fotoyta.glb>'
+python -B tools/material_versions.py --dealer paulina activate --edition '<fas-N/vN>' --id '<utgåvans-id>' --name '<visningsnamn>' --geometry $geometry --appearance $appearance
 ```
 
-För en annan registrerad dealer öppnas `/?dealer=<namn>#modellering`. Kameraprovet körs från `studio` med `node tools/kameraprov.mjs <namn>` medan den lokala studion är öppen. Exportören läser de GLB-bytes som laddades i visaren och kamerans läge, riktpunkt, utsnitt och zoom i varje ruta. FFprobe läser färdig MP4. Andra 3D-renderare kan registrera sina exporter genom `film --file <mp4> --capture <tagning.json>` på samma verktyg. Exportören lämnar filmens hash, rigg, fotoyta, tagning, kamera och rutnummer. En fysisk referensfilm dokumenteras med egen kamera, synkpunkt och källfil när dess rörelse överförs till riggen. [Kameraprovet](../studio/tools/kameraprov.mjs)
+En grå kroppsutgåva kan väljas med bara `--geometry`. Registrera animerad GLB med samma `model`-kommando. Registrera film med `film --file <film.mp4> --capture <capture.json>` och granskning med `review --film <filmkvitto> --camera <kamera> --frames <n> --note <iakttagelse>`. Studion läser lokala `avatars/<dealer>/3d/versioner/` för utgåvor och filmkvitton. [Paulinas aktuella materialrapport](http://127.0.0.1:4317/api/material?dealer=paulina&report=md) · [Kameraprovet](../studio/tools/kameraprov.mjs)
 
-## Nästa prov för att få Paulina naturlig
+## Kontrollera GLB:ens kropp och material
 
-I den första filmexporten på sittmodell v4 skjuter vänsterhanden ut KORT-02 i ruta 4. Högern möter i 9, vänder i 16 och lägger kortet på plats 4 i 22. Kortet ligger kvar när högern börjar lämna i 25. Jämför samma ruta från stol 4 och stol 1 för att se fingrar som skymmer varandra. [Film på sittmodell v4](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#givfilm) · [Uppmätt kortbana och kontaktrutor](../test/dealer/paulina/giv-sam-v4-v1/handelser.json)
+Kör från projektroten. Grundkontrollen använder Pythons standardbibliotek.
 
-1. Filma **ett verkligt kortdrag samtidigt framifrån och från sidan**. Låt tummen, pekfingret, skons öppning och kortkanten synas. Spara synkpunkten och markera grepp, kort på kant och släpp.
-2. Jämför högerns lillfinger under vändningen i ruta 16 med samma händelse i referensen. Kontrollera att en justerad fingerpose behåller kantkontakt, släpp och landningspunkt från båda stolarna.
-3. Granska glidning, skuggor och timing i spelarens utsnitt. Där stolen syns behövs också kontakt mellan säte, sits och golv. I viloposens profilprov syns bakgrunden under sätet.
-4. Bedöm hud, hår och kavaj i de två färdiga vyerna. Ta en skarp närbild där ytdetalj saknas, till exempel bakre trekvart för håret. Om rörelsen stämmer men fotoytan brister, prova filmprojektion från en känd kamera på samma rigg.
+```powershell
+python -B tools/glb_surface_check.py '<modell.glb>'
+python -B tools/glb_surface_check.py '<modell.glb>' --near-mm 2
+```
+
+Rapporten anger modellens SHA-256, scen, noder, primitiv, material och faktiskt ritade trianglar. `sharedTriangles` räknar exakt samma trianglar efter nodernas statiska omvandlingar, oberoende av index, hörnordning och material. `relation` anger identiska triangelytor (`same`), en delad del (`partial`) eller noll exakt gemensamma trianglar (`distinct`). `unusedMaterials` visar deklarerade material som saknar primitiv i scenen. Två primitiv med samma material kan ha olika yta. [Kontrollverktyget](../tools/glb_surface_check.py)
+
+`--near-mm` gäller modeller i meter och kräver NumPy och SciPy. För primitiv på samma nod visas andelen triangelcentrum som projiceras inuti den andra ytan inom valt avstånd, med högst 20° mellan trianglarnas normaler. Andelen gäller triangelcentrum, med en rad per riktning i primitivens ordning. Kontrollen läser modellens statiska data före hudbindning, morph och animation. Bedöm eventuell visuell effekt i den berörda kameran och bildrutan.
+
+För tidigare kontroller av fingerrotation, ögonlock, fotoyta och giv finns det fullständiga historiska underlaget i `git show d4acb1b:information/MATERIALVERSIONER.md`. Privata filvägar där kan slås upp i arkivets manifest. [Historisk provkatalog](PAULINAS_PROV.md) · [Arkivet och återställning](HANDOFF.md#arkivet-från-20-november-2026)
