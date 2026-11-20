@@ -17,11 +17,12 @@ async function start() {
   scene.add(globe);
   const home = new T.Vector3().fromArray(canvas.dataset.eye ? canvas.dataset.eye.split(",").map(Number) : [1, .13, -1.05]);
   if (canvas.dataset.seat) {
-    status.textContent = "Läser bordet och kortskon…";
+    const placement = canvas.dataset.view === "paulina";
+    status.textContent = placement ? "Läser Paulina, bordet och kortskon…" : "Läser bordet och kortskon…";
     const { placeTable } = await import("./bord.mjs");
     // Align the centre seat with the studio view Jakob chose.
     globe.rotation.y = -Math.atan2(home.x, home.z);
-    const { seat, table } = await placeTable(scene, renderer, canvas.dataset.seat);
+    const { seat, table } = await placeTable(scene, renderer, canvas.dataset.seat, placement);
     camera.position.fromArray(seat.eye);
     globe.position.copy(camera.position);
     home.copy(camera.position).sub(new T.Vector3().fromArray(seat.aim));

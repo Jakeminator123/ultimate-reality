@@ -30,3 +30,16 @@ Provet `golv-v2` utgår från `panorama-v1`, Brown Photostudio 01 och BORD-02. �
 | Stol 4, 46,27° nedåt | Båda fötterna syns. Varje ring får en mjuk skugga utan synlig ytterkant. | [Utan skugga](golv-v2/stol-4-utan.jpg) | [Med skugga](golv-v2/stol-4-med.jpg) |
 
 Skuggornas lägen och storlek följer 3D-modellens lägsta cylindrar. Skuggstyrkan är vald för bildprovet. Fotot är taget från en punkt och golvets verkliga avstånd till de modellerade fötterna är okänt. Vid jämförelse före JPEG-export var referensbilden pixelidentisk med v1 efter fyra piltryck nedåt. Påslagen skugga mörkade 12 275 av 771 456 pixlar från Stol 1 och 13 356 från Stol 4. [Skuggans utformning](golv-v2/kontaktskugga.mjs)
+
+## Paulina v2 vid bordet
+
+Placeringsprovet `paulina-placering-v1` använder RUM-02 från `panorama-v1` och export E från LJUS-05. Riggen använder exportens egna bordskoordinater med skalfaktor 1. De båda kamerorna fryser pose 17 av 33 vid 16/24 s. Bord, filt och sko är BORD-02, YTA-02 och SKO-03. Det första rödryggade KORT-02 har färdats 54 mm längs 70/30-tagningens bana. [Stol 4](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4&vy=paulina) · [Stol 1](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=1&vy=paulina)
+
+| Kamera | Synligt i pose 17 | Fryst bild |
+| --- | --- | --- |
+| Stol 4, 124 cm över modellgolvet, 48° vertikalt synfält | Bålen är centrerad bakom bordet. Kortet böjs ut ur skon och vänster armbåge hålls högt. | [Bild från Stol 4](paulina-placering-v1/stol-4-pose-17.jpg) |
+| Stol 1, 116 cm över modellgolvet, 48° vertikalt synfält | Kroppen syns i profil. Hand och skomynning överlappar, vilket gör kortkanten svårare att följa. | [Bild från Stol 1](paulina-placering-v1/stol-1-pose-17.jpg) |
+
+Bildgranskaren bedömde kroppsskalan som rimlig i de två bilderna på 1602 × 901 px. Höga armbågar, kompakt hårkontur, kavajveck och svag skugga under handen ger ett renderat intryck. Bordsskivan skymmer bäcken och sits. Modellens proportioner kan bedömas mot bordet, medan fotomöblernas verkliga avstånd och fysisk sitthöjd är okända. Vid pose 17 gav exportens tidigare geometrikontroll 0,1498 mm mellan pekfingrets hud och dess kontaktyta på kortet och 0,1491 mm för långfingret. Alla fem kontrollerade objektpar var fria från genomskärning. [Geometrirapport för export E](../../dealer/paulina/kortdrag-v2-v1/kollisioner.json)
+
+Visaren verifierar de hämtade filernas SHA-256 innan den ställer in kroppen och kortet. Animationen är `c05b66757319c3742c8700c637dd6f32939714960b9479c37736c3b48be5577b` och kortbanan är `711a8391cdf54fac06c09785f37891438a871be0dbc4206f140037e73c19543e`. Stolsbyte behåller posen. Båda bilderna stod still vid upprepad avläsning. Golv-v2, mobilbredd 390 px och LJUS-05 på pose 17 provades efter ändringen.

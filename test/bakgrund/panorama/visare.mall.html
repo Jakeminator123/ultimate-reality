@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{rum}} · Panorama</title><link rel="icon" href="data:,">
+  <title>{{title}} · Panorama</title><link rel="icon" href="data:,">
   <style>
     :root {color-scheme:dark; font:16px "DM Sans",system-ui,sans-serif; background:#17201d; color:#f6f0e6}
     * {box-sizing:border-box} body {margin:0}
@@ -24,18 +24,18 @@
 </head>
 <body>
   <main>
-    <header><h1>{{rum}}</h1>
+    <header><h1>{{title}}</h1>
       {{platser}}
       <nav aria-label="Panoramamiljö">
         <a data-room="fotostudio" href="/bordsprov/panorama/fotostudio">Fotostudion</a>
         <a data-room="lounge" href="/bordsprov/panorama/lounge">Loungen</a>
       </nav>
     </header>
-    <canvas id="panorama" data-eye="{{blick}}" data-seat="{{plats}}" tabindex="0" aria-label="Se dig omkring i {{rum}}"></canvas>
+    <canvas id="panorama" data-eye="{{blick}}" data-seat="{{plats}}" data-view="{{vy}}" tabindex="0" aria-label="Se dig omkring i {{rum}}"></canvas>
     <footer aria-label="Blickriktning">
       <button id="left">Vrid åt vänster</button><button id="right">Vrid åt höger</button>
       <button id="reset">Till utgångsvyn</button><button id="full" hidden>Helskärm</button>
-      {{golvkontroll}}
+      {{kontroller}}
       <span>Dra för att se dig omkring.</span>
     </footer>
     <p id="status" role="status">Läser panoramat…</p>

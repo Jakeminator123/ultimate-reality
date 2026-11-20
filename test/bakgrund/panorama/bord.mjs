@@ -9,9 +9,11 @@ async function loadSceneData(file) {
   return response.json();
 }
 
-export async function placeTable(scene, renderer, seatId) {
+export async function placeTable(scene, renderer, seatId, placement) {
+  const study = placement ? await import("./placering.mjs") : null;
   const [layout, calibration, take] = await Promise.all([
-    loadSceneData("layout.json"), loadSceneData("kameror.json"), loadSceneData("bana.json"),
+    loadSceneData("layout.json"), loadSceneData("kameror.json"),
+    study ? study.loadCardPath() : loadSceneData("bana.json"),
   ]);
   // Sample the oriented photo before adding furniture so its reflections match the visible room.
   const cube = new T.WebGLCubeRenderTarget(256, { type: T.HalfFloatType });
@@ -26,7 +28,11 @@ export async function placeTable(scene, renderer, seatId) {
   const table = buildTable(layout, false, textiles(layout));
   await applyTableMaterials(table, layout, "/bordsprov/rum3d/");
   const { shoe, draw } = buildDrawShoe(take.shoe);
-  draw(take.frames[0].card_curve_zy_m);
+  if (study) {
+    await study.placePaulina(scene, take, draw);
+  } else {
+    draw(take.frames[0].card_curve_zy_m);
+  }
   scene.add(table, shoe);
   return { table, seat: calibration.cameras[seatId] };
 }
