@@ -47,6 +47,8 @@ try {
   rim.position.set(2, 2, -1);
   world.add(rim);
   const asset = await new GLTFLoader().loadAsync(renderer.domElement.dataset.scene || "/__ankare-prov/ankare.glb");
+  const normalBias = asset.parser.json.asset.extras?.portraitLighting?.shadowNormalBiasM;
+  if (Number.isFinite(normalBias) && normalBias >= 0 && normalBias <= .005) key.shadow.normalBias = normalBias;
   world.add(asset.scene);
   const mixer = new T.AnimationMixer(asset.scene),
     action = mixer.clipAction(asset.animations[0]);

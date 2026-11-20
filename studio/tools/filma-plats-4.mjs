@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { digest, publish, readIfPresent } from "./publicera-kamerafil.mjs";
+import { sideFieldOfView } from "../app/giv-plats-4/orbit-cameras.mjs";
 
 const repo = fileURLToPath(new URL("../../", import.meta.url));
 const version = path.join(repo, "avatars/paulina/giv-plats-4/v1");
@@ -42,7 +43,7 @@ function view(azimuthDeg, heightM, targetYM, verticalFovDeg, label) {
 }
 const views = {
   front: view(0, 1.4, .82, 40, "Front 0° · 1,40 m"),
-  sida70: view(70, 1.792, .862, 31, "Kontroll +70° · 1,792 m")
+  sida70: view(70, 1.792, .862, sideFieldOfView(report), "Kontroll +70° · 1,792 m")
 };
 const recipeSha256 = digest(JSON.stringify({ scripts, views, extraFrames }));
 const out = positional[1] ? path.resolve(positional[1]) : preview ?

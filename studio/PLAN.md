@@ -14,7 +14,7 @@ Redigeringsvyn och den gemensamma 3D-scenen finns i Next.js, React och TypeScrip
 | --- | --- |
 | Stående 0°, 45°, 90° | Håller ihop identitet, kläder och proportioner mellan vyer. |
 | Sittande 0°, 45°, 90° | Sittfronten ger neutral pose. Trekvarten och vald profil visar hur samma silhuett, händer och skor ska läsas från två andra vinklar. |
-| Ansikte 0°, 45°, 90° | Ger huvudets fotoyta och tre håll att kontrollera ögon och profil från. Ögonlocken animeras genom att hudens hörn flyttas, käken med sin led. En rörlig blick behöver även en ögonyta med styrbar iris. |
+| Ansikte 0°, 45°, 90° | Ger tre håll att kontrollera ögon och profil från. I Paulinas giv V3 ger original 03 den främre ansiktshuden och irisarna. Modellens två ögonleder flyttar den fotograferade ögonytan innanför ögonlocken. Blickprovet håller huvudet stilla och jämför samma kamera före och efter ögonrotationen. [Blickprovet](http://127.0.0.1:4317/giv-plats-4/v3/blickprov.jpg) |
 | Båda handryggarna ovanifrån | Ger naglar, hud och tatueringar till riggens händer. Handleden och fingerlederna styr senare greppet. |
 | Vänster kortgrepp och extra höger kortvändning | Visar två enskilda kontaktlägen. Filmerna behövs för att välja rörelseordning, kortets rotation och tidpunkten för släppet. |
 

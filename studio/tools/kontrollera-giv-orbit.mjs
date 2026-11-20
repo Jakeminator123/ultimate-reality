@@ -4,9 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 import { digest, publish } from "./publicera-kamerafil.mjs";
+import { sideFieldOfView } from "../app/giv-plats-4/orbit-cameras.mjs";
 
 const edition = process.argv[2] ?? "v2";
-assert.ok(["v1", "v2"].includes(edition), "Ange v1 eller v2.");
+assert.ok(["v1", "v2", "v3"].includes(edition), "Ange v1, v2 eller v3.");
 const repo = fileURLToPath(new URL("../../", import.meta.url));
 const trial = path.join(repo, "avatars/paulina/giv-plats-4");
 const folder = path.join(trial, edition, "rigg"), rig = path.join(folder, "giv.glb");
@@ -17,13 +18,13 @@ const anchor = JSON.parse(await readFile(path.join(repo, "avatars/paulina/prov-a
 const code = fileURLToPath(new URL("../app/giv-plats-4/", import.meta.url));
 const scripts = {};
 for (const name of ["orbit-runtime.mjs", "orbit-cameras.mjs", "OrbitViewer.tsx"]) scripts[name] = digest(await readFile(path.join(code, name)));
-const out = path.resolve(process.argv[3] ?? path.join(trial, "v2/granskning/120-vinklar",
+const out = path.resolve(process.argv[3] ?? path.join(trial, edition === "v1" ? "v2" : edition, "granskning/120-vinklar",
   edition + "-" + sceneSha256.slice(0, 8) + "-" + digest(JSON.stringify(scripts)).slice(0, 8)));
 const origin = "http://127.0.0.1:4317";
-const sceneUrl = edition === "v1" ? "/__giv-orbit/scen.glb" : "/giv-plats-4/v2/giv.glb";
-if (edition === "v2") {
+const sceneUrl = edition === "v1" ? "/__giv-orbit/scen.glb" : "/giv-plats-4/" + edition + "/giv.glb";
+if (edition !== "v1") {
   const response = await fetch(origin + sceneUrl);
-  assert.ok(response.ok, "V2-scenen kunde inte hämtas lokalt.");
+  assert.ok(response.ok, "Scenen kunde inte hämtas lokalt.");
   assert.equal(digest(Buffer.from(await response.arrayBuffer())), sceneSha256);
 }
 await mkdir(out, { recursive: true });
@@ -83,6 +84,7 @@ try {
   assert.equal(new Set(orbit.map(v => JSON.stringify(v.table.eyeM))).size, 120);
   assert.equal(new Set(orbit.map(v => JSON.stringify(v.hands.eyeM))).size, 120);
   assert.equal(new Set(orbit.map(v => JSON.stringify(v.face.eyeM))).size, 120);
+  assert.equal(orbit[60].table.verticalFovDeg, sideFieldOfView(report));
   const selectedFrames = [...new Set([...Object.values(report.keyframes), 71, 92, 125])].sort((a, b) => a - b);
   const selections = {};
   const saved = edition === "v1" ? JSON.parse(await readFile(path.join(trial, "v1/visning/rendering.json"))) : null;
@@ -108,7 +110,7 @@ try {
   assert.ok(allTimes.every((s, i) => Math.abs(s - i / report.fps) < 1e-6));
   const summary = { sceneSha256, scripts, sceneUrl, edition, width: 1280, height: 720, fps: report.fps, frames: allTimes.length,
     profile: { angles: 120, stepDeg: 3, radiusM: 1.62, centerXZ: [.072, .233], front: { heightM: 1.4, targetYM: .82, verticalFovDeg: 40 },
-      high: { startAtFromFrontDeg: 70, heightM: 1.792, targetYM: .862, verticalFovDeg: 31 },
+      high: { startAtFromFrontDeg: 70, heightM: 1.792, targetYM: .862, verticalFovDeg: sideFieldOfView(report) },
       heightCurve: "smoothstep(t) = t²(3−2t), t = min(avståndet i grader till fronten / 70, 1). Samma kurva för blickhöjd och vertikalt synfält.",
       hands: { verticalFovDeg: 30, elevationDeg: 55, minDistanceM: .37, focus: "Båda handlederna och de tio fingertopparna. Kortets åtta hörn ingår inom 18 cm från en led. Kamerans avstånd anpassas efter den aktuella vinkelns projektion." } },
     faceCloseUp: { radiusM: .96, cameraAboveTargetM: .10, targetBelowEyesM: .022, verticalFovDeg: 22, views: orbit.length },

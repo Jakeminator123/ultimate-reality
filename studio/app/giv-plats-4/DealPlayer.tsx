@@ -7,6 +7,11 @@ import type { DealVersion } from "./media";
 import styles from "./deal.module.css";
 
 const root = "/giv-plats-4/";
+const related: Record<DealVersion, [DealVersion, string][]> = {
+  v1: [["v2", "Se de uppdaterade händerna och rörelsen"], ["v3", "Öppna giv V3"]],
+  v2: [["v1", "Jämför med den första given"], ["v3", "Öppna giv V3"]],
+  v3: [["v2", "Jämför samma ruta i V2"]],
+};
 const handFrame = 92;
 const cameras = {
   front: { name: "Front · 1,40 m", src: "front.mp4" },
@@ -30,7 +35,7 @@ const slidingMoments = [
 function validTimeline(value: Timeline | undefined, version: DealVersion): value is Timeline {
   return !!value && Number.isFinite(value.fps) && value.fps > 0 &&
     Number.isSafeInteger(value.frames) && value.frames > 0 && !!value.keyframes &&
-    (version === "v2" ? slidingMoments : moments).every(([key]) => Number.isSafeInteger(value.keyframes[key]) &&
+    (version === "v1" ? moments : slidingMoments).every(([key]) => Number.isSafeInteger(value.keyframes[key]) &&
       value.keyframes[key] >= 0 && value.keyframes[key] < value.frames);
 }
 
@@ -49,21 +54,24 @@ function updateAddress(camera: Camera, frame: number, angle: number, cut: OrbitC
 
 export default function DealPlayer({ version }: { version: DealVersion }) {
   const base = root + version;
-  const alternate = version === "v2" ? "v1" : "v2";
   const stage = useRef<HTMLElement>(null);
   const player = useRef<HTMLVideoElement>(null);
   const clockFrame = useRef(0);
   const nextPosition = useRef({ time: 0, play: false });
-  const [camera, setCamera] = useState<Camera>(version === "v2" ? "120" : "front");
+  const defaultCamera = version === "v1" ? "front" : "120";
+  const [camera, setCamera] = useState<Camera>(defaultCamera);
   const [angle, setAngle] = useState(0);
   const [cut, setCut] = useState<OrbitCut>("helbild");
-  const [alternateAvailable, setAlternateAvailable] = useState(false);
+  const [otherVersions, setOtherVersions] = useState<[DealVersion, string][]>([]);
   const [timeline, setTimeline] = useState<Timeline>();
   const [frame, setFrame] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [timelineError, setTimelineError] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const orderedMoments = timeline ? [...(version === "v1" ? moments : slidingMoments)].sort(
+    ([a], [b]) => timeline.keyframes[a] - timeline.keyframes[b]
+  ) : [];
 
   function showFrame(at: number) {
     clockFrame.current = at;
@@ -89,7 +97,7 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
       const first = Number.isSafeInteger(wantedFrame) && wantedFrame >= 0 && wantedFrame < saved.frames ? wantedFrame : 0;
       const degrees = Number(params.get("vinkel"));
       nextPosition.current = { time: first === 0 ? 0 : (first + 0.5) / saved.fps, play: false };
-      setCamera(wanted && Object.hasOwn(cameras, wanted) ? wanted as Camera : version === "v2" ? "120" : "front");
+      setCamera(wanted && Object.hasOwn(cameras, wanted) ? wanted as Camera : defaultCamera);
       setAngle(Number.isFinite(degrees) ? ((Math.round(degrees / 3) % 120) + 120) % 120 : 0);
       const initialCut = params.get("utsnitt");
       setCut(initialCut === "hander" || initialCut === "ansikte" ? initialCut : "helbild");
@@ -97,10 +105,14 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
       setTimeline(saved);
     }
     load().catch(() => { if (!controller.signal.aborted) setTimelineError(true); });
-    fetch(root + alternate + "/rendering.json", { method: "HEAD", signal: controller.signal })
-      .then(res => setAlternateAvailable(res.ok)).catch(() => {});
+    Promise.all(related[version].map(async entry => {
+      try {
+        const res = await fetch(root + entry[0] + "/rendering.json", { method: "HEAD", signal: controller.signal });
+        return res.ok ? entry : null;
+      } catch { return null; }
+    })).then(entries => { if (!controller.signal.aborted) setOtherVersions(entries.filter(entry => entry !== null)); });
     return () => controller.abort();
-  }, [base, alternate, version]);
+  }, [base, defaultCamera, version]);
 
   useEffect(() => {
     const video = player.current;
@@ -197,12 +209,11 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
   return <main ref={stage} className={styles.main}>
     <nav className={styles.navigation} aria-label="Dealerversion">
       <a href="/" className={styles.back}><ArrowLeft size={16} aria-hidden /> Till dealerstudion</a>
-      {alternateAvailable && <a className={styles.back} href={root + alternate + selection(camera, frame, angle, cut)}>
-        {version === "v2" ? "Jämför med den första given" : "Se de uppdaterade händerna och rörelsen"}
-      </a>}
+      {otherVersions.map(([id, label]) => <a key={id} className={styles.back}
+        href={root + id + selection(camera, frame, angle, cut)}>{label}</a>)}
     </nav>
     <header className={styles.header}>
-      <h1>Paulinas giv till plats 4</h1>
+      <h1>Paulinas giv till plats 4 · {version.toUpperCase()}</h1>
       <div className={styles.cameras} role="group" aria-label="Kameravy">
         {cameraOrder.map(key => <button type="button" key={key}
           aria-pressed={camera === key} disabled={!timeline} onClick={() => chooseCamera(key)}>
@@ -247,16 +258,17 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
         </button>}
       </div>
       <div className={styles.moments} role="group" aria-label="Gå till ett moment i given">
-        {(version === "v2" ? slidingMoments : moments).map(([key, label]) => <button key={key} type="button"
+        {orderedMoments.map(([key, label]) => <button key={key} type="button"
           aria-pressed={frame === timeline.keyframes[key]} onClick={() => seekFrame(timeline.keyframes[key])}>
-          {label}
+          {version === "v3" && key === "present" ? "Högerhanden tar emot" : label}
         </button>)}
         <button type="button" onClick={inspectHands}>Granska händerna i ruta 92</button>
       </div>
-      {version === "v2" && <nav className={styles.references} aria-label="Fotografiska jämförelser">
-        <a href={base + "/tre-poser.jpg"}>Jämför de tre rörelseposerna</a>
-        <a href={base + "/hander-ruta-92.jpg"}>Jämför handen med fotot</a>
+      {version !== "v1" && <nav className={styles.references} aria-label="Fotografiska jämförelser">
+        <a href={base + "/tre-poser.jpg"}>{version === "v3" ? "Jämför högerhandens rörelse" : "Jämför de tre rörelseposerna"}</a>
+        {version === "v2" && <a href={base + "/hander-ruta-92.jpg"}>Jämför handen med fotot</a>}
         <a href={base + "/ansikte-original.jpg"}>Jämför ansiktet med original 03</a>
+        {version === "v3" && <a href={base + "/blickprov.jpg"}>Se vad som rör sig när Paulina byter blick</a>}
       </nav>}
     </div>}
   </main>;

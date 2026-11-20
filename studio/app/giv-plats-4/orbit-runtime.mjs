@@ -1,11 +1,11 @@
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { aspect, tableView } from "./orbit-cameras.mjs";
+import { aspect, sideFieldOfView, tableView } from "./orbit-cameras.mjs";
 
 const fingerNames = ["wrist", "thumb_null", "index_null", "middle_null", "ring_null", "pinky_null"];
 
 // Keep the lighting of the registered v1 film (studio/tools/ankarkameran.mjs).
-function lightStage(renderer, world) {
+function lightStage(renderer, world, normalBias) {
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.NoToneMapping;
   renderer.shadowMap.enabled = true;
@@ -23,7 +23,7 @@ function lightStage(renderer, world) {
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   Object.assign(key.shadow.camera, { left: -1.5, right: 1.5, top: 1.6, bottom: -1.5, near: .2, far: 8 });
-  key.shadow.normalBias = .0005;
+  key.shadow.normalBias = Number.isFinite(normalBias) && normalBias >= 0 && normalBias <= .005 ? normalBias : .0005;
   key.shadow.bias = -.00012;
   const rim = new T.DirectionalLight(0xe4edff, .85);
   rim.position.set(2, 2, -1);
@@ -113,7 +113,7 @@ export async function createOrbitScene(canvas, sceneUrl, signal) {
     const cardCenter = cardLocal.getCenter(new T.Vector3());
     renderer = new T.WebGLRenderer({ canvas, antialias: true });
     world.remove(asset.scene);
-    lightStage(renderer, world);
+    lightStage(renderer, world, asset.parser.json.asset.extras?.portraitLighting?.shadowNormalBiasM);
     world.add(asset.scene);
     asset.scene.traverse(obj => { if (obj.isMesh) { obj.castShadow = true; obj.receiveShadow = true; } });
     const mixer = new T.AnimationMixer(asset.scene), clip = asset.animations[0], action = mixer.clipAction(clip);
@@ -122,6 +122,7 @@ export async function createOrbitScene(canvas, sceneUrl, signal) {
     action.play();
     const camera = new T.PerspectiveCamera(40, aspect, .015, 30);
     const at = new T.Vector3(), fingertip = joints.map(() => new T.Vector3()), liveCorners = corners.map(() => new T.Vector3());
+    const highFov = sideFieldOfView(asset.parser.json.asset.extras);
     let gaze = new T.Vector3(), sampledSeconds = 0;
     let idMaterials;
     /** @param {number} frame @param {number} fps @param {number} index @param {boolean | "helbild" | "hander" | "ansikte"} cut */
@@ -134,7 +135,7 @@ export async function createOrbitScene(canvas, sceneUrl, signal) {
       joints.forEach((joint, i) => joint.getWorldPosition(fingertip[i]));
       card.localToWorld(at.copy(cardCenter));
       corners.forEach((corner, i) => card.localToWorld(liveCorners[i].copy(corner)));
-      const view = tableView(index);
+      const view = tableView(index, highFov);
       if (cut === "ansikte") {
         const radians = view.azimuthDeg * Math.PI / 180;
         gaze.copy(eyes[0].getWorldPosition(vertex)).add(eyes[1].getWorldPosition(vertex)).multiplyScalar(.5);
