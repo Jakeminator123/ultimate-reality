@@ -19,6 +19,7 @@ export type FilmRecord = {
   cameras: { id: string; projection?: string; samples: { frame: number; azimuth?: number; elevation?: number; distance?: number; zoom?: number }[] }[];
   marks: { frame: number; label: string; seconds?: number }[];
   motion?: string;
+  poses?: { start: "A1" | "A2.3"; end: "A1" | "A2.3" };
 };
 export type MotionRecord = ModelRecord & { motion: {
   geometry: string; appearance: string | null; take: string; card: string | null; pathSha256: string;
@@ -35,10 +36,11 @@ export type Edition = {
   schema: 1; id: string; name: string; edition: string; geometry: string; appearance: string | null;
   photoRegister: string; geometryRecord: string; appearanceRecord: string | null;
 };
+export type TrialFilmSummary = Pick<FilmRecord, "take" | "sha256" | "poses"> & { url: string };
 export type DealerMaterial = {
   dealer: string; edition: string; revision: string | null; stamp: string; versions: { key: string; name: string }[];
   photos: Photo[]; issues: string[]; activeModel: ActiveDealerModel | null;
-  seatedTrial?: { id: string; name: string; film?: Pick<FilmRecord, "take" | "sha256"> & { url: string } };
+  seatedTrial?: { id: string; name: string; film?: TrialFilmSummary; films?: TrialFilmSummary[] };
   geometry: ModelRecord | null; appearance: ModelRecord | null; motions: (MotionRecord & { url: string })[];
   films: (FilmRecord & { url: string; reviews: FilmReview[] })[];
 };

@@ -136,6 +136,16 @@ class MaterialTests(unittest.TestCase):
             self.assertEqual(versions.register_film(self.store, file, capture), key)
             receipt = versions.read_json(self.store / "filmer" / (key + ".json"))
             self.assertAlmostEqual(receipt["marks"][0]["seconds"], .07)
+            self.assertNotIn("poses", receipt)
+            pose_receipts = []
+            for end_pose in ("A1", "A2.3"):
+                poses = {"start": "A2.3", "end": end_pose}
+                pose_key = versions.register_film(self.store, file, dict(capture, poses=poses))
+                self.assertEqual(versions.read_json(self.store / "filmer" / (pose_key + ".json"))["poses"], poses)
+                pose_receipts.append(pose_key)
+            self.assertEqual(len({key, *pose_receipts}), 3)
+            with self.assertRaisesRegex(ValueError, "slutpose"):
+                versions.register_film(self.store, file, dict(capture, poses={"start": "A2.3"}))
             versions.register_review(self.store, key, "Modellkameran", [2], "Hela skon syns.")
             with self.assertRaisesRegex(ValueError, "kamera"):
                 versions.register_review(self.store, key, "Annan kamera", [2], "Hela skon syns.")

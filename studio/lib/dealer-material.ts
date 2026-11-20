@@ -10,6 +10,7 @@ import { cropSource, dimensions, hasReviewedSeatCameras, roleName } from "./mate
 import { bodyPixels, checkSeatedFrame, floorSpread, readSeatedMeasurement, seatedStandard } from "./seated-review";
 import { verifiedPhotoReview } from "./photo-review";
 import type { DealerMaterial, Edition, FilmRecord, FilmReview, ModelRecord, MotionRecord, Photo } from "./material-types";
+import type { ActiveDealerModel } from "./modeling";
 import type dealingStudy from "../../information/paulina-rorelseunderlag.json";
 import { LocalError } from "./storage";
 
@@ -70,6 +71,25 @@ async function lockedRecord<T>(folder: string, key: string): Promise<T | null> {
   if (!data) return null;
   if (digest(data) !== key) bad("Den sparade versionsbeskrivningen avviker.");
   return JSON.parse(data.toString("utf8").replace(/^\uFEFF/, ""));
+}
+
+async function optionalRecord<T>(folder: string, key: string, issues: string[]): Promise<T | null> {
+  try { return await lockedRecord<T>(folder, key); }
+  catch (error) {
+    if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
+    issues.push("Versionsuppgifterna i " + path.basename(folder) + "/" + key + ".json kunde inte verifieras.");
+    return null;
+  }
+}
+
+async function verifiedMedia(store: string, sha256: string, extension: ".glb" | ".mp4") {
+  try {
+    const file = await bytes(path.join(store, "filer", sha256 + extension));
+    return file !== null && digest(file) === sha256;
+  } catch (error) {
+    if (!(error instanceof LocalError)) throw error;
+    return false;
+  }
 }
 
 type ImageRow = { fil: string; kategori: string; motiv: string; typ: string; sha256: string; vinkelGrader?: number };
@@ -163,7 +183,12 @@ async function modelRecord(store: string, key: string, kind: ModelRecord["kind"]
   return model;
 }
 
-export async function seatedTrialModel(material: DealerMaterial, trial: Photo, includeFilm = false) {
+type ReviewedTrialTake = { film: DealerMaterial["films"][number]; animation: MotionRecord; receipt: string };
+type SeatedTrial = ActiveDealerModel & Partial<ReviewedTrialTake> & {
+  run: string | null; appearanceError?: string; reviewedTakes?: ReviewedTrialTake[];
+};
+
+export async function seatedTrialModel(material: DealerMaterial, trial: Photo, includeFilm = false): Promise<SeatedTrial | null> {
   const avatar = avatarDir(material.dealer);
   type Candidate = { schema: number; baseRevision: string; profile: string; geometry: string; modelRecord: string;
     appearance?: string; appearanceRecord?: string; motion?: string; filmRecord?: string; name: string; run: string };
@@ -185,9 +210,11 @@ export async function seatedTrialModel(material: DealerMaterial, trial: Photo, i
       bad("Sittmodellprovets fotoyta saknar ett giltigt kvitto.");
     const look = await modelRecord(store, candidate.appearance, "appearance", candidate.appearanceRecord);
     if (!look || look.parent !== model.sha256) bad("Sittmodellprovets fotoyta saknas eller tillhör en annan kropp.");
-    const reviewed = includeFilm && candidate.motion && candidate.filmRecord ?
-      await reviewedTrialFilm(material.dealer, model.sha256, look.sha256, candidate.motion, candidate.filmRecord) : undefined;
-    return { ...body, appearanceUrl: url(material.dealer, { model: look.sha256 }), ...reviewed };
+    const withAppearance = { ...body, appearanceUrl: url(material.dealer, { model: look.sha256 }) };
+    if (!includeFilm) return withAppearance;
+    const reviewedTakes = await reviewedTrialTakes(material.dealer, model.sha256, look.sha256, material.issues);
+    const selected = reviewedTakes.find(take => take.receipt === candidate.filmRecord && take.animation.sha256 === candidate.motion);
+    return { ...withAppearance, reviewedTakes, ...selected };
   } catch (error) {
     if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
     return { ...body, appearanceError: "Fotoytan kunde inte verifieras för den här SAM-kroppen. Provet visas med neutral yta." };
@@ -209,45 +236,54 @@ export async function currentSeatedTrial(project: DealerMaterial): Promise<Await
 
 export async function reviewedTrialFilm(dealer: string, geometry: string, appearance: string, motion: string, receipt: string) {
   if (!hex.test(motion) || !hex.test(receipt)) return;
+  const takes = await reviewedTrialTakes(dealer, geometry, appearance, [], receipt);
+  return takes.find(take => take.animation.sha256 === motion);
+}
+
+async function reviewedTrialTakes(dealer: string, geometry: string, appearance: string, issues: string[], receipt?: string): Promise<ReviewedTrialTake[]> {
   const store = path.join(avatarDir(dealer), "3d", "versioner");
   try {
-    const motions = await motionsFor(dealer, store, geometry, appearance, []);
-    const animation = motions.find(m => m.sha256 === motion && m.schema === 1 && m.parent === appearance && m.motion.appearance === appearance);
-    if (!animation) return;
-    const [film] = await filmsFor(dealer, store, geometry, appearance, [animation], [], receipt);
-    if (film?.appearance === appearance && film.motion === motion && hasReviewedSeatCameras(film)) return { film, animation, receipt };
+    const motions = await motionsFor(dealer, store, geometry, appearance, issues);
+    const byMotion = new Map(motions.filter(m => m.parent === appearance && m.motion.appearance === appearance)
+      .map(m => [m.sha256, m]));
+    const films = await filmsFor(dealer, store, geometry, appearance, motions, issues, receipt);
+    return films.flatMap(film => {
+      const animation = film.motion && byMotion.get(film.motion);
+      return animation && film.appearance === appearance && hasReviewedSeatCameras(film)
+        ? [{ film, animation, receipt: film.receipt }] : [];
+    });
   } catch (error) {
     if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
+    issues.push("Filmregistret för sittmodellprovet kunde inte verifieras.");
+    return [];
   }
 }
 async function motionsFor(dealer: string, store: string, geometry: string, appearance: string | null, issues: string[]) {
   const folder = path.join(store, "rorelser"), motions: DealerMaterial["motions"] = [];
   for (const name of await records(folder)) {
-    const item = await lockedRecord<MotionRecord>(folder, name.slice(0, -5));
-    if (!item || item.kind !== "motion" || item.motion.geometry !== geometry || (item.motion.appearance && item.motion.appearance !== appearance)) continue;
-    if (!hex.test(item.sha256)) bad("Ogiltig animationsversion.");
-    const file = await bytes(path.join(store, "filer", item.sha256 + ".glb"));
-    if (!file || digest(file) !== item.sha256) { issues.push("Animationsfilen för " + item.motion.take + " avviker."); continue; }
+    const item = await optionalRecord<MotionRecord>(folder, name.slice(0, -5), issues);
+    if (!item || item.schema !== 1 || item.kind !== "motion" || item.motion?.geometry !== geometry || (item.motion.appearance && item.motion.appearance !== appearance)) continue;
+    if (!hex.test(item.sha256)) { issues.push("Ogiltig animationsversion i " + name + "."); continue; }
+    if (!await verifiedMedia(store, item.sha256, ".glb")) { issues.push("Animationsfilen för " + item.motion.take + " avviker."); continue; }
     motions.push({ ...item, url: url(dealer, { model: item.sha256 }) });
   }
   return motions;
 }
 async function filmsFor(dealer: string, store: string, geometry: string, appearance: string | null, motions: DealerMaterial["motions"], issues: string[], receipt?: string) {
   const folder = path.join(store, "filmer");
-  const films: DealerMaterial["films"] = [];
+  const films: (DealerMaterial["films"][number] & { receipt: string })[] = [];
   const reviewFolder = path.join(store, "granskningar");
-  const reviews = await Promise.all((await records(reviewFolder)).map(name => lockedRecord<FilmReview>(reviewFolder, name.slice(0, -5))));
+  const reviews = await Promise.all((await records(reviewFolder)).map(name => optionalRecord<FilmReview>(reviewFolder, name.slice(0, -5), issues)));
   const keys = receipt ? [receipt] : (await records(folder)).map(name => name.slice(0, -5));
   for (const key of keys) {
-    const film = await lockedRecord<FilmRecord>(folder, key);
+    const film = await optionalRecord<FilmRecord>(folder, key, issues);
     if (!film || film.schema !== 1 || film.geometry !== geometry || (film.appearance && film.appearance !== appearance)) continue;
     if (film.motion && !motions.some(m => m.sha256 === film.motion && m.motion.take === film.take && m.motion.card === film.card)) {
       issues.push("Animationsversionen för " + film.title + " saknas eller avviker."); continue;
     }
-    if (!hex.test(film.sha256)) bad("Ogiltig filmreferens.");
-    const file = await bytes(path.join(store, "filer", film.sha256 + ".mp4"));
-    if (!file || digest(file) !== film.sha256) { issues.push(film.title + " saknas eller har ändrats."); continue; }
-    films.push({ ...film, url: url(dealer, { film: key }), reviews: reviews.filter((r): r is FilmReview => r?.film === key) });
+    if (!hex.test(film.sha256)) { issues.push("Ogiltig filmreferens i " + key + "."); continue; }
+    if (!await verifiedMedia(store, film.sha256, ".mp4")) { issues.push(film.title + " saknas eller har ändrats."); continue; }
+    films.push({ ...film, receipt: key, url: url(dealer, { film: key }), reviews: reviews.filter((r): r is FilmReview => r?.film === key) });
   }
   return films;
 }
@@ -408,9 +444,14 @@ export function materialMarkdown(project: DealerMaterial, origin?: string) {
     }
   }
   if (project.seatedTrial) {
-    const { name, id, film } = project.seatedTrial;
+    const { name, id, film, films = [] } = project.seatedTrial;
     rows.push("", "## SAM-kroppsprov", "", name + " · GLB " + id);
-    if (film) rows.push("", "[" + film.take + "](" + (origin ? new URL(film.url, origin).href : film.url) + ") · film " + film.sha256);
+    const takes = film ? [film, ...films.filter(take => take.url !== film.url)] : films;
+    for (const take of takes) {
+      const link = origin ? new URL(take.url, origin).href : take.url;
+      rows.push("", "[" + take.take + "](" + link + ") · film " + take.sha256 +
+        (take.poses ? " · start " + take.poses.start + " · slut " + take.poses.end : "") + (take.url === film?.url ? " · vald tagning" : ""));
+    }
   }
   rows.push("", "## Registrerade animationer", "");
   if (!project.motions.length) rows.push("Inga verifierade animationer för modellparet.");

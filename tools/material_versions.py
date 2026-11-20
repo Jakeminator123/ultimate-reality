@@ -342,6 +342,11 @@ def register_film(store, movie, capture):
         check(all(animated.get(k) == capture.get(k) for k in ("geometry", "appearance", "take", "card")),
               "Animationsfilen hör till en annan rigg, fotoyta, tagning eller kort.")
     check(SLUG.fullmatch(capture["take"]) and capture["title"].strip() and capture["cameras"], "Ofullständig tagning.")
+    if "poses" in capture:
+        poses = capture["poses"]
+        check(isinstance(poses, dict) and set(poses) == {"start", "end"} and
+              all(pose in ("A1", "A2.3") for pose in poses.values()),
+              "Givens start- och slutpose ska vara A1 eller A2.3.")
     probe = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_frames",
         "-show_entries", "stream=width,height,avg_frame_rate,codec_name:frame=best_effort_timestamp_time",
         "-of", "json", str(movie)]))
@@ -372,6 +377,8 @@ def register_film(store, movie, capture):
                   width=stream["width"], height=stream["height"], fps=str(Fraction(stream["avg_frame_rate"])), codec=stream["codec_name"])
     if motion:
         record["motion"] = motion
+    if "poses" in capture:
+        record["poses"] = capture["poses"]
     data = json_bytes(record)
     key = hashlib.sha256(data).hexdigest()
     put(store / "filer" / (record["sha256"] + ".mp4"), movie, record["sha256"])

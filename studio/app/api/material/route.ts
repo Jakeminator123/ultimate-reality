@@ -1,7 +1,12 @@
 import { currentSeatedTrial, dealerMaterial, materialFile, materialMarkdown, materialStamp } from "../../../lib/dealer-material";
+import type { TrialFilmSummary } from "../../../lib/material-types";
 import { errorResponse, requireLocal } from "../../../lib/storage";
 
 export const dynamic = "force-dynamic";
+function filmSummary({ take, sha256, url, poses }: TrialFilmSummary): TrialFilmSummary {
+  return { take, sha256, url, ...(poses && { poses }) };
+}
+
 export async function GET(request: Request) {
   try {
     requireLocal(request);
@@ -15,10 +20,8 @@ export async function GET(request: Request) {
     const candidate = await currentSeatedTrial(project);
     if (candidate) {
       project.seatedTrial = { id: candidate.id, name: candidate.name };
-      if ("film" in candidate && candidate.film) {
-        const { take, sha256, url } = candidate.film;
-        project.seatedTrial.film = { take, sha256, url };
-      }
+      if (candidate.film) project.seatedTrial.film = filmSummary(candidate.film);
+      if (candidate.reviewedTakes?.length) project.seatedTrial.films = candidate.reviewedTakes.map(({ film }) => filmSummary(film));
     }
     if (query.get("report") === "md") {
       const host = request.headers.get("host");
