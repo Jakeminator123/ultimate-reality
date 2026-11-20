@@ -55,7 +55,8 @@ export default function SittingScale({ dealer, edition, views }: { dealer: strin
   const reviewed = rows.filter(r => r.photo).length;
   const uncertainties = [...new Set(views.flatMap(p => p.seated.marks ? [p.seated.marks.uncertaintyPx] : []))];
   return <main className={styles.page}>
-    <nav aria-label="Studionavigering"><a href={dealer === "paulina" ? "/#modellering" : "/?dealer=" + encodeURIComponent(dealer) + "#modellering"}>← 3D-modellering</a><a href="/bildstandard">Bildstandard</a></nav>
+    <nav aria-label="Studionavigering"><a href={dealer === "paulina" ? "/#modellering" : "/?dealer=" + encodeURIComponent(dealer) + "#modellering"}>← 3D-modellering</a><a href="/bildstandard">Bildstandard</a>
+      {dealer === "paulina" && edition === "fas-1/v1" && <a href="/bildstandard/sittprofil#jamforelse">Ny sittprofil bredvid 3D-modellen</a>}</nav>
     <header><p>{name} · {edition}</p><h1>Sittande i tre vinklar</h1></header>
     {!front ? <p>De lokala bilderna och mätningen för sittfronten behövs för att visa jämförelsen.</p> : <>
       <p className={styles.intro}>Jämför kroppens utsnitt, ögonens läge och stolbenens kontakt med golvet. Sidovinklarna är receptets mål. Fotokamerans höjd och lutning är okända.</p>

@@ -16,6 +16,7 @@ const hex = /^[a-f0-9]{64}$/;
 const slug = /^[a-z0-9][a-z0-9-]*$/;
 const editionPath = /^fas-[1-9]\d*\/v[1-9]\d*$/;
 const photoPath = /^[a-z0-9-]+\/[a-z0-9-]+\.(?:jpe?g|png|webp)$/;
+const profileTrialPath = /^granskning\/sittprofil-front-v[1-9]\d*\/profil\.png$/;
 const digest = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 const cacheHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
 function bad(message: string): never { throw new LocalError(message, 409); }
@@ -117,6 +118,35 @@ export async function readPhotoEdition(dealer: string, edition: string, snapshot
   return { photos, issues };
 }
 
+export async function readSeatedProfileTrial(dealer: string, edition: string) {
+  if (!editionPath.test(edition)) throw new LocalError("Ogiltig bildutgåva.");
+  const folder = path.join(avatarDir(dealer), edition);
+  type Review = {
+    schema: number; release: string; selected: string; modelRevision: string; frontSha256: string;
+    views: { file: string; sourceSha256: string }[];
+  };
+  const review = await record<Review>(path.join(folder, "granskning", "sittprofilprov.json")).catch(error => {
+    if (error instanceof SyntaxError) bad("Profilprovets granskningsfil kunde inte tolkas.");
+    throw error;
+  });
+  if (!review) return null;
+  if (review.schema !== 1 || review.release !== edition || !hex.test(review.modelRevision) ||
+      !hex.test(review.frontSha256) || !profileTrialPath.test(review.selected) || !Array.isArray(review.views))
+    bad("Profilprovets versionsunderlag är ogiltigt.");
+  const row = review.views.find(view => view?.file === review.selected);
+  if (!row || !hex.test(row.sourceSha256)) bad("Det valda profilprovet saknar bildversion.");
+  const data = await bytes(path.join(folder, row.file));
+  if (!data) return null;
+  if (digest(data) !== row.sourceSha256) bad("Profilprovet avviker från den uppmätta bilden.");
+  const { width, height, format } = await sharp(data).metadata();
+  const identity = { width, height, sha256: row.sourceSha256, file: row.file };
+  const seated = readSeatedMeasurement(identity, edition, review, review);
+  if (!seated || format !== "png") bad("Profilprovets mätning stämmer inte med filen.");
+  const photo = { ...identity, seated, id: "sittande/profilprov", name: "Ny sittprofil", group: "Sittande",
+    targetAngle: 90, format: "PNG", kind: "profilprov", url: url(dealer, { edition, photo: row.file, sha: row.sourceSha256 }) };
+  return { photo, revision: review.modelRevision, frontSha256: review.frontSha256 };
+}
+
 async function modelRecord(store: string, key: string, kind: ModelRecord["kind"], receipt: string) {
   if (!hex.test(key)) bad("Ogiltig modellversion.");
   const [metadata, file] = await Promise.all([
@@ -209,9 +239,10 @@ export async function materialFile(query: URLSearchParams, range: string | null)
   if (query.has("photo")) {
     const edition = query.get("edition") ?? "", photo = query.get("photo") ?? "";
     expected = query.get("sha") ?? "";
-    if (!editionPath.test(edition) || !photoPath.test(photo) || !hex.test(expected)) throw new LocalError("Ogiltig bildversion.");
+    const trial = profileTrialPath.test(photo);
+    if (!editionPath.test(edition) || !(photoPath.test(photo) || trial) || !hex.test(expected)) throw new LocalError("Ogiltig bildversion.");
     data = await bytes(path.join(root, edition, photo));
-    if (!data || digest(data) !== expected) {
+    if (!trial && (!data || digest(data) !== expected)) {
       const archived = await bytes(path.join(store, "filer", expected + path.extname(photo)));
       if (archived) data = archived;
     }

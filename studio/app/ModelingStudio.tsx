@@ -6,7 +6,7 @@ import {
   FolderOpen, ImageOff, Images, RefreshCw,
 } from "lucide-react";
 import { seriesCount } from "../lib/material-types";
-import MaterialEvidence, { PhotoEvidence } from "./MaterialEvidence";
+import MaterialEvidence, { PhotoCameraGuides, PhotoEvidence } from "./MaterialEvidence";
 import { useCurrentModel } from "./useModelingInventory";
 import styles from "./modeling.module.css";
 
@@ -73,12 +73,7 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
           {!source || missing.includes(source)
             ? <div className={styles.empty}><ImageOff size={26}/><p>{loading ? "Läser bildoriginalen…" : "Bildfilen saknas på den här datorn."}</p></div>
             : <img key={source} src={source} alt={name + " · " + selected.name} onError={() => markMissing(source)} />}
-          {cameraGuides && source && !missing.includes(source) && selected?.seated?.marks && <svg aria-hidden="true"
-            className={styles.photoGuides} viewBox={`0 0 ${selected.width} ${selected.height}`}>
-            <line x1="0" x2={selected.width} y1={selected.seated.marks.eye.y + .5} y2={selected.seated.marks.eye.y + .5}/>
-            <circle cx={selected.seated.marks.eye.x + .5} cy={selected.seated.marks.eye.y + .5} r={selected.width * .009}/>
-            <path d={`M ${selected.width/2-24} ${selected.height/2} h 48 M ${selected.width/2} ${selected.height/2-24} v 48`}/>
-          </svg>}
+          {cameraGuides && source && !missing.includes(source) && selected && <PhotoCameraGuides photo={selected}/>}
         </div>
         <figcaption className={styles.rail}><span>{name}{selected && " · " + selected.group}</span>
           {source && !missing.includes(source) &&

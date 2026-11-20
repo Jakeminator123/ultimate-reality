@@ -25,7 +25,7 @@ type Viewport = {
 };
 
 type ReviewProps =
-  | { model: ActiveDealerModel; cameraAngle?: number; reference?: Photo; guides: boolean; onGuides: (value: boolean) => void; pose?: never; initialVersion?: never }
+  | { model: ActiveDealerModel; cameraAngle?: number; reference?: Photo; guides: boolean; onGuides: (value: boolean) => void; pose?: never; initialVersion?: "front" | "utseende" }
   | { model?: never; cameraAngle?: never; reference?: never; guides?: never; onGuides?: never; pose: SamPose; initialVersion: Version };
 
 export default function PoseReview(props: ReviewProps) {

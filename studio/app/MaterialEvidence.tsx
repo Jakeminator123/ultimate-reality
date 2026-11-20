@@ -4,6 +4,16 @@ import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-rev
 import { modelPhotoRoles } from "../lib/photo-review";
 import styles from "./modeling.module.css";
 
+export function PhotoCameraGuides({ photo }: { photo: Photo }) {
+  const eye = photo.seated?.marks?.eye;
+  if (!eye) return null;
+  return <svg aria-hidden="true" className={styles.photoGuides} viewBox={`0 0 ${photo.width} ${photo.height}`}>
+    <line x1="0" x2={photo.width} y1={eye.y + .5} y2={eye.y + .5}/>
+    <circle cx={eye.x + .5} cy={eye.y + .5} r={photo.width * .009}/>
+    <path d={`M ${photo.width/2-24} ${photo.height/2} h 48 M ${photo.width/2} ${photo.height/2-24} v 48`}/>
+  </svg>;
+}
+
 export function PhotoEvidence({ photo, project }: { photo: Photo; project: DealerMaterial }) {
   const roles = modelPhotoRoles(photo, project);
   const front = project.photos.find(p => p.id === "sittande/front");
@@ -32,6 +42,8 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
       <summary>Fotots riktning och ljus</summary><p>{photo.observed.observation.riktning} {photo.observed.observation.ljus}</p>
       <p>{photo.observed.osakerhet}</p></details></>}
     {photo.group === "Sittande" && front?.seated && <a href={measured}>Jämför utsnitt, ögonlinje och stolkontakter</a>}
+    {project.dealer === "paulina" && project.edition === "fas-1/v1" && photo.id === "sittande/profil" &&
+      <p><a href="/bildstandard/sittprofil#jamforelse">Visa den nya sittprofilen bredvid 3D-modellen</a></p>}
   </div>;
 }
 

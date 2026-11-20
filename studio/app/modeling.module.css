@@ -190,6 +190,9 @@
 .archiveJumps a, .historical a { font-size: 13px; }
 .archiveLinks button { padding: 4px 8px; font-size: 12px; }
 .archiveLinks button[aria-pressed=true] { color: var(--pine); border-color: #6c8d68; background: #e5efdc; }
+.workspace.profilePair { grid-template-areas: "photo model"; }
+.profilePair .archiveLinks { margin-bottom: 9px; }
+.profilePair :global(.view-switch) { max-width: 100%; flex-wrap: wrap; }
 .historical { margin-top: 16px; }
 .historical summary { cursor: pointer; }
 .historical .archiveLinks { margin-top: 8px; }
@@ -199,6 +202,16 @@
   .resources a { padding: 11px; gap: 6px; }
 }
 @media (max-width: 700px) {
+  .workspace.profilePair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    --view-height: clamp(160px, 51vw, 340px);
+  }
+  .profilePair .panelHeader { height: 88px; padding: 7px; }
+  .profilePair .meta { overflow-wrap: anywhere; }
+  .profilePair .panelHeader h2 { font-size: 16px; }
+  .profilePair .sourceNote, .profilePair :global(.pose-tools) { padding: 7px; }
+  .profilePair .rail { padding-inline: 7px; flex-wrap: wrap; }
   .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "model" "gallery" "evidence" "roadmap" "resources"; gap: 12px; }
   .panelHeader { min-height: 64px; padding: 10px 13px; }
   .workspace { --view-height: clamp(280px, 40svh, 365px); }
