@@ -134,3 +134,16 @@
   .contact-strip { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); padding: 0 10px 12px; }
   .contact-strip img { height: 60px; }
 }
+.pose-review { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; background: #f9faf6; }
+.pose-tools { display: flex; flex: 0 0 auto; gap: 6px; flex-wrap: wrap; align-items: center; padding: 6px 12px; background: #f9faf6; border-bottom: 1px solid #d7ddd5; }
+.pose-tools > button { font: inherit; font-size: 12px; padding: 5px 8px; }
+.pose-tools > button[aria-pressed="true"] { color: #214b3a; background: #e5eee4; }
+.pose-joints { flex: 0 0 auto; padding: 5px 12px; color: #294738; border-bottom: 1px solid #d7ddd5; font-size: 13px; }
+.pose-joints summary { cursor: pointer; width: fit-content; }
+.pose-joints > div, .pose-joints label { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.pose-joints > div { padding: 5px 0; }
+.pose-joints input { width: clamp(70px, 16vw, 160px); accent-color: #246447; }
+.pose-joints output { min-width: 3ch; font-variant-numeric: tabular-nums; }
+.pose-canvas { flex: 1 1 0; min-width: 0; min-height: 0; }
+.pose-canvas canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.pose-message { position: absolute; inset: 45% 0 auto; text-align: center; }

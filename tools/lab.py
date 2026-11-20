@@ -161,6 +161,36 @@ def run_sam(root, inputs, mesh_only):
     print(f"Färdig: {run}")
 
 
+def export_front_model(mesh, landmarks, pose):
+    """Keep SAM's vertical axis and turn the hips toward a level front camera."""
+    import numpy as np
+    import trimesh
+
+    joints = landmarks * [1, -1, -1]
+    hip = joints[[9, 10]].mean(axis=0)
+    for left, right in ((9, 10), (5, 6)):
+        lateral = joints[left] - joints[right]
+        lateral[1] = 0
+        span = np.linalg.norm(lateral)
+        if np.isfinite(span) and span > 1e-5:
+            break
+    else:
+        return  # This pose does not establish a horizontal front direction.
+    lateral /= span
+    up = np.array([0., 1., 0.])
+    axes = np.column_stack((lateral, up, np.cross(lateral, up)))
+    vertices = (mesh.vertices - hip) @ axes
+    vertices[:, 1] -= vertices[:, 1].min()
+    front = trimesh.Trimesh(vertices=vertices, faces=mesh.faces, process=False)
+    output = pose.with_name(pose.stem + "-front.glb")
+    temp = output.with_name(output.name + "." + uuid.uuid4().hex + ".tmp")
+    try:
+        temp.write_bytes(front.export(file_type="glb"))
+        temp.replace(output)
+    finally:
+        temp.unlink(missing_ok=True)
+
+
 def export_views(root, name):
     import numpy as np
     import trimesh
@@ -179,6 +209,8 @@ def export_views(root, name):
             # SAM uses image coordinates. glTF uses Y up and the camera looks along -Z.
             mesh = trimesh.Trimesh(vertices=data["pred_vertices"] * [1, -1, -1],
                                    faces=data["faces"], process=False)
+            if "pred_keypoints_3d" in data:
+                export_front_model(mesh, data["pred_keypoints_3d"], pose)
         page = pose.with_suffix(".html")
         staged = page.with_suffix(".tmp")
         staged.write_text(scene_to_html(mesh.scene()), encoding="utf-8")

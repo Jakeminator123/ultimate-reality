@@ -5,6 +5,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 import next from "next";
 import { chromium } from "playwright-core";
 
@@ -158,6 +159,21 @@ test(
       await page.locator(".reference-surface img").evaluate(img => img.decode());
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       assert.equal((await page.request.get(origin + "/api/modeling?run=" + run + "&index=2&view=mesh")).status(), 404);
+      const modelUrl = origin + "/api/modeling?run=" + run + "&index=1&view=";
+      assert.equal((await page.request.get(modelUrl + "front")).status(), 404);
+      assert.equal((await page.request.get(modelUrl + "bordsvila")).status(), 404);
+      assert.equal((await page.request.get(modelUrl + "utseende")).status(), 404);
+      assert.equal((await page.request.get(modelUrl + "rak")).status(), 404);
+      for (const view of ["front", "bordsvila", "utseende", "rak"]) {
+        const marker = Buffer.from("glTF-" + view);
+        await fs.writeFile(path.join(saved, prefix + "-" + view + ".glb"), marker);
+        const response = await page.request.get(modelUrl + view);
+        assert.equal(response.status(), 200);
+        assert.equal(response.headers()["content-type"], "model/gltf-binary");
+        assert.deepEqual(await response.body(), marker);
+      }
+      const inventory = await (await page.request.get(origin + "/api/modeling")).json();
+      assert.ok(inventory.poses.some(p => p.run === run && p.index === 1 && p.hasFront && p.hasTablePose && p.hasAppearance && p.hasUpright));
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.getByRole("link", { name: "Filmutkast" }).click();
       await page.locator("summary").click();
@@ -365,6 +381,36 @@ test(
       );
       assert.deepEqual(appErrors, []);
       assert.deepEqual(remote, []);
+      await t.test("fotomallen visar alla nio vinklar och båda prompterna från den sparade HTML-filen offline", async () => {
+        const guideUrl = origin + "/fotomall.html";
+        assert.equal((await page.request.get(guideUrl + "?kallbild=finns-inte")).status(), 404);
+        const response = await page.request.get(guideUrl + "?hamta=1");
+        assert.equal(response.status(), 200);
+        assert.match(response.headers()["content-disposition"], /Fotomall-steg-1\.html/);
+        const guideFile = path.join(temporary, "Fotomall-steg-1.html");
+        await fs.writeFile(guideFile, await response.body());
+        const offline = await browser.newPage({ viewport: { width: 390, height: 844 } });
+        try {
+          await offline.context().setOffline(true);
+          await offline.goto(pathToFileURL(guideFile).href);
+          assert.equal(await offline.getByRole("button", { name: /^Förstora / }).count(), 4);
+          await offline.getByRole("button", { name: "Visa alla", exact: true }).click();
+          const sizes = await offline.locator(".photo-button img").evaluateAll(async images => {
+            await Promise.all(images.map(image => image.decode()));
+            return images.map(image => ({ width: image.clientWidth, height: image.clientHeight, natural: image.naturalWidth }));
+          });
+          assert.equal(sizes.length, 9);
+          assert.ok(sizes.every(p => p.natural === 720 && Math.abs(p.height - p.width * 880 / 720) < 2));
+          assert.ok(await offline.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+          await offline.getByRole("button", { name: "Visa dockans vinkel för bild 11" }).click();
+          assert.equal(await offline.locator("dialog[open] #large-title").innerText(), "Vänsterhandens kortgrepp");
+          await offline.getByRole("button", { name: "Stäng", exact: true }).click();
+          assert.equal(await offline.getByRole("button", { name: /^Kopiera prompt / }).count(), 2);
+          assert.equal(await offline.locator("[data-studio]").getAttribute("href"), origin + "/#modellering");
+        } finally {
+          await offline.close();
+        }
+      });
     } finally {
       await browser.close();
       server.closeAllConnections();

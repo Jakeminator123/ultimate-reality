@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Fotomall för en dealer · Ultimate Reality</title>
+    <style>
+      @font-face {
+        font-family: DM;
+        src: url("__FONT_URI__") format("woff2");
+        font-weight: 100 1000;
+        font-style: normal;
+        font-display: swap;
+      }
+      :root {
+        --ink: #192f25;
+        --forest: #153b2c;
+        --green: #256748;
+        --accent: #bb7746;
+        --muted: #4f655a;
+        --line: #cdd8ce;
+        --paper: #f8faf6;
+        --sage: #eaf0e9;
+        --white: #fff;
+        --radius: 12px;
+        color-scheme: light;
+        scroll-behavior: smooth;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          16px/1.5 DM,
+          "Segoe UI",
+          sans-serif;
+      }
+      a {
+        color: var(--green);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+      button,
+      a {
+        touch-action: manipulation;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid #c87c31;
+        outline-offset: 3px;
+      }
+      button:disabled {
+        cursor: default;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .wrap {
+        max-width: 1376px;
+        margin: 0 auto;
+        padding-inline: clamp(18px, 4.2vw, 70px);
+      }
+      .mast {
+        background: var(--forest);
+        color: white;
+      }
+      .mast .wrap {
+        min-height: 61px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .brand {
+        display: inline-flex;
+        gap: 12px;
+        align-items: center;
+        color: white;
+        text-decoration: none;
+        font-size: 1.03rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+      }
+      .mark {
+        width: 24px;
+        height: 25px;
+        position: relative;
+        margin-left: 3px;
+      }
+      .mark:before,
+      .mark:after {
+        content: "";
+        position: absolute;
+        width: 14px;
+        height: 18px;
+        border: 1.6px solid #e3efd8;
+        border-radius: 3px;
+        left: 1px;
+        top: 3px;
+        transform: rotate(-18deg);
+      }
+      .mark:after {
+        background: var(--forest);
+        transform: rotate(10deg);
+        left: 7px;
+        top: 4px;
+      }
+      .mast nav {
+        display: flex;
+        align-items: center;
+        gap: clamp(12px, 2vw, 32px);
+        flex-wrap: wrap;
+      }
+      .mast nav a {
+        color: #eff5ec;
+        text-decoration: none;
+        font-size: 0.91rem;
+      }
+      .mast .save {
+        border: 1px solid #80998c;
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+      .mast a:hover {
+        text-decoration: underline;
+      }
+      .intro {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 32px;
+        padding-block: clamp(23px, 3vw, 46px) 25px;
+      }
+      .step {
+        margin: 0 0 6px;
+        color: var(--green);
+        font-size: 0.79rem;
+        font-weight: 720;
+        letter-spacing: 0.105em;
+        text-transform: uppercase;
+      }
+      .intro h1 {
+        font-size: clamp(2.35rem, 4.3vw, 4.15rem);
+        letter-spacing: -0.068em;
+        line-height: 1.02;
+        margin: 0;
+        font-weight: 640;
+      }
+      .lead {
+        max-width: 430px;
+        color: var(--muted);
+        font-size: 1.07rem;
+        line-height: 1.5;
+        margin: 0 0 2px;
+      }
+      section[id] {
+        scroll-margin-top: 12px;
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin: 0 0 15px;
+      }
+      .section-head h2,
+      .lower h2 {
+        margin: 0;
+        font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+        letter-spacing: -0.052em;
+        line-height: 1.15;
+        font-weight: 650;
+      }
+      .seg {
+        display: inline-flex;
+        flex-wrap: wrap;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        gap: 3px;
+        background: #ecf1eb;
+      }
+      .seg button {
+        border: 0;
+        background: transparent;
+        border-radius: 5px;
+        color: #465e50;
+        padding: 6px 12px;
+        font-size: 0.89rem;
+        font-weight: 550;
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--forest);
+        color: white;
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: clamp(10px, 1.55vw, 22px);
+      }
+      .gallery[data-filter="extra"] {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+      .gallery[data-filter="all"] {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .shot {
+        margin: 0;
+        min-width: 0;
+      }
+      .photo-button {
+        display: block;
+        position: relative;
+        width: 100%;
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid #c3d0c4;
+        border-radius: var(--radius);
+        background: #dce5df;
+      }
+      .photo-button img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 9/11;
+        object-fit: contain;
+      }
+      .zoom {
+        position: absolute;
+        right: 9px;
+        bottom: 9px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        width: 25px;
+        height: 25px;
+        background: #f7faf5ed;
+        color: #365b43;
+        box-shadow: 0 1px 6px #12251521;
+      }
+      .zoom:before,
+      .zoom:after {
+        content: "";
+        position: absolute;
+        height: 1.5px;
+        width: 10px;
+        background: currentColor;
+      }
+      .zoom:after {
+        transform: rotate(90deg);
+      }
+      .photo-button:hover {
+        border-color: #527a60;
+        box-shadow: 0 3px 16px #17372316;
+      }
+      .shot h3 {
+        font-size: clamp(1.05rem, 1.45vw, 1.33rem);
+        letter-spacing: -0.04em;
+        line-height: 1.22;
+        margin: 10px 0 2px;
+      }
+      .angle {
+        margin: 0;
+        color: var(--green);
+        font-size: 0.87rem;
+        font-weight: 590;
+      }
+      .shot .why {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 0.93rem;
+        line-height: 1.45;
+      }
+      .camera-note {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin: 18px 0 0;
+        padding: 11px 14px;
+        background: var(--sage);
+        border-left: 3px solid #64896f;
+        border-radius: 0 5px 5px 0;
+        color: #3c5748;
+        font-size: 0.94rem;
+      }
+      .camera-note b {
+        white-space: nowrap;
+      }
+      .lower {
+        margin-top: clamp(35px, 4.5vw, 62px);
+        border-top: 1px solid var(--line);
+        padding-top: 24px;
+      }
+      .sub {
+        margin: 7px 0 15px;
+        max-width: 83ch;
+        color: var(--muted);
+      }
+      .status-head {
+        align-items: flex-end;
+      }
+      .status-head .sub {
+        margin-bottom: 0;
+      }
+      .references {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+        margin: 0 0 22px;
+      }
+      .reference {
+        display: flex;
+        text-align: left;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 5px;
+        font: inherit;
+        color: var(--ink);
+      }
+      .reference:hover {
+        border-color: #547865;
+      }
+      .reference img {
+        width: 49px;
+        height: 54px;
+        object-fit: contain;
+        background: #eaebeb;
+        border-radius: 4px;
+        flex: none;
+      }
+      .reference strong,
+      .reference small {
+        display: block;
+      }
+      .reference strong {
+        font-size: 0.86rem;
+        line-height: 1.25;
+      }
+      .reference small {
+        font-size: 0.77rem;
+        color: var(--muted);
+        line-height: 1.24;
+        margin-top: 3px;
+      }
+      .model-panel {
+        background: #edf2eb;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: clamp(11px, 1.5vw, 20px);
+      }
+      .model-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .model-top h3 {
+        margin: 0;
+        font-size: 1.18rem;
+        letter-spacing: -0.035em;
+      }
+      .model-top p {
+        margin: 2px 0 0;
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+      .model-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .model-pair figure {
+        margin: 0;
+        position: relative;
+      }
+      .model-pair img {
+        width: 100%;
+        aspect-ratio: 16/9;
+        object-fit: contain;
+        background: #15251b;
+        border-radius: 6px;
+      }
+      .model-pair figcaption {
+        position: absolute;
+        bottom: 7px;
+        left: 7px;
+        color: white;
+        background: #143122e8;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.82rem;
+      }
+      .model-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 23px;
+        margin: 12px 0 0;
+      }
+      .model-links a {
+        font-size: 0.91rem;
+        font-weight: 600;
+      }
+      .orders {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .order {
+        padding: clamp(14px, 2vw, 24px);
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        min-width: 0;
+      }
+      .order header {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .order .sample {
+        border: 1px solid #c5d1c5;
+        border-radius: 6px;
+        overflow: hidden;
+        flex: none;
+        width: 80px;
+        padding: 0;
+        background: #dce5df;
+      }
+      .sample img {
+        width: 100%;
+        aspect-ratio: 9/11;
+        object-fit: contain;
+      }
+      .order h3 {
+        font-size: 1.22rem;
+        line-height: 1.24;
+        letter-spacing: -0.033em;
+        margin: 1px 0 5px;
+      }
+      .order header p {
+        font-size: 0.93rem;
+        margin: 0;
+        color: var(--muted);
+      }
+      .order .saved {
+        margin: 4px 0;
+        font-size: 0.83rem;
+        color: var(--green);
+        font-weight: 660;
+      }
+      .attach {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 15px 0 9px;
+        font-size: 0.92rem;
+      }
+      .attach a {
+        font-weight: 650;
+      }
+      .order details {
+        border-top: 1px solid var(--line);
+        margin-top: 10px;
+        padding-top: 9px;
+      }
+      .order summary {
+        cursor: pointer;
+        font-weight: 580;
+        font-size: 0.94rem;
+      }
+      .prompt {
+        font-size: 0.94rem;
+        color: #385143;
+        margin: 9px 0 2px;
+        user-select: text;
+      }
+      .copy,
+      .large-link,
+      .dialog-controls button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 7px 13px;
+        border-radius: 5px;
+        font-weight: 560;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .copy,
+      .large-link {
+        background: var(--forest);
+        color: white;
+        border: 1px solid var(--forest);
+      }
+      .copy:hover,
+      .large-link:hover {
+        background: #295741;
+      }
+      .file-name {
+        display: block;
+        line-height: 1.4;
+        margin-top: 10px;
+        font:
+          0.78rem/1.4 ui-monospace,
+          Consolas,
+          monospace;
+        color: #405c4b;
+        overflow-wrap: anywhere;
+      }
+      .feedback {
+        margin-left: 7px;
+        color: var(--green);
+        font-size: 0.87rem;
+      }
+      .optional {
+        margin: 15px 0;
+        color: var(--muted);
+        max-width: 90ch;
+      }
+      .optional strong {
+        color: var(--ink);
+      }
+      .folder {
+        overflow-wrap: anywhere;
+      }
+      .footer {
+        margin: 36px 0 19px;
+        padding-top: 13px;
+        border-top: 1px solid var(--line);
+        font-size: 0.89rem;
+        color: var(--muted);
+      }
+      dialog {
+        padding: 0;
+        width: min(850px, 94vw);
+        max-height: 92svh;
+        overflow: auto;
+        border: 1px solid #b8c9bc;
+        border-radius: 14px;
+        background: var(--paper);
+        color: var(--ink);
+        box-shadow: 0 25px 90px #101a1544;
+      }
+      dialog::backdrop {
+        background: #15281ed6;
+      }
+      .dialog-inner {
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) minmax(180px, 0.85fr);
+      }
+      .dialog-img {
+        width: 100%;
+        height: 100%;
+        max-height: 76svh;
+        object-fit: contain;
+        background: #dce5df;
+      }
+      .dialog-info {
+        padding: 22px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .dialog-info h2 {
+        font-size: 1.8rem;
+        letter-spacing: -0.045em;
+        margin: 0;
+        line-height: 1.12;
+      }
+      .dialog-info p {
+        margin: 0;
+      }
+      .dialog-info .dialog-use {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .dialog-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 9px 13px;
+        border-top: 1px solid var(--line);
+      }
+      .dialog-controls button {
+        border: 1px solid #c4d1c5;
+        background: white;
+        color: var(--ink);
+      }
+      .dialog-controls button:disabled {
+        opacity: 0.4;
+      }
+      @media (max-width: 970px) {
+        .gallery[data-filter="extra"] {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .references {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .intro {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .lead {
+          max-width: 66ch;
+        }
+        .gallery {
+          gap: 12px;
+        }
+      }
+      @media (max-width: 760px) {
+        .gallery[data-filter] {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 19px 11px;
+        }
+        .mast .wrap {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 6px;
+          padding-block: 10px;
+        }
+        .mast nav {
+          gap: 13px;
+        }
+        .mast nav a {
+          font-size: 0.84rem;
+        }
+        .mast .save {
+          padding: 2px 7px;
+        }
+        .orders {
+          grid-template-columns: 1fr;
+        }
+        .model-top {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .wrap {
+          padding-inline: 15px;
+        }
+        .camera-note {
+          display: block;
+        }
+        .camera-note b {
+          margin-right: 4px;
+        }
+        .section-head {
+          gap: 10px;
+        }
+        .shot .why {
+          font-size: 0.89rem;
+        }
+        .references {
+          gap: 6px;
+        }
+      }
+      @media (max-width: 530px) {
+        .intro {
+          padding-top: 24px;
+        }
+        .step {
+          font-size: 0.71rem;
+        }
+        .intro h1 {
+          font-size: 2.65rem;
+        }
+        .lead {
+          font-size: 1rem;
+        }
+        .references {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .model-pair {
+          grid-template-columns: 1fr;
+        }
+        .dialog-inner {
+          grid-template-columns: 1fr;
+        }
+        .dialog-img {
+          max-height: 44svh;
+          min-height: 150px;
+        }
+        .dialog-info {
+          padding: 13px;
+          gap: 5px;
+        }
+        .dialog-info h2 {
+          font-size: 1.4rem;
+        }
+        .dialog-controls {
+          position: sticky;
+          bottom: 0;
+          background: var(--paper);
+        }
+        .seg button {
+          padding: 5px 9px;
+        }
+        .section-head h2 {
+          font-size: 1.6rem;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        :root {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="mast">
+      <div class="wrap">
+        <a class="brand" data-studio href="/#modellering"
+          ><span class="mark" aria-hidden="true"></span>Ultimate Reality</a
+        >
+        <nav aria-label="Fotomallens avsnitt">
+          <a href="#vinklar">Fotovinklar</a
+          ><a href="#paulina">Paulinas modell</a
+          ><a href="#nya-bilder">Nya bilder</a
+          ><a
+            class="save"
+            id="save-page"
+            href="?hamta=1"
+            download="Fotomall-steg-1.html"
+            >Spara HTML</a
+          >
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <header class="intro">
+        <div>
+          <p class="step">Steg 1 · Fotomaterial</p>
+          <h1>Fotomall för en dealer</h1>
+        </div>
+        <p class="lead">
+          Börja med tre kroppsbilder och en handbild. Flytta undan bordet för
+          de två sittbilderna så att höft, knän och fötter syns.
+        </p>
+      </header>
+      <section id="vinklar" aria-labelledby="angle-heading">
+        <div class="section-head">
+          <h2 id="angle-heading">Fotovinklar</h2>
+          <div class="seg" role="group" aria-label="Välj fotovinklar">
+            <button type="button" data-filter="base" aria-pressed="true">
+              4 grundbilder</button
+            ><button type="button" data-filter="extra" aria-pressed="false">
+              5 extravinklar</button
+            ><button type="button" data-filter="all" aria-pressed="false">
+              Visa alla
+            </button>
+          </div>
+        </div>
+        <div id="shots" class="gallery"></div>
+        <p class="camera-note" id="camera-note">
+          <b>Sittande framifrån och från sidan</b> Flytta kameran 90° runt samma
+          sittpose. Håll den i våg på brösthöjd med fri sikt till höft, knän och
+          fötter.
+        </p>
+      </section>
+      <section id="paulina" class="lower" aria-labelledby="paulina-heading">
+        <div class="section-head status-head">
+          <div>
+            <h2 id="paulina-heading">Paulinas modell</h2>
+            <p class="sub">
+              01 och 03 ger Paulinas utseende. Från sittbild 08 byggde vi en
+              rigg med 127 rörliga leder.
+            </p>
+          </div>
+        </div>
+        <div
+          class="references"
+          id="references"
+          aria-label="Paulinas tidigare grundbilder"
+        ></div>
+        <div class="model-panel" id="model-panel">
+          <div class="model-top">
+            <div>
+              <h3>08-rak-v1 vid kortskon</h3>
+              <p id="take-description"></p>
+            </div>
+            <div
+              class="seg"
+              role="group"
+              aria-label="Utsnitt för Paulinas modell"
+            >
+              <button type="button" data-view="bord" aria-pressed="true">
+                Vid bordet</button
+              ><button type="button" data-view="hand" aria-pressed="false">
+                Hand och kort
+              </button>
+            </div>
+          </div>
+          <div class="model-pair">
+            <figure>
+              <img id="seat4" alt="" />
+              <figcaption>Stol 4</figcaption>
+            </figure>
+            <figure>
+              <img id="seat1" alt="" />
+              <figcaption>Stol 1</figcaption>
+            </figure>
+          </div>
+          <p class="model-links">
+            <a id="play-take">Spela hela utdraget</a
+            ><a id="before-after">Jämför före och efter</a
+            ><a id="rotate">Vrid 3D-modellen</a>
+          </p>
+        </div>
+        <p id="no-model" class="sub" hidden>
+          Det uppmätta 3D-provet hör till den lokala Paulina-mappen. Där finns
+          de båda kamerorna och kortutdraget.
+        </p>
+      </section>
+      <section id="nya-bilder" class="lower" aria-labelledby="next-heading">
+        <h2 id="next-heading">Nya bilder av Paulina</h2>
+        <p class="sub">
+          05b visar redan en sittprofil och 09 visar vänsterhanden ovanifrån. De
+          här två närbilderna kompletterar underlaget för nästa prov av
+          fingrarna.
+        </p>
+        <div class="orders" id="orders"></div>
+        <p class="optional">
+          <strong>Om du kan fotografera Paulina på riktigt</strong> är samma
+          avslappnade sittpose i ren 90°-profil mest värdefull för kroppens
+          proportioner. Genererade bilder hjälper oss att forma greppet.
+          Originalfoton på händerna behövs för att fastställa finare
+          tatueringar.
+        </p>
+        <p class="footer">
+          Lägg dina nya filer i <code class="folder">avatars/paulina/</code> i
+          projektet <b>ultimate-reality</b>.
+        </p>
+      </section>
+      <noscript
+        ><p>
+          Aktivera JavaScript för att se dockans kameravinklar, Paulinas modell
+          och bildprompterna.
+        </p></noscript
+      >
+    </main>
+    <dialog id="lightbox" aria-labelledby="large-title">
+      <div class="dialog-inner">
+        <img class="dialog-img" id="large-img" alt="" />
+        <div class="dialog-info">
+          <p class="angle" id="large-angle"></p>
+          <h2 id="large-title"></h2>
+          <p id="large-setup"></p>
+          <p class="dialog-use" id="large-use"></p>
+          <a class="large-link" id="large-download">Spara mallbild</a>
+        </div>
+      </div>
+      <div class="dialog-controls">
+        <button type="button" id="previous">Föregående</button
+        ><button type="button" id="close" autofocus>Stäng</button
+        ><button type="button" id="next">Nästa</button>
+      </div>
+    </dialog>
+    <script type="application/json" id="data">
+      __GUIDE_JSON__
+    </script>
+    <script>
+      "use strict";
+      const data = JSON.parse(document.getElementById("data").textContent);
+      const el = (id) => document.getElementById(id);
+      const node = (tag, cls, text) => {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text) e.textContent = text;
+        return e;
+      };
+      document.querySelector("[data-studio]").href =
+        data.origin + "/#modellering";
+      if (data.portable) el("save-page").hidden = true;
+      const dialog = el("lightbox");
+      let visibleShots = [],
+        slideList = [],
+        slideIndex = 0;
+      function paintSlide() {
+        const item = slideList[slideIndex];
+        const photo = el("large-img");
+        photo.src = item.image || item.preview;
+        photo.alt = item.title || item.label;
+        el("large-angle").textContent = item.angle || "Paulina · " + item.id;
+        el("large-title").textContent = item.title || item.label;
+        el("large-setup").textContent = item.setup || item.role;
+        el("large-use").textContent = item.use || "";
+        const dl = el("large-download");
+        dl.href = item.attachment || item.image;
+        dl.download = item.name || item.id + ".webp";
+        dl.textContent = item.image
+          ? "Spara mallbild"
+          : data.portable && !item.attachment.startsWith("data:")
+            ? "Hämta original i studion"
+            : "Hämta originalbild";
+        el("previous").disabled = slideIndex === 0;
+        el("next").disabled = slideIndex === slideList.length - 1;
+      }
+      function showSlide(list, index) {
+        slideList = list;
+        slideIndex = index;
+        paintSlide();
+        dialog.showModal();
+      }
+      function advance(step) {
+        const index = slideIndex + step;
+        if (index >= 0 && index < slideList.length) {
+          slideIndex = index;
+          paintSlide();
+        }
+      }
+      el("close").onclick = () => dialog.close();
+      el("previous").onclick = () => advance(-1);
+      el("next").onclick = () => advance(1);
+      dialog.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          advance(e.key === "ArrowRight" ? 1 : -1);
+        }
+      });
+      dialog.addEventListener("click", (e) => {
+        if (e.target === dialog) {
+          const r = dialog.getBoundingClientRect();
+          if (
+            e.clientX < r.left ||
+            e.clientX > r.right ||
+            e.clientY < r.top ||
+            e.clientY > r.bottom
+          )
+            dialog.close();
+        }
+      });
+      function buildGallery(filter) {
+        visibleShots = data.shots.filter(
+          (s) => filter === "all" || s.base === (filter === "base"),
+        );
+        const gallery = el("shots");
+        gallery.dataset.filter = filter;
+        gallery.replaceChildren();
+        for (const [index, s] of visibleShots.entries()) {
+          const frame = node("figure", "shot"),
+            button = node("button", "photo-button"),
+            img = node("img");
+          button.type = "button";
+          button.setAttribute(
+            "aria-label",
+            "Förstora " + s.title.toLowerCase(),
+          );
+          button.onclick = () => showSlide(visibleShots, index);
+          img.src = s.image;
+          img.alt = s.title + " · " + s.angle;
+          img.width = 720;
+          img.height = 880;
+          const zoom = node("span", "zoom");
+          zoom.setAttribute("aria-hidden", "true");
+          button.append(img, zoom);
+          const caption = node("figcaption");
+          caption.append(
+            node("h3", "", s.title),
+            node("p", "angle", s.angle),
+            node("p", "why", s.use),
+          );
+          frame.append(button, caption);
+          gallery.append(frame);
+        }
+        for (const b of document.querySelectorAll("[data-filter]"))
+          b.setAttribute("aria-pressed", String(b.dataset.filter === filter));
+        const note = el("camera-note");
+        if (filter === "extra")
+          note.replaceChildren(
+            node("b", "", "Hög och låg kamera"),
+            document.createTextNode(
+              " Ovanifrån syns handryggar och naglar. Lågt från tumsidan syns greppet mot kortkanten. Välj extravinkel efter detaljen du vill förbättra.",
+            ),
+          );
+        else
+          note.replaceChildren(
+            node("b", "", "Sittande framifrån och från sidan"),
+            document.createTextNode(
+              " Flytta kameran 90° runt samma sittpose. Håll den i våg på brösthöjd med fri sikt till höft, knän och fötter.",
+            ),
+          );
+      }
+      for (const b of document.querySelectorAll("[data-filter]"))
+        b.onclick = () => buildGallery(b.dataset.filter);
+      buildGallery("base");
+      for (const [index, r] of data.refs.entries()) {
+        const button = node("button", "reference");
+        button.type = "button";
+        button.setAttribute(
+          "aria-label",
+          "Öppna " + r.id + " " + r.label.toLowerCase(),
+        );
+        button.onclick = () => showSlide(data.refs, index);
+        const img = node("img");
+        img.src = r.preview;
+        img.alt = "";
+        img.loading = "lazy";
+        const label = node("span");
+        label.append(
+          node("strong", "", r.id + " · " + r.label),
+          node("small", "", r.role),
+        );
+        button.append(img, label);
+        el("references").append(button);
+      }
+      if (data.current) {
+        const t = data.current;
+        function setView(view) {
+          for (const seat of ["4", "1"]) {
+            const img = el("seat" + seat);
+            img.src = t[view][seat];
+            img.alt =
+              "Paulina från stol " +
+              seat +
+              ", " +
+              (view === "hand"
+                ? "vänster hand på första kortet"
+                : "sittande vid bordet") +
+              ", ruta " +
+              t.frame;
+          }
+          for (const b of document.querySelectorAll("[data-view]"))
+            b.setAttribute("aria-pressed", String(b.dataset.view === view));
+          el("play-take").href =
+            data.origin + "/bordsprov/paulina-rak?vy=" + view + "&ruta=1";
+        }
+        el("take-description").textContent =
+          "Bålen gick från " +
+          t.before.toLocaleString("sv-SE", { minimumFractionDigits: 1 }) +
+          "° till " +
+          t.after.toLocaleString("sv-SE", { minimumFractionDigits: 1 }) +
+          "°. Första kortet med 70/30-skon, ruta " +
+          t.frame +
+          " av " +
+          t.total +
+          ".";
+        el("before-after").href =
+          data.origin + "/bordsprov/paulina-rak?ruta=" + t.frame;
+        el("rotate").href =
+          data.origin +
+          "/?pose=" +
+          encodeURIComponent(t.run + "/1") +
+          "&version=rak#modellering";
+        for (const b of document.querySelectorAll("[data-view]"))
+          b.onclick = () => setView(b.dataset.view);
+        setView("bord");
+      } else {
+        el("model-panel").hidden = true;
+        el("no-model").hidden = false;
+      }
+      for (const item of data.next) {
+        const shot = data.shots.find((s) => s.id === item.shot),
+          card = node("article", "order"),
+          header = node("header");
+        const sample = node("button", "sample");
+        sample.type = "button";
+        sample.setAttribute(
+          "aria-label",
+          "Visa dockans vinkel för bild " + item.id,
+        );
+        sample.onclick = () => showSlide([shot], 0);
+        const img = node("img");
+        img.src = shot.image;
+        img.alt = "";
+        img.loading = "lazy";
+        sample.append(img);
+        const intro = node("div");
+        intro.append(
+          node("h3", "", item.id + " · " + item.title),
+          node("p", "", item.goal),
+        );
+        if (item.saved)
+          intro.append(node("p", "saved", "Filen finns i avatars/paulina/."));
+        header.append(sample, intro);
+        card.append(header);
+        const attach = node("div", "attach");
+        attach.append(node("strong", "", "Bifoga"));
+        for (const id of item.refs) {
+          const r = data.refs.find((x) => x.id === id);
+          if (r) {
+            const a = node("a", "", "Bild " + id);
+            a.href = r.attachment;
+            a.download = r.name;
+            a.setAttribute(
+              "aria-label",
+              "Hämta referensbild " + id + " till bild " + item.id,
+            );
+            attach.append(a);
+          } else attach.append(node("span", "", "Bild " + id));
+        }
+        const details = node("details"),
+          summary = node("summary", "", "Läs hela prompten"),
+          prompt = node("p", "prompt", item.prompt);
+        details.append(summary, prompt);
+        const button = node("button", "copy", "Kopiera prompt " + item.id);
+        button.type = "button";
+        const status = node("span", "feedback");
+        status.setAttribute("role", "status");
+        button.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(item.prompt);
+            status.textContent = "Kopierad.";
+          } catch {
+            details.open = true;
+            const range = document.createRange();
+            range.selectNodeContents(prompt);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            status.textContent = "Markerad. Kopiera med Ctrl+C.";
+          }
+        };
+        card.append(
+          attach,
+          button,
+          status,
+          details,
+          node("code", "file-name", item.file),
+        );
+        el("orders").append(card);
+      }
+    </script>
+  </body>
+</html>

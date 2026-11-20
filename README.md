@@ -32,7 +32,11 @@ npm run dev
 
 ## 3D-modellering på labbdatorn
 
+[Steg 1 · Fotomall för en dealer](http://127.0.0.1:4317/fotomall.html) visar en neutral docka i fyra grundbilder och fem extravinklar. Där finns också Paulinas 08-modell i båda spelarvyerna, bildreferenser och färdiga prompter till hennes två handbilder. **Spara HTML** tar med mallbilderna och de två referensoriginalen så att guiden fungerar offline.
+
 I [3D-modellering](http://127.0.0.1:4317/#modellering) visas bildinkorgen, datorns NVIDIA-grafikkort och de SAM-vikter som finns på disk. Välj ett foto eller ett sparat kroppsprov. **Överlägg** visar original, kroppsskattning och sidovy. Under **3D** kan du vrida modellen. Fliken läser resultaten från labbets `saved` och uppdateras med knappen vid **Bildinkorg**. Egna grundbilder och resultat kan användas direkt i den lokala studion.
+
+**Framifrån** och **Från sidan** använder en lodrät kamera och ett 10 cm-rutnät. Lodlinjen går genom bäckenets mitt i frontvyn. För sparade prov med riggad **Bordsvila** kan du växla mellan två poser med samma kamera och prova att böja armbågar, pekfingrar och långfingrar.
 
 ## Gemensam 3D-scen
 

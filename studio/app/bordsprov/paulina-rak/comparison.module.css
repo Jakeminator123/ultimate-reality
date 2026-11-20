@@ -1,0 +1,37 @@
+.page { max-width: 1220px; margin: 0 auto; padding: 14px clamp(14px, 3.4vw, 50px) 25px; color: #1d3028; }
+.nav, .toolbar, .timeline, .group, .guides, .play { display: flex; align-items: center; }
+.nav { justify-content: space-between; border-bottom: 1px solid #cfdbd2; padding: 0 0 10px; }
+.nav a { display: inline-flex; gap: 6px; align-items: center; color: #34594b; text-decoration: none; font-size: .83rem; }
+.nav a:hover { text-decoration: underline; }
+.header { margin: 13px 0 15px; }
+.header h1 { margin: 0; font-size: clamp(1.65rem, 3.5vw, 2.65rem); letter-spacing: -.05em; line-height: 1.1; }
+.header p, .note { color: #4b6055; margin: 5px 0 0; font-size: .93rem; }
+.toolbar { flex-wrap: wrap; gap: 6px 18px; }
+.group { padding: 3px; gap: 2px; border: 1px solid #cbd7cc; background: #e8eee7; border-radius: 7px; }
+.group button, .play { min-height: 30px; padding: 4px 10px; border: 0; border-radius: 4px; background: transparent; color: #31463a; font: inherit; font-size: .85rem; cursor: pointer; }
+.group button[aria-pressed=true], .play { color: white; background: #244b3b; }
+.page button:focus-visible, .page a:focus-visible, .page input:focus-visible { outline: 3px solid #ba7427; outline-offset: 2px; }
+.guides { gap: 5px; font-size: .85rem; cursor: pointer; }
+.guides input, .timeline input { accent-color: #26624b; }
+.timeline { gap: 14px; margin: 12px 0; }
+.play { gap: 5px; justify-content: center; min-width: 80px; }
+.timeline input { flex: 1; min-width: 45px; cursor: pointer; margin: 0; }
+.timeline output { font: .77rem "IBM Plex Mono", monospace; color: #33473d; }
+.timeline output span { color: #5d6d63; }
+.labels, .row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+.labels h2 { margin: 0 0 5px; font-size: 1.08rem; line-height: 1.3; }
+.labels h2 span { margin-left: 3px; font-size: .83rem; font-weight: 500; color: #51675a; }
+.figure { margin: 0; position: relative; overflow: hidden; border: 1px solid #c9d2c8; border-radius: 5px; background: #182920; }
+.row + .row { margin-top: 8px; }
+.shot { display: block; width: 100%; height: auto; }
+.figure figcaption { position: absolute; left: 8px; bottom: 7px; padding: 2px 8px; background: #14291fed; color: white; border: 1px solid #ffffff38; border-radius: 4px; font-size: .76rem; }
+.note { margin-top: 10px; font-size: .84rem; }
+@media (max-width: 600px) {
+  .page { padding: 10px; }
+  .toolbar { gap: 4px 6px; }
+  .group button { font-size: .76rem; padding: 3px 5px; }
+  .labels, .row { gap: 4px; }
+  .timeline { gap: 6px; }
+  .timeline output span { display: none; }
+  .figure figcaption { left: 3px; bottom: 3px; font-size: .65rem; padding: 1px 4px; }
+}

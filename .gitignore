@@ -33,6 +33,16 @@
 *.jpeg
 *.png
 *.webp
+# Offentliga, egenritade dockvyer till fotomallen
+!/studio/public/fotomall/docka/staende-front.webp
+!/studio/public/fotomall/docka/staende-trekvart.webp
+!/studio/public/fotomall/docka/staende-profil.webp
+!/studio/public/fotomall/docka/sittande-front.webp
+!/studio/public/fotomall/docka/sittande-profil.webp
+!/studio/public/fotomall/docka/sittande-bord.webp
+!/studio/public/fotomall/docka/handryggar.webp
+!/studio/public/fotomall/docka/kortgrepp.webp
+!/studio/public/fotomall/docka/nacke.webp
 *.avif
 *.heic
 *.gif
@@ -57,6 +67,7 @@
 *.fbx
 *.obj
 *.ply
+*.spz
 *.blend
 *.stl
 *.usdz
@@ -106,6 +117,11 @@ playwright-report/
 Thumbs.db
 .vercel/
 .codex/
+!/.codex/
+/.codex/*
+!/.codex/agents/
+/.codex/agents/*
+!/.codex/agents/bildgranskare.toml
 .cursor/
 .claude/
 .idea/

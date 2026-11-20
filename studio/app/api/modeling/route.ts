@@ -24,7 +24,9 @@ async function readPoses(saved: string, run: string): Promise<SamPose[]> {
     const source = path.win32.basename(input.path);
     const base = String(i + 1).padStart(2, "0") + "-" + path.parse(source).name;
     return [{ run, index: i + 1, source, hasViewer: files.has(base + ".html"), hasSheet: files.has(base + ".png"),
-      hasComparison: files.has(base + "-jamforelse.png") }];
+      hasComparison: files.has(base + "-jamforelse.png"), hasFront: files.has(base + "-front.glb"),
+      hasTablePose: files.has(base + "-bordsvila.glb"), hasAppearance: files.has(base + "-utseende.glb"),
+      hasUpright: files.has(base + "-rak.glb") }];
   });
 }
 
@@ -72,12 +74,16 @@ export async function GET(req: Request) {
       if (!pose) throw new LocalError("Det sparade resultatet saknas.", 404);
       const extension = view === "mesh" && pose.hasViewer ? ".html"
         : view === "sheet" && pose.hasSheet ? ".png"
-        : view === "comparison" && pose.hasComparison ? "-jamforelse.png" : null;
+        : view === "comparison" && pose.hasComparison ? "-jamforelse.png"
+        : view === "front" && pose.hasFront ? "-front.glb"
+        : view === "bordsvila" && pose.hasTablePose ? "-bordsvila.glb"
+        : view === "utseende" && pose.hasAppearance ? "-utseende.glb"
+        : view === "rak" && pose.hasUpright ? "-rak.glb" : null;
       if (!extension) throw new LocalError("Det sparade resultatet saknas.", 404);
       const file = String(pose.index).padStart(2, "0") + "-" + path.parse(pose.source).name + extension;
       const bytes = await fs.readFile(/* turbopackIgnore: true */ path.join(saved, run, file));
       return new Response(new Uint8Array(bytes), { headers: {
-        "Content-Type": view === "mesh" ? "text/html; charset=utf-8" : "image/png",
+        "Content-Type": extension.endsWith(".glb") ? "model/gltf-binary" : view === "mesh" ? "text/html; charset=utf-8" : "image/png",
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
         "Content-Security-Policy": "sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src data: blob:; frame-ancestors 'self'",

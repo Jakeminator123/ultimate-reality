@@ -5,6 +5,10 @@ export type SamPose = {
   hasViewer: boolean;
   hasSheet: boolean;
   hasComparison: boolean;
+  hasFront: boolean;
+  hasTablePose: boolean;
+  hasAppearance: boolean;
+  hasUpright: boolean;
 };
 
 export type ModelingInventory = {
@@ -15,7 +19,9 @@ export type ModelingInventory = {
   poses: SamPose[];
 };
 
-export function resultUrl(pose: SamPose, view: "mesh" | "sheet" | "comparison") {
+export type PoseVersion = "front" | "bordsvila" | "utseende" | "rak";
+
+export function resultUrl(pose: SamPose, view: "mesh" | "sheet" | "comparison" | PoseVersion) {
   const params = new URLSearchParams({ run: pose.run, index: String(pose.index), view });
   return "/api/modeling?" + params.toString();
 }
