@@ -6,22 +6,24 @@ const shoulder = -0.21, railWidth = 0.062;
 const paint = (color, roughness, metalness = 0) =>
   new T.MeshStandardMaterial({ color, roughness, metalness });
 
-function textiles(layout) {
+function textiles(layout, { onlyMarkings = false } = {}) {
   const size = 1536, span = Math.max(1.8, layout.table.radiusX * 2 + 0.20);
   const tile = document.createElement("canvas");
   tile.width = tile.height = size;
   const ctx = tile.getContext("2d");
-  const pixels = ctx.createImageData(size, size);
-  let seed = 108;
-  for (let i = 0; i < pixels.data.length; i += 4) {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    const grain = (seed / 4294967296 - 0.5) * 11;
-    pixels.data[i] = 33 + grain;
-    pixels.data[i + 1] = 83 + grain;
-    pixels.data[i + 2] = 67 + grain;
-    pixels.data[i + 3] = 255;
+  if (!onlyMarkings) {
+    const pixels = ctx.createImageData(size, size);
+    let seed = 108;
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      const grain = (seed / 4294967296 - 0.5) * 11;
+      pixels.data[i] = 33 + grain;
+      pixels.data[i + 1] = 83 + grain;
+      pixels.data[i + 2] = 67 + grain;
+      pixels.data[i + 3] = 255;
+    }
+    ctx.putImageData(pixels, 0, 0);
   }
-  ctx.putImageData(pixels, 0, 0);
   ctx.translate(size / 2, size / 2);
   ctx.scale(size / span, size / span);
   ctx.strokeStyle = "#b7aa74";

@@ -9,7 +9,7 @@ async function loadSceneData(file) {
   return response.json();
 }
 
-export async function placeTable(scene, renderer, seatId, placement) {
+export async function placeTable(scene, renderer, seatId, placement, mat) {
   const study = placement ? await import("./placering.mjs") : null;
   const [layout, calibration, take] = await Promise.all([
     loadSceneData("layout.json"), loadSceneData("kameror.json"),
@@ -27,6 +27,10 @@ export async function placeTable(scene, renderer, seatId, placement) {
   }
   const table = buildTable(layout, false, textiles(layout));
   await applyTableMaterials(table, layout, "/bordsprov/rum3d/");
+  if (mat === "gras") {
+    const { applyGrassMat } = await import("./grasmatta.mjs");
+    await applyGrassMat(table, textiles(layout, { onlyMarkings: true }), renderer);
+  }
   const { shoe, draw } = buildDrawShoe(take.shoe);
   if (study) {
     await study.placePaulina(scene, take, draw);

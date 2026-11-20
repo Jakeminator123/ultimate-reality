@@ -22,19 +22,24 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       const requestedView = query.get("vy");
       const view = seat && (requestedView === "golv" || requestedView === "paulina") ? requestedView : "";
       const viewQuery = view ? "&amp;vy=" + view : "";
-      const seatLinks = ["4", "1"].map(id => `<a data-seat="${id}" href="?stol=${id}${viewQuery}">Stol ${id}</a>`).join("");
+      const grass = Boolean(seat && query.get("matta") === "gras");
+      const matQuery = grass ? "&amp;matta=gras" : "";
+      const seatLinks = ["4", "1"].map(id => `<a data-seat="${id}" href="?stol=${id}${viewQuery}${matQuery}">Stol ${id}</a>`).join("");
       const seatMenu = key === "fotostudio" ? `<nav aria-label="Utsnitt i fotostudion"><a data-seat="" href="/bordsprov/panorama/fotostudio">Tomt rum</a>${seatLinks}</nav>` : "";
       let controls = "";
       if (seat) {
         controls = view === "golv"
-          ? `<a href="?stol=${seat}">Visa bordsskivan</a><label><input id="kontaktskugga" type="checkbox" checked> Kontaktskugga</label>`
-          : `<a href="?stol=${seat}&amp;vy=golv">Visa bordsfötterna</a>`;
+          ? `<a href="?stol=${seat}${matQuery}">Visa bordsskivan</a><label><input id="kontaktskugga" type="checkbox" checked> Kontaktskugga</label>`
+          : `<a href="?stol=${seat}&amp;vy=golv${matQuery}">Visa bordsfötterna</a>`;
         controls += view === "paulina"
-          ? `<a href="?stol=${seat}">Visa bordet utan Paulina</a>`
-          : `<a href="?stol=${seat}&amp;vy=paulina">Placeringsprov med Paulina</a>`;
+          ? `<a href="?stol=${seat}${matQuery}">Visa bordet utan Paulina</a>`
+          : `<a href="?stol=${seat}&amp;vy=paulina${matQuery}">Placeringsprov med Paulina</a>`;
+        controls += grass
+          ? `<a href="?stol=${seat}${viewQuery}">Visa grön filt</a>`
+          : `<a href="?stol=${seat}${viewQuery}&amp;matta=gras">Prova gräsmattan</a>`;
       }
       const title = view === "paulina" ? "Placeringsprov · Paulina v2 · pose 17" : room.name;
-      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{platser}}", seatMenu).replace("{{kontroller}}", controls), {
+      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{matta}}", grass ? "gras" : "filt").replace("{{platser}}", seatMenu).replace("{{kontroller}}", controls), {
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-cache" },
       });
     }
@@ -43,9 +48,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       ["bord.mjs", ["test/bakgrund/panorama/bord.mjs", "text/javascript"]],
       ["golv-v2.mjs", ["test/bakgrund/panorama/golv-v2/kontaktskugga.mjs", "text/javascript"]],
       ["placering.mjs", ["test/bakgrund/panorama/paulina-placering-v1/placering.mjs", "text/javascript"]],
+      ["grasmatta.mjs", ["test/bakgrund/polyhaven/grass-ground-v1/grasmatta.mjs", "text/javascript"]],
       ["studio.hdr", [room.photo, "application/octet-stream"]],
       ["HDRLoader.js", ["studio/node_modules/three/examples/jsm/loaders/HDRLoader.js", "text/javascript"]],
     ]);
+    for (const kind of ["diff", "nor_gl", "rough"]) {
+      const file = `grass_ground_${kind}_2k.jpg`;
+      resources.set(file, ["test/bakgrund/polyhaven/grass-ground-v1/" + file, "image/jpeg"]);
+    }
     const resource = resources.get(asset);
     if (!resource) return new Response("Okänd panoramaresurs.", { status: 404 });
     const data = await readFile(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ root, resource[0]));

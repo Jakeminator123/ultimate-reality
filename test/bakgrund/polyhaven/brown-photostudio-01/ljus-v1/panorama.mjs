@@ -22,7 +22,7 @@ async function start() {
     const { placeTable } = await import("./bord.mjs");
     // Align the centre seat with the studio view Jakob chose.
     globe.rotation.y = -Math.atan2(home.x, home.z);
-    const { seat, table } = await placeTable(scene, renderer, canvas.dataset.seat, placement);
+    const { seat, table } = await placeTable(scene, renderer, canvas.dataset.seat, placement, canvas.dataset.mat);
     camera.position.fromArray(seat.eye);
     globe.position.copy(camera.position);
     home.copy(camera.position).sub(new T.Vector3().fromArray(seat.aim));
