@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
-import type { DealReference } from "../../../lib/deal-references";
+import { placedCardReference, type DealReference } from "../../../lib/deal-references";
 import type { DealerMaterial } from "../../../lib/material-types";
 import styles from "./comparison.module.css";
 
@@ -90,6 +90,10 @@ export default function DealComparison({ film, modelPlayer, clips, times, viewGu
 
   return <section id="jamfor-giv" className={styles.comparison} aria-labelledby="jamfor-giv-rubrik">
     <h3 id="jamfor-giv-rubrik">{pair ? "Jämför given med originalfilmen" : "Jämför handbytet och släppet"}</h3>
+    <p><strong>Jämförelsematerial för tidigare givprov.</strong>{" "}
+      {clips.some(clip => clip.sha256 === placedCardReference.sha256) && "Jakob skickade filmen främst som exempel på delar av REDO. "}
+      Klippens tempo, givförlopp och viloposer gäller de visade tagningarna.
+      I dealerprojektets godkända REDO-ankare A2.3 är båda händerna vid skon och blicken sänkt mot tryckhanden.</p>
     <p>{pair ? "Välj en händelse för att pausa båda filmerna vid motsvarande rörelse. Hastigheten gäller båda. Kontaktkraften mellan fingrar och kort har inte mätts."
       : "Handbyte och Släpp pausar alla tre filmerna vid motsvarande rörelse. Hastigheten gäller också alla tre."}</p>
     <div className={styles.actions} role="group" aria-label={pair ? "Styr båda filmerna" : "Styr de tre filmerna"}>

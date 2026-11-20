@@ -1,6 +1,8 @@
 # Jakobs givningar från Desktop/v2
 
-**Använd `pos4-v.mp4` för en giv där högerhanden följer kortet till filten.** För ett tidigare släpp med fri kortbana finns `pos4.mp4`. Båda visar vänsterhandens uttag och högerhandens vändning i samma frontvy. Platsnumret anger givarens mål i filmerna. Kameran står kvar när målet växlar från mitten till ytterplatsen.
+**Jämförelsematerial för tidigare givprov.** Jakob skickade filmerna främst som exempel på delar av REDO. Tempo, givförlopp och viloposer nedan beskriver respektive tagning. I dealerprojektets godkända REDO-ankare A2.3 är båda händerna vid skon och blicken sänkt mot tryckhanden.
+
+I `pos4-v.mp4` följer högerhanden kortet till filten. I `pos4.mp4` släpper högern tidigare och kortet fortsätter fritt. Båda visar vänsterhandens uttag och högerhandens vändning i samma frontvy. Platsnumret anger givarens mål i filmerna. Kameran står kvar när målet växlar från mitten till ytterplatsen.
 
 35/35 original inventerades med SHA-256 och ffprobe. 8/35 klipp (23 %) rörelsegranskades i alla 371 visningsrutor. Alla 35 är H.264, 1080 × 1920, med jämna tidssteg vid 24 fps. R0 är första rutan. Tid i sekunder är rutnumret delat med 24. Vänster och höger anges från dealerns perspektiv. De vita kortsidorna saknar läsbar färg och valör. [Källista med fullständiga hashvärden](kallor.json)
 
