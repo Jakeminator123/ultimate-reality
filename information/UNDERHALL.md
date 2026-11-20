@@ -87,3 +87,9 @@ Den fortsatta granskningen den 20 november omfattade 46 Paulina-provmappar, 23 s
 Den andra genomgången tog bort **101 kopior på 84 345 148 byte** och lade **39 återbildade filer på 2 282 972 byte** i papperskorgen. De fyra fristående 100°-visarna med unika bildrutor flyttades oförändrade från `test/artefakter/kasinorum-utdrag-100/` till syskonmappen `utdrag-100-historik/`. SHA-256 och deras relativa rumslänk kontrollerades på den nya platsen. [Öppna historiska visare](../test/README.md)
 
 V1:s gamla v4-mellanexport gav andra GLB-bytes vid ombygge. V3:s blinkbygge läser sin mellanexport direkt. Två v5-mellanexporter är dokumenterade rörelsekällor till äldre v6-varianter. De bevaras med sina exakta versions-ID. De historiska arbetskantsbilder som gav olika bytes vid omrendering finns också kvar. [Underlagen per version](PAULINAS_PROV.md)
+
+### Granskningsbilderna i givprov 3
+
+I `giv-sam-v4-v3/utprovning` fanns 16 PNG-kopior om sammanlagt 15 382 482 byte. Rutorna 1, 3, 4, 7, 8, 9, 12, 15, 16, 18, 22, 24, 25, 43, 51 och 53 matchade samma filnamn och SHA-256 i [tagningens rot](../test/dealer/paulina/giv-sam-v4-v3/). Kopiorna flyttades till Windows papperskorg den 20 november 2026. Varje återställningspost och bevarad bild kontrollerades efteråt.
+
+Provets [ruta 26](../test/dealer/paulina/giv-sam-v4-v3/utprovning/ruta-26.png) och [ruta 46](../test/dealer/paulina/giv-sam-v4-v3/utprovning/ruta-46.png) skiljer sig från slututgåvan. Blinkbygget använder mellanexporten `6db7ab4b` och ögonjämförelsen avkodar mellanmappens MP4 `360ba0a8`. Båda finns vid sina registrerade sökvägar.

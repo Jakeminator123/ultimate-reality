@@ -21,7 +21,7 @@ Handljuset motsvarar en liten avskärmad diffusor. Fyra lika ljuskällor samplas
 | Hela utsnittet med hand och kort | +28,9 % | +11,4 % |
 | Tre filtutsnitt samt bakväggen | 0,0 % | 0,0 % |
 
-Rörelsen i film och visare kommer från export E, SHA-256 `c05b66757319c3742c8700c637dd6f32939714960b9479c37736c3b48be5577b`. Kamerorna renderar samma ögonblick. Stol 4 visar fingrarna mot kortets mönstrade rygg. Från Stol 1 ligger handflatan framför en del av kortet. Ljusets ökade kantteckning syns även där, men själva kontakten är delvis skymd. [Geometrikontroll för export E](../../../../dealer/paulina/kortdrag-v2-v1/kollisioner-e.json)
+Rörelsen i film och visare kommer från export E, SHA-256 `c05b66757319c3742c8700c637dd6f32939714960b9479c37736c3b48be5577b`. Kamerorna renderar samma ögonblick. Stol 4 visar fingrarna mot kortets mönstrade rygg. Från Stol 1 ligger handflatan framför en del av kortet. Ljusets ökade kantteckning syns även där, men själva kontakten är delvis skymd. [Geometrikontroll för export E](../../../../dealer/paulina/kortdrag-v2-v1/kollisioner.json)
 
 ## Återskapa
 

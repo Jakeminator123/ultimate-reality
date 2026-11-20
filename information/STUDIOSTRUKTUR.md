@@ -32,3 +32,5 @@ Vid ett synligt fel anger bildgranskaren materialversion och källbild. För en 
 | Koden bakom en vy eller ett lokalt verktyg | Studions sidor och API har sina ingångar under `studio/app`. Kameraprovets CLI finns under `studio/tools`, de generiska bildrecepten under `studio/fotomall` och provdockans nio bilder under `studio/public/fotomall/docka`. För egna modellprov startar du med [lab.ps1](../lab.ps1) eller [modellverktygen](../tools/). |
 
 De lokala mätningarna i `information/lokalt/` och de tidigare rörelsefilmerna i `information/random/` kompletterar proven. Nya grundbilder väljs från avataren eller labbets inkorg. [Underhåll och gallringsprotokoll](UNDERHALL.md)
+
+Gällande arbetsanvisningar finns i [överlämningen](HANDOFF.md), [Runway-guiden](RUNWAY_DEALER.md) och [underhållet](UNDERHALL.md). De tre äldre lokala dokumenten har daterade filnamn som börjar med `historik-` i `information/lokalt/`. Deras relativa länkar leder till samma underlag som när dokumenten skrevs.

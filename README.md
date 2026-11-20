@@ -96,4 +96,14 @@ Ersätt `<körnings-id>` med namnet från `list`. Öppna HTML-filen som `view` s
 
 GitHub innehåller studion, provskripten, generella recept och tester. Bilder, film, kroppsskattningar, maskinrapporter och färdigrenderade visare lagras lokalt. Ett bordsprov med en avatar behöver motsvarande egen modell. Följ respektive provs renderingsanvisningar.
 
-Kör lagringsproven med `python -B -m unittest discover -s tests -v` på Windows med Python 3.11 eller senare.
+Kör lagringsproven med Python 3.11 eller senare från projektroten.
+
+```powershell
+python -B -m unittest discover -s tests -p test_storage.py -v
+```
+
+Hela Python-testsviten använder bland annat NumPy och SciPy för att kontrollera riggens rotationer. De finns i projektets SAM-miljö. För standardinstallationen i systermappen på Windows används följande kommando.
+
+```powershell
+& ..\sam-3d-body\.venv\Scripts\python.exe -B -m unittest discover -s tests -v
+```

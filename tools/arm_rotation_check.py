@@ -6,8 +6,6 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 
-from paulina_utseende import Glb, sha
-
 
 def rotation_steps(times, values, sampling):
     """Geodesic angle in local joint space. Sign-equivalent quaternions give the same pose."""
@@ -20,6 +18,10 @@ def rotation_steps(times, values, sampling):
 def arm_rotation_report(model_file, first, last, fps):
     if last <= first or first < 0 or fps <= 0:
         raise ValueError("Ange ett giltigt rutintervall och en positiv bildfrekvens.")
+
+    # Loading a GLB brings in the photo-model dependencies.
+    from paulina_utseende import Glb, sha
+
     model = Glb(model_file)
     skin, = model.doc["skins"]
     clip, = model.doc["animations"]
