@@ -1,6 +1,24 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { panoramaDeals } from "../lib/panorama-deals.ts";
+import { panoramaDeals, samPanoramaDeal, samPanoramaTake } from "../lib/panorama-deals.ts";
+
+test("SAM-scenprovet använder givens egen kropp, fotoyta och tidslinje", () => {
+  const { take, geometry, appearance, motion } = samPanoramaTake;
+  const film = { take, geometry, appearance, motion, card: "KORT-02", frames: 54, fps: "24", marks: [
+    { frame: 4, label: "Utskjut ur skon" }, { frame: 9, label: "Höger tar emot kortkanten" },
+    { frame: 16, label: "Höger vänder upp kortet" }, { frame: 22, label: "Landning på plats 4" },
+    { frame: 46, label: "Ögonlockens slutningsmaximum" },
+  ] };
+  const animation = { sha256: motion, joints: 127, motion: { take, geometry, appearance, card: film.card, start: 0, end: 53/24 } };
+  const [deal] = samPanoramaDeal({ film, animation });
+  assert.equal(deal.motion, motion);
+  assert.deepEqual(deal.jumps.map(j => j.frame), [4, 9, 16, 22, 46]);
+  assert.deepEqual(samPanoramaDeal(), []);
+  for (const change of [{ geometry: "annan kropp" }, { appearance: "tidigare fotoyta" }, { motion: "tidigare giv" }, { frames: 55 }]) {
+    assert.deepEqual(samPanoramaDeal({ film: { ...film, ...change }, animation }), []);
+  }
+  assert.deepEqual(samPanoramaDeal({ film, animation: { ...animation, motion: { ...animation.motion, appearance: "annan fotoyta" } } }), []);
+});
 
 test("panoramat föredrar en styrkt ny giv och behåller den tidigare tagningen", () => {
   const rig = { geometry: "kropp", appearance: "fotoyta" };
