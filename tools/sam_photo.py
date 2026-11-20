@@ -1,5 +1,6 @@
 """Fotoprovet bygger på verktyg/sam_snabbprov.py i Dealer_3D_labbpaket.zip."""
 
+import hashlib
 import os
 import sys
 
@@ -47,6 +48,12 @@ def estimate(repo, sources, run, mesh_only):
         raise RuntimeError("SAM-miljön hittar ingen CUDA-GPU.")
     model, config = load_sam_3d_body(str(checkpoint), device="cuda", mhr_path=str(mhr))
     estimator = SAM3DBodyEstimator(model, config)
+    from sam_3d_body.data.transforms.common import TopdownAffine
+    def crop_size(pipeline):
+        return next(step.input_size for step in pipeline.transforms if isinstance(step, TopdownAffine))
+    body_crop = crop_size(estimator.transform)
+    hand_crop = crop_size(estimator.transform_hand)
+    config_sha = hashlib.sha256((weights / "model_config.yaml").read_bytes()).hexdigest()
     faces = np.asarray(estimator.faces)
     fields = ("pred_vertices", "pred_cam_t", "focal_length", "pred_keypoints_2d",
               "pred_keypoints_3d", "pred_joint_coords", "hand_pose_params",
@@ -64,7 +71,8 @@ def estimate(repo, sources, run, mesh_only):
         person = people[0]
         prefix = f"{index:02d}-{path.stem}"
         np.savez_compressed(run / (prefix + ".npz"), faces=faces, original_size=original_size,
-                            inference_size=photo.size, **{key: person[key] for key in fields})
+                            inference_size=photo.size, body_crop_size=body_crop, hand_crop_size=hand_crop,
+                            sam_config_sha256=config_sha, **{key: person[key] for key in fields})
         with (run / (prefix + ".obj")).open("w", encoding="utf-8") as obj:
             obj.write("# SAM 3D Body. Camera translation is stored separately in NPZ.\n")
             np.savetxt(obj, person["pred_vertices"], fmt="v %.7f %.7f %.7f")

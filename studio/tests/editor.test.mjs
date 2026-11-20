@@ -103,10 +103,43 @@ test(
         assert.equal(await work.getByRole("link", { name: /Fas 2.*3D-modell/ }).getAttribute("aria-current"), "page");
       });
       await page.getByRole("heading", { name: "Paulinas bildserie" }).waitFor();
-      assert.equal(await page.getByRole("region", { name: "Paulinas bildserie" }).getByRole("button").count(), 12);
+      const material = await (await page.request.get(origin + "/api/material?report=json&dealer=paulina")).json();
+      await page.getByRole("heading", { name: "Modellens underlag" }).waitFor();
+      assert.equal(await page.getByRole("region", { name: "Paulinas bildserie" }).getByRole("button").count(), material.photos.length);
+      await t.test("materialrapport och filmrutor följer de sparade filversionerna", async () => {
+        const report = await page.request.get(origin + "/api/material?report=md&dealer=paulina");
+        const markdown = await report.text();
+        for (const photo of material.photos) {
+          assert.ok(markdown.includes(photo.sha256));
+          assert.ok(markdown.includes(photo.width + " × " + photo.height));
+        }
+        if (material.photos.length) {
+          const wrong = new URL(material.photos[0].url, origin);
+          wrong.searchParams.set("sha", "0".repeat(64));
+          assert.equal((await page.request.get(wrong.href)).status(), 409);
+        }
+        const film = material.films.find(f => f.take === "sittvila-kameravridning-v1");
+        if (film) {
+          assert.equal(film.geometry, material.geometry.sha256);
+          assert.equal(film.appearance, material.appearance?.sha256 ?? null);
+          const partial = await page.request.get(origin + film.url, { headers: { Range: "bytes=0-15" } });
+          assert.equal(partial.status(), 206);
+          assert.equal((await partial.body()).length, 16);
+          await page.getByText(film.title, { exact: true }).click();
+          const mark = film.marks.find(m => m.seconds > 0);
+          if (mark) {
+            await page.getByRole("button", { name: mark.label + " · ruta " + mark.frame }).click();
+            await page.waitForFunction(({ title, seconds }) => {
+              const video = Array.from(document.querySelectorAll("video")).find(v => v.getAttribute("aria-label") === title);
+              return video && !video.seeking && Math.abs(video.currentTime - seconds) < .001;
+            }, { title: film.title, seconds: mark.seconds });
+          }
+        }
+      });
       await t.test("sittbilderna kan jämföras i originalens utsnitt och i frontens skala", async () => {
         const link = page.getByRole("link", { name: "Jämför sitthöjd och bildskala" });
-        await link.click();
+        if (await link.count()) await link.click();
+        else await page.goto(origin + "/bildstandard/sitthojd");
         await page.getByRole("heading", { name: "Sittande i tre vinklar" }).waitFor();
         const figures = page.locator("figure");
         if (await figures.count()) {

@@ -32,6 +32,8 @@ npm run dev
 
 ## 3D-modellering på labbdatorn
 
+Under **Modellens underlag** ser du vilka bildoriginal som gav kroppen och fotoytan, SAM:s bildmått och vilka filmrutor som hör till den valda modellen. Sidan och rapporten läser samma versionsbundna filer. [3D-modellering](http://127.0.0.1:4317/#modellering) · [Standard för bilder, modeller och filmer](information/MATERIALVERSIONER.md)
+
 I [Runways bildpipeline](http://127.0.0.1:4317/bildpipeline) kan du lägga in exempelvis fyra blandade foton och skapa en ny stående helfigur av personen. Spara ett lokalt utkast och välj ståfronten eller hela serien i den synliga beställningsvyn. Där finns exakt prompt, bildordning, referenser, upplösning och beräknat pris för varje steg. [Pipelineplan med bildberoenden](information/BILDPIPELINE.md)
 
 [Bildstandarden för en dealer](http://127.0.0.1:4317/bildstandard) visar elva grundvyer och en extra kortvändning. Varje vy har en kopierbar prompt för egna foton och ett granskat exempel från Paulina. Hämta Paulinas ifyllda mall eller en tom mall för nästa avatars bildmått, observationer och osäkerheter. Båda använder samma JSON-format.

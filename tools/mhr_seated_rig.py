@@ -11,6 +11,7 @@ from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
 import torch
 import trimesh
+from material_versions import AVATARS, register_model, save_version, store_for
 
 
 def digest(path):
@@ -326,15 +327,15 @@ def main():
     extras = dict(run=manifest["id"], inputIndex=1, input=front.photo.name, sourceViews=sources_meta,
                   unit="metre",up="+Y",forward="+Z",mhrModelSha256=digest(args.model))
     encoded, bind_error = export(skeleton,vertices,front.faces,world,extras)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    stage = args.output.with_suffix(".partial")
-    stage.write_bytes(encoded)
-    stage.replace(args.output)
+    output = save_version(args.output, encoded)
+    if output.resolve().is_relative_to(AVATARS):
+        dealer = output.resolve().relative_to(AVATARS).parts[0]
+        register_model(store_for(dealer), output, args.run)
     report = dict(**extras, estimatedFromViews=measured, after=after, handLiftMm={s:1000*v for s,v in lift.items()},
                   postureReferenceWeights=[0,.2,.8], joints=len(world), vertices=len(vertices), faces=len(front.faces),
-                  inverseBindMaxError=bind_error, outputSha256=digest(args.output))
-    args.report.parent.mkdir(parents=True,exist_ok=True)
-    args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+"\n",encoding="utf8")
+                  inverseBindMaxError=bind_error, outputSha256=digest(output))
+    save_version(args.report, (json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+"\n").encode())
+    print(output)
     print(json.dumps(after))
 
 

@@ -15,6 +15,7 @@ from scipy.spatial import cKDTree
 from scipy.ndimage import distance_transform_edt
 import torch
 import trimesh
+from material_versions import read_json, register_model, save_version, store_for
 
 ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "avatars/paulina/fas-1/v1"
@@ -226,18 +227,20 @@ class Glb:
         js=json.dumps(self.doc,separators=(",",":")).encode()
         js+=b" "*(-len(js)%4)
         header=struct.pack("<4sII",b"glTF",2,28+len(js)+len(self.data))
-        path.parent.mkdir(parents=True,exist_ok=True)
-        stage=path.with_suffix(".partial")
-        stage.write_bytes(header+struct.pack("<I4s",len(js),b"JSON")+js+struct.pack("<I4s",len(self.data),b"BIN\0")+self.data)
-        stage.replace(path)
+        return save_version(path,header+struct.pack("<I4s",len(js),b"JSON")+js+struct.pack("<I4s",len(self.data),b"BIN\0")+self.data)
 
 
 class Source:
-    def __init__(self,idx,lab,faces):
+    def __init__(self,idx,lab,faces,registered):
         view=VIEWS[idx]
         self.file=PHOTOS/"sittande"/(view+".png")
         self.portrait_file=PHOTOS/"ansikte"/(view+".png")
-        self.npz=next(lab.glob(f"{idx+1:02d}-*.npz"))
+        name=registered["estimate"]
+        if Path(name).name != name or registered["index"] != idx+1 or sha(self.file) != registered["photoSha256"]:
+            raise ValueError("The seated photograph does not match the geometry source")
+        self.npz=lab/name
+        if sha(self.npz) != registered["estimateSha256"]:
+            raise ValueError("The saved estimate does not match the geometry source")
         a=np.load(self.npz)
         if not np.array_equal(a["faces"],faces):
             raise ValueError(f"Different topology in {self.npz}")
@@ -444,7 +447,11 @@ def hair_surface(ref,profile,body,head):
 def build(args):
     torch.set_num_threads(4)
     cv2.setNumThreads(4)
-    glb=Glb(BASE)
+    glb=Glb(args.base)
+    provenance=glb.doc["asset"]["extras"]
+    run=read_json(args.run/"run.json")
+    if run["state"] != "complete" or run["id"] != provenance["run"] or sha(args.model) != provenance["mhrModelSha256"]:
+        raise ValueError("The run or MHR weights do not belong to this seated rig")
     prim=glb.doc["meshes"][0]["primitives"][0]
     attrs=prim["attributes"]
     original_attrs={name:glb.read(index) for name,index in attrs.items()}
@@ -470,7 +477,7 @@ def build(args):
     hand=mass(lambda n:any(x in n for x in ("wrist","thumb","pinky","ring","middle","index")) and "wrist_twist" not in n)
     torso=mass(lambda n:n.startswith("c_spine") or "clavicle" in n)
     groups=np.column_stack([mix(.15,.75,head+.88*neck),mix(.32,.79,hand),mix(.20,.76,torso),mix(.19,.72,head)])
-    refs=[Source(i,args.run,faces) for i in range(3)]
+    refs=[Source(i,args.run,faces,provenance["sourceViews"][i]) for i in range(3)]
     hands=HandPhoto(refs[0],names)
     rest=m.rest_vertices.numpy()
     reflected=rest.copy()
@@ -504,9 +511,9 @@ def build(args):
     inputs={str(p.relative_to(PHOTOS)).replace(chr(92),"/"):sha(p) for r in refs for p in [r.file,r.portrait_file]}
     inputs["hander/handryggar.png"]=sha(hands.file)
     glb.doc["asset"].setdefault("extras",{}).update(appearanceVersion=version,appearanceInputSHA256=inputs,
-                                                     sourceModelSHA256=sha(BASE),sourceModel=BASE.name)
-    glb.save(DEST)
-    check=Glb(DEST)
+                                                     sourceModelSHA256=sha(args.base),sourceModel=args.base.name)
+    output=glb.save(args.output)
+    check=Glb(output)
     for k,array in original_attrs.items():
         if not np.array_equal(check.read(attrs[k]),array[vertex]):
             raise ValueError(f"Modified source body attribute {k}")
@@ -514,19 +521,23 @@ def build(args):
     if not np.array_equal(vertex[check_faces],faces.ravel()):
         raise ValueError("Topology changed")
     REVIEW.mkdir(parents=True,exist_ok=True)
-    record={"version":version,"rig":DEST.name,"sha256":sha(DEST),"baseSha256":sha(BASE),"sources":inputs,
-            "run":RUN_ID,"npz":{r.npz.name:sha(r.npz) for r in refs},"joints":len(names),
+    register_model(store_for("paulina"), args.base, args.run)
+    register_model(store_for("paulina"), output)
+    record={"version":version,"rig":output.name,"sha256":sha(output),"baseSha256":sha(args.base),"sources":inputs,
+            "run":run["id"],"npz":{r.npz.name:sha(r.npz) for r in refs},"joints":len(names),
             "materialRevision":2,"bodyAtlasSize":[args.size,args.size],"bodyTriangles":len(faces),"hairTriangles":len(hfaces),"verifiedBodyAttributes":list(original_attrs),
             "bodySourceWeights":dict(zip([*VIEWS,"handryggar","inferred"],coverage.tolist())),
             "limitations":["Hair at rear inferred from side locks. Left side mirrored for unseen locks.",
                            "Rear clothing, occluded skin and soles filled with material colours; no rear photograph.",
                            "Body is the neutral fitted SAM surface beneath the suit. Photos represent three separate poses."]}
-    (REVIEW/"kallor.json").write_text(json.dumps(record,indent=2,ensure_ascii=False)+"\n",encoding="utf8")
-    print(DEST,coverage,flush=True)
+    save_version(REVIEW/"kallor.json",(json.dumps(record,indent=2,ensure_ascii=False)+"\n").encode())
+    print(output,coverage,flush=True)
 
 
 if __name__=="__main__":
     cli=argparse.ArgumentParser(description=__doc__)
+    cli.add_argument("--base",type=Path,default=BASE)
+    cli.add_argument("--output",type=Path,default=DEST)
     cli.add_argument("--run",type=Path,default=Path(os.environ.get("ULTIMATE_REALITY_STORAGE","D:/" if Path("D:/").is_dir() else ROOT/".lab-data"))/"ultimate-reality-lab/saved"/RUN_ID)
     cli.add_argument("--model",type=Path,default=Path(os.environ.get("SAM3D_ROOT",ROOT.parent/"sam-3d-body"))/"checkpoints/sam-3d-body-dinov3/assets/mhr_model.pt")
     cli.add_argument("--size",type=int,default=2048)

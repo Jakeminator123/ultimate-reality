@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import path from "node:path";
+import { rangedResponse } from "../../../lib/byte-range";
 import {
   assetFile,
   errorResponse,
@@ -23,43 +24,8 @@ export async function GET(req: Request) {
         headers: { "Cache-Control": "no-store" },
       });
     const { file, size, mime } = await assetFile(name);
-    const range = req.headers.get("range");
-    let start = 0,
-      end = size - 1;
-    if (range) {
-      const match = /^bytes=(\d*)-(\d*)$/.exec(range);
-      if (!match || (!match[1] && !match[2]))
-        return new Response(null, {
-          status: 416,
-          headers: { "Content-Range": "bytes */" + size },
-        });
-      start = match[1]
-        ? Number(match[1])
-        : Math.max(0, size - Number(match[2]));
-      end =
-        match[1] && match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
-      if (start > end || start >= size)
-        return new Response(null, {
-          status: 416,
-          headers: { "Content-Range": "bytes */" + size },
-        });
-    }
-    const headers = new Headers({
-      "Content-Type": mime,
-      "Accept-Ranges": "bytes",
-      "Content-Length": String(end - start + 1),
-      "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
-    });
-    if (range) headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
-    return new Response(
-      size
-        ? (Readable.toWeb(
-            createReadStream(file, { start, end }),
-          ) as ReadableStream)
-        : null,
-      { status: range ? 206 : 200, headers },
-    );
+    return rangedResponse(size, mime, req.headers.get("range"),
+      (start, end) => Readable.toWeb(createReadStream(file, { start, end })) as ReadableStream);
   } catch (e) {
     return errorResponse(e);
   }

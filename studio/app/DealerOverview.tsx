@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Box, Camera, ImageOff, UserRoundPlus } from "lucide-react";
 import { useCurrentModel } from "./useModelingInventory";
+import { seriesCount } from "../lib/material-types";
 import styles from "./dealer-overview.module.css";
 
 export default function DealerOverview({ dirty }: { dirty: boolean }) {
@@ -9,17 +10,18 @@ export default function DealerOverview({ dirty }: { dirty: boolean }) {
   const [hasPortrait, setHasPortrait] = useState(true);
   const external = dirty ? { target: "_blank", rel: "noreferrer" } : {};
   const model = inventory?.activeModel;
-  const modelStatus = model ? "Sittande arbetsmodell v2" : loading ? "Läser lokal modell…" : error || "Modellfil saknas lokalt";
+  const modelStatus = model?.name ?? (loading ? "Läser lokal modell…" : error || "Modellfil saknas lokalt");
+  const portrait = inventory?.photos.find(photo => photo.id === "ansikte/front");
   return <section className={styles.dealers} aria-label="Dealerval">
     <article className={styles.current}>
       <div className={styles.portrait}>
-        {hasPortrait ? <img src="/fotomall.html/fas-1/v1/ansikte/front.png" alt="Paulinas porträtt framifrån" onError={() => setHasPortrait(false)}/>
-          : <span><ImageOff aria-hidden size={24}/> Porträttet saknas lokalt</span>}
+        {portrait && hasPortrait ? <img src={portrait.url} alt="Paulinas porträtt framifrån" onError={() => setHasPortrait(false)}/>
+          : <span><ImageOff aria-hidden size={24}/> {loading ? "Läser porträttet…" : "Porträttet saknas lokalt"}</span>}
       </div>
       <div className={styles.dealer}>
         <h2>Paulina</h2>
         <dl>
-          <div><dt><Camera size={17} aria-hidden/> Fas 1 · Bildserie</dt><dd>11 grundvyer och en kortvändning</dd></div>
+          <div><dt><Camera size={17} aria-hidden/> Fas 1 · Bildserie</dt><dd>{inventory ? seriesCount(inventory.photos) : loading ? "Läser bildregistret…" : "Bildregistret saknas"}</dd></div>
           <div><dt><Box size={17} aria-hidden/> Fas 2 · 3D-modell</dt><dd>{modelStatus}</dd></div>
         </dl>
         <a className={styles.open} href="#modellering">Öppna Paulinas modell</a>

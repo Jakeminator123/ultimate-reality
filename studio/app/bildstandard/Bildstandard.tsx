@@ -7,6 +7,7 @@ import { basvyer, bildrecept, skapaBildprompt, valbaraRoller, type Bildreferens 
 import { skapaBildserie } from "../../fotomall/bildserie";
 import { kortMedVitRam, referenskort } from "../../fotomall/kortstandard";
 import type { PaulinaExempel } from "./exempeltyp";
+import { cropSource, dimensions, seriesCount, type DealerMaterial } from "../../lib/material-types";
 import styles from "./bildstandard.module.css";
 
 const grupper = Array.from(new Set(bildrecept.map((recept) => recept.grupp)));
@@ -25,7 +26,7 @@ function Fakta({ rader }: { rader: [string, ReactNode][] }) {
   );
 }
 
-export default function Bildstandard({ exempel }: { exempel: PaulinaExempel[] }) {
+export default function Bildstandard({ exempel, project }: { exempel: PaulinaExempel[]; project: DealerMaterial | null }) {
   const [vy, setVy] = useState<string>(bildrecept[0].id);
   const [referenser, setReferenser] = useState<Bildreferens[]>([]);
   const [kopieringsstatus, setKopieringsstatus] = useState("");
@@ -33,6 +34,7 @@ export default function Bildstandard({ exempel }: { exempel: PaulinaExempel[] })
   const filval = useRef<HTMLInputElement>(null);
   const recept = bildrecept.find((bild) => bild.id === vy) ?? bildrecept[0];
   const paulina = exempel.find((bild) => bild.id === recept.id);
+  const body = project?.geometry?.sources.find(s => s.role === "geometry")?.processing;
   const prompt = skapaBildprompt(recept, referenser);
   const kortvandning = recept.id === "rorelsereferens/kortvandning-hoger";
 
@@ -84,11 +86,13 @@ export default function Bildstandard({ exempel }: { exempel: PaulinaExempel[] })
       <header className={styles.huvud}>
         <p className="phase-caption">Fas 1 · Bildpipeline</p>
         <h1>Bildstandard för en dealer</h1>
-        <p>Paulinas serie består av elva grundbilder och en extra kortvändning. Här kan du granska hennes bilder och förbereda referenser för nästa dealer. Runways beställningsflöde är i beta.</p>
+        <p>{project && project.photos.length > 0 && "Paulinas utgåva innehåller " + seriesCount(project.photos) + ". "}Granska originalen och förbered referenser för nästa dealer. Runways beställningsflöde är i beta.</p>
         <details className={styles.upplosning}>
           <summary>Behöver Paulinas bilder högre upplösning?</summary>
-          <p>Behåll nuvarande helbilder på 1083 × 1452 px för kroppens pose. I den sparade körningen lästes de in som 955 × 1280 px. Kroppsmodellen arbetade sedan med ett utsnitt på 512 × 512 px. Varje hand fick ett eget utsnitt.</p>
-          <p>Fototexturen använder originalfilerna. Komplettera med skarpa närbilder där detaljer saknas, i första hand bakhuvudet och fingrarnas kontakt med kortet. En samtidig sidofilm av utdraget ger underlag för handens djup och släpptid. <a href="https://github.com/facebookresearch/sam-3d-body">Meta SAM 3D Body</a></p>
+          {body ? <p>Den modellbyggande sittbilden var {dimensions(body.original)}. SAM läste in {dimensions(body.prepared)}.
+            {body.crop && <> Kroppsutsnittet var {dimensions(body.crop.body)} och varje handutsnitt {dimensions(body.crop.hand)} enligt {cropSource[body.crop.evidence]}.</>}</p>
+            : <p>Bildmåtten för en registrerad kroppsmodell visas när dess sparade körning finns lokalt.</p>}
+          <p>För Paulinas nästa kortdrag rekommenderar vi en samtidig sidofilm där fingrarnas kontakt med kortkanten syns. För hud, hår och tyg används detaljer från originalbilderna. Komplettera med bakifrån snett taget hårporträtt där täckning saknas. <a href="/#modellering">Modellens källbilder och filmprov</a></p>
         </details>
       </header>
       <section aria-label="Välj en bildvy" className={styles.valrad}>

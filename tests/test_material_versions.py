@@ -1,0 +1,129 @@
+"""Versionskopplingar provas med små syntetiska källor, även när ett arbetsnamn återanvänds."""
+import json
+import struct
+import sys
+import tempfile
+import unittest
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
+from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+import material_versions as versions
+
+
+class MaterialTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.store = self.root / "mira/3d/versioner"
+        self.edition = self.root / "mira/fas-1/v1"
+        self.photo = self.edition / "sittande/front.png"
+        self.photo.parent.mkdir(parents=True)
+        Image.new("RGB", (14, 19), "blue").save(self.photo)
+        self.photo_sha = versions.sha(self.photo)
+        (self.edition / "bildregister.json").write_bytes(versions.json_bytes(dict(avatar="Mira", fas=1, utgava=1,
+            bilder=[dict(fil="sittande/front.png", sha256=self.photo_sha)])))
+        self.run = self.root / "sam-test"
+        self.run.mkdir()
+        (self.run / "run.json").write_bytes(versions.json_bytes(dict(id=self.run.name, state="complete",
+            method="SAM 3D Body / DINOv3", inputs=[dict(sha256=self.photo_sha)])))
+        np.savez(self.run / "01.npz", original_size=(14, 19), inference_size=(12, 16),
+                 body_crop_size=(8, 9), hand_crop_size=(7, 6), sam_config_sha256="1" * 64)
+        self.views = [dict(index=1, photo="front.png", photoSha256=self.photo_sha, estimate="01.npz",
+                           estimateSha256=versions.sha(self.run / "01.npz"))]
+        self.body = self.make_model("rigg", dict(run=self.run.name, inputIndex=1, sourceViews=self.views))
+        self.look = self.make_model("yta", dict(sourceModelSHA256=self.body,
+            appearanceInputSHA256={"sittande/front.png": self.photo_sha}))
+
+    def make_model(self, name, extras):
+        data = json.dumps({"asset": {"version": "2.0", "extras": extras}}).encode()
+        data += b" " * (-len(data) % 4)
+        file = self.root / (name + ".glb")
+        file.write_bytes(struct.pack("<4sIIII", b"glTF", 2, len(data) + 20, len(data), 0x4e4f534a) + data)
+        return versions.register_model(self.store, file, self.run)
+
+    def activate(self, geometry, appearance):
+        versions.activate(self.store, "fas-1/v1", "mira-v1", "Mira v1", geometry, appearance)
+
+    def test_exact_measurements_and_immutable_sources(self):
+        self.activate(self.body, self.look)
+        release = versions.read_json(self.store / "aktiv.json")
+        model = versions.read_json(self.store / "modeller" / (self.body + ".json"))
+        processing = model["sources"][0]["processing"]
+        self.assertEqual(processing["prepared"], [12, 16])
+        self.assertEqual((processing["crop"]["body"], processing["crop"]["hand"]), ([8, 9], [7, 6]))
+        self.assertEqual(processing["crop"]["evidence"], "saved-run")
+        self.assertEqual(release["geometryRecord"], versions.sha(self.store / "modeller" / (self.body + ".json")))
+        Image.new("RGB", (10, 12), "green").save(self.photo)
+        with self.assertRaisesRegex(ValueError, "utgåvan"):
+            self.activate(self.body, self.look)
+        self.assertEqual(versions.sha(self.store / "filer" / (self.photo_sha + ".png")), self.photo_sha)
+        self.assertEqual(versions.read_json(self.store / "aktiv.json"), release)
+
+    def test_other_geometry_cannot_replace_approved_pair(self):
+        self.activate(self.body, self.look)
+        old = (self.store / "aktiv.json").read_bytes()
+        different = self.make_model("annan", {})
+        with self.assertRaisesRegex(ValueError, "annan rigg"):
+            self.activate(different, self.look)
+        self.assertEqual((self.store / "aktiv.json").read_bytes(), old)
+        self.activate(different, None)
+        self.assertEqual(len(list((self.store / "utgavor").glob("*.json"))), 2)
+
+    def test_concurrent_exports_preserve_both_contents(self):
+        name = self.root / "export.glb"
+        versions.save_version(name, b"first")
+        with ThreadPoolExecutor(max_workers=4) as workers:
+            results = list(workers.map(lambda _: versions.save_version(name, b"second"), range(4)))
+        self.assertEqual(len(set(results)), 1)
+        self.assertEqual(name.read_bytes(), b"first")
+        self.assertEqual(results[0].read_bytes(), b"second")
+
+    def test_animation_timeline_is_read_from_glb(self):
+        extras = dict(motionBaseSHA256=self.look, geometrySHA256=self.body, take="kortdrag", card="KORT-02",
+                      cardPathSHA256="a" * 64)
+        document = dict(asset=dict(version="2.0", extras=extras), nodes=[{}], buffers=[dict(byteLength=48)],
+                        bufferViews=[dict(buffer=0, byteLength=12), dict(buffer=0, byteOffset=12, byteLength=36)],
+                        accessors=[dict(bufferView=0, componentType=5126, type="SCALAR", count=3),
+                                   dict(bufferView=1, componentType=5126, type="VEC3", count=3)],
+                        animations=[dict(samplers=[dict(input=0, output=1)],
+                                         channels=[dict(sampler=0, target=dict(node=0, path="translation"))])])
+        chunk = json.dumps(document).encode()
+        chunk += b" " * (-len(chunk) % 4)
+        keys = struct.pack("<12f", 0, .25, .5, 0, 0, 0, 1, 0, 0, 2, 0, 0)
+        file = self.root / "kortdrag.glb"
+        file.write_bytes(struct.pack("<4sIIII", b"glTF", 2, 28+len(chunk)+len(keys), len(chunk), 0x4e4f534a) +
+                         chunk + struct.pack("<I4s", len(keys), b"BIN\0") + keys)
+        fingerprint = versions.register_model(self.store, file)
+        receipt = versions.read_json(self.store / "modeller" / (fingerprint + ".json"))
+        self.assertEqual(receipt["kind"], "motion")
+        self.assertEqual((receipt["motion"]["keyframes"], receipt["motion"]["end"]), (3, .5))
+        self.assertEqual(receipt["motion"]["appearance"], self.look)
+        self.assertEqual(len(list((self.store / "rorelser").glob("*.json"))), 1)
+
+    def test_film_frame_times_and_review_belong_to_one_take(self):
+        file = self.root / "test.mp4"
+        file.write_bytes(b"anonymous-movie-fixture")
+        capture = dict(videoSha256=versions.sha(file), take="kameraprov", title="Vridning", geometry=self.body,
+            appearance=self.look, marks=[dict(frame=2, label="Profil")],
+            cameras=[dict(id="Modellkameran", projection="ortografisk",
+            samples=[dict(frame=0, azimuth=0, elevation=0, distance=3), dict(frame=2, azimuth=90, elevation=0, distance=3)])])
+        probe = dict(streams=[dict(width=14, height=12, avg_frame_rate="24/1", codec_name="h264")],
+                     frames=[dict(best_effort_timestamp_time=t) for t in ("0.100", "0.125", "0.170")])
+        with patch.object(versions.subprocess, "check_output", return_value=json.dumps(probe).encode()):
+            key = versions.register_film(self.store, file, capture)
+            self.assertEqual(versions.register_film(self.store, file, capture), key)
+            receipt = versions.read_json(self.store / "filmer" / (key + ".json"))
+            self.assertAlmostEqual(receipt["marks"][0]["seconds"], .07)
+            versions.register_review(self.store, key, "Modellkameran", [2], "Hela skon syns.")
+            with self.assertRaisesRegex(ValueError, "kamera"):
+                versions.register_review(self.store, key, "Annan kamera", [2], "Hela skon syns.")
+            with self.assertRaisesRegex(ValueError, "Granskningsrutan"):
+                versions.register_film(self.store, file, dict(capture, marks=[dict(frame=3, label="Grepp")]))
+            with self.assertRaisesRegex(ValueError, "annan rigg"):
+                versions.register_film(self.store, file, dict(capture, geometry=self.make_model("annan", {})))

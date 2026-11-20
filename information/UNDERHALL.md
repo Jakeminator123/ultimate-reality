@@ -5,7 +5,7 @@
 | `studio/` i Git | Appens källkod, plan och generella recept. | Versionshistorik i Git. |
 | `information/` i Git | Beslut, verifierade slutsatser, handoff och tidigare skriftliga projektöversikter. | En aktuell handoff. Äldre versioner finns i Git. |
 | `tools/`, `tests/` i Git | Lokala modellverktyg och isolerade tester. | Versionshistorik i Git. |
-| `avatars/paulina/fas-1/v1/` och `avatars/paulina/3d/fas1-v2/` lokalt | Aktiva grundbilder med källregister, bildmått, rigg och texturerad variant. `studio.json` identifierar de två granskade GLB-filerna med SHA-256. | Bevarade avatarversioner på labbdatorn. |
+| `avatars/<dealer>/` lokalt | Bildoriginal, rigg, fotoyta och tagningar. `3d/versioner/aktiv.json` väljer en sparad utgåva. `studio.json` finns kvar för den tidigare Paulina-visaren. | Bevarade avatarversioner på labbdatorn. |
 | `inputs/` på labbdisken | Egna källfoton, filmer och ljud som Jakob lägger in. | Original bevaras. |
 | `orders/` på labbdisken | Versionssparade lokala utkast med exakt JSON, beskurna referensbilder och filmgranskning, under `giv-plats-4`. | Sparade revisioner bevaras. Verkliga leverantörsjobb är en senare etapp. |
 | `orders/bildpipeline/<revision>/` på labbdisken | Runways stillbildsserie, källkopior, låsta prompter, skickade referenser, jobb-ID och mottagna resultat. | Bevarade beställningsrevisioner. Filnamn och referensbytes omfattas av den lokala backupen. |
@@ -18,6 +18,8 @@ På Jakobs dator är labbdisken `D:\ultimate-reality-lab`. Kör `.\lab.ps1 list`
 För Fas 1 jämför `tools/seated_photo_scale.py` de tre PNG-filerna med bildregistret och skriver `sittande-bildskala.json` i samma utgåva. `tools/mhr_seated_rig.py` skapar sittmodellen från den sparade SAM-körningen och `tools/paulina_utseende.py` lägger de granskade fotografiska källorna på riggen. [Köranvisning och material-ID](../test/dealer/paulina/fas1-sittande-v2/README.md)
 
 ## Vad ska till GitHub?
+
+Registrerade foton, GLB-filer och filmer ligger under avatarens lokala `3d/versioner`. Källrelationer och tidigare val följer med en lokal säkerhetskopia av avatarens mapp. Projektkoden kan återskapa visningen från den kopian. [Versionshantering och köranvisning](MATERIALVERSIONER.md)
 
 - Versionshantera källkod, delade agentinstruktioner, tester, generella recept, beroendelåsfil, exempelfält utan hemligheter och korta textbeslut. Dela reproducerbara anvisningar och anonyma testdata.
 - Håll källfoton, filmer, mesh, modellvikter, råa Runway-beställningar och svar, leverantörslänkar, tokens, arbetskopior, byggresultat, cache och lokala IDE-inställningar på datorn. Git-reglerna finns i rotens `.gitignore`.

@@ -132,6 +132,14 @@ export default function PoseReview(props: ReviewProps) {
       // Keep the reference plane vertical and behind the body as the camera orbits.
       wall.rotation.y = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
       renderer.render(scene, camera);
+      if (activeRig) {
+        orbit.setFromVector3(offset.subVectors(camera.position, controls.target));
+        renderer.domElement.dataset.camera = JSON.stringify({
+          azimuth: T.MathUtils.radToDeg(orbit.theta), elevation: 90 - T.MathUtils.radToDeg(orbit.phi),
+          distance: orbit.radius, zoom: camera.zoom, position: camera.position.toArray(), target: controls.target.toArray(),
+          frustum: [camera.left, camera.right, camera.bottom, camera.top, camera.near, camera.far],
+        });
+      }
     }
     function cameraMoved() { reportCamera(); draw(); }
     let height = 1.8;
@@ -238,6 +246,7 @@ export default function PoseReview(props: ReviewProps) {
     }
     function changePose(selected: Version) {
       for (const [key, body] of bodies) body.visible = key === selected;
+      if (activeRig) renderer.domElement.dataset.model = (selected === "utseende" ? lookUrl : frontUrl) || "";
       measureJoint();
       draw();
     }

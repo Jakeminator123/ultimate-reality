@@ -22,6 +22,6 @@ export default function RigCamera({ values, ready, adjust }: {
           onChange={event => adjust({ [s.key]: Number(event.target.value) })}/>
       </label>)}
     </div>
-    <p>Vridningen utgår från Paulinas front. Avståndet mäts i modellen från kameran till riktpunkten. Zoom ändrar den ortografiska kamerans utsnitt.</p>
+    <p>Vridningen utgår från modellens front. Avståndet mäts från kameran till riktpunkten. Zoom ändrar den ortografiska kamerans utsnitt.</p>
   </details>;
 }

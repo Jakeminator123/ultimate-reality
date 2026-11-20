@@ -1,7 +1,7 @@
 .workspace {
   --view-height: clamp(350px, 47svh, 530px);
   display: grid;
-  grid-template-areas: "photo model" "gallery gallery" "roadmap roadmap" "resources resources";
+  grid-template-areas: "photo model" "gallery gallery" "evidence evidence" "roadmap roadmap" "resources resources";
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
@@ -16,6 +16,22 @@
 }
 .photoPanel { grid-area: photo; }
 .modelPanel { grid-area: model; }
+.evidence { grid-area: evidence; padding: 15px 18px; background: var(--white); border: 1px solid var(--line); border-radius: 13px; min-width: 0; }
+.evidence h2 { margin: 0; font-size: 19px; }
+.evidence p, .sourceNote p { margin: 3px 0 5px; }
+.evidence details { padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.evidence summary { cursor: pointer; font-weight: 650; }
+.evidence video { display: block; width: min(100%, 520px); margin: 8px 0; }
+.evidence a, .evidence p { font-size: 13px; }
+.lineage { display: flex; flex-wrap: wrap; gap: 10px 35px; margin: 13px 0; }
+.lineage dt { color: var(--muted); font-size: 12px; }
+.lineage dd { margin: 0; font-size: 14px; }
+.dataScroll { overflow-x: auto; }
+.dataScroll table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.dataScroll th, .dataScroll td { text-align: left; border-bottom: 1px solid var(--line); padding: 6px 10px 6px 0; }
+.jsonLink { display: inline-block; margin-top: 5px; }
+.frameMarks { display: flex; flex-wrap: wrap; gap: 5px; }
+.frameMarks button { font-size: 12px; padding: 4px 7px; }
 .panelHeader, .galleryHeader {
   display: flex;
   align-items: center;
@@ -174,7 +190,7 @@
   .resources a { padding: 11px; gap: 6px; }
 }
 @media (max-width: 700px) {
-  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "model" "gallery" "roadmap" "resources"; gap: 12px; }
+  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "model" "gallery" "evidence" "roadmap" "resources"; gap: 12px; }
   .panelHeader { min-height: 64px; padding: 10px 13px; }
   .workspace { --view-height: clamp(280px, 40svh, 365px); }
   .gallery { padding: 13px; }

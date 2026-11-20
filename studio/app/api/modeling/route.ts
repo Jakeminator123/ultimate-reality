@@ -4,7 +4,8 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { errorResponse, folders, listAssets, LocalError, requireLocal } from "../../../lib/storage";
 import type { ModelingInventory, SamPose } from "../../../lib/modeling";
-import { currentModel, modelFile } from "../../../lib/current-model";
+import { modelFile } from "../../../lib/current-model";
+import { dealerMaterial } from "../../../lib/dealer-material";
 
 export const dynamic = "force-dynamic";
 const execute = promisify(execFile);
@@ -61,7 +62,7 @@ export async function GET(req: Request) {
     requireLocal(req);
     const query = new URL(req.url).searchParams;
     if (query.size === 1 && query.get("current") === "1")
-      return Response.json({ activeModel: await currentModel() }, { headers: { "Cache-Control": "private, no-store" } });
+      return Response.json({ activeModel: (await dealerMaterial()).activeModel }, { headers: { "Cache-Control": "private, no-store" } });
     if (query.has("model")) return await modelFile(query);
     const { root, inputs } = await folders();
     const saved = path.join(root, "saved");
@@ -96,7 +97,7 @@ export async function GET(req: Request) {
     const dirs = savedStat ? await fs.readdir(/* turbopackIgnore: true */ saved, { withFileTypes: true }) : [];
     const ids = dirs.filter(d => d.isDirectory() && runId.test(d.name)).map(d => d.name).sort().reverse();
     const [assets, runs, checkpoints, gpu, activeModel] = await Promise.all([
-      listAssets(), Promise.all(ids.map(id => readPoses(saved, id))), localWeights(), graphicsCard(), currentModel(),
+      listAssets(), Promise.all(ids.map(id => readPoses(saved, id))), localWeights(), graphicsCard(), dealerMaterial().then(p => p.activeModel),
     ]);
     const inventory: ModelingInventory = {
       inbox: inputs, images: assets.filter(a => a.kind === "image").map(a => a.name), poses: runs.flat(), checkpoints, gpu, activeModel,
