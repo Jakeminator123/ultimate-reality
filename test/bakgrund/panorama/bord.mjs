@@ -9,8 +9,8 @@ async function loadSceneData(file) {
   return response.json();
 }
 
-export async function placeTable(scene, renderer, seatId, placement) {
-  const study = placement ? await import("./placering.mjs") : null;
+export async function placeTable(scene, renderer, seatId, view) {
+  const study = view === "paulina" ? await import("./placering.mjs") : null;
   const [layout, calibration, take] = await Promise.all([
     loadSceneData("layout.json"), loadSceneData("kameror.json"),
     study ? study.loadCardPath() : loadSceneData("bana.json"),
@@ -27,12 +27,17 @@ export async function placeTable(scene, renderer, seatId, placement) {
   }
   const table = buildTable(layout, false, textiles(layout));
   await applyTableMaterials(table, layout, "/bordsprov/rum3d/");
-  const { shoe, draw } = buildDrawShoe(take.shoe);
-  if (study) {
+  const { shoe, draw, card } = buildDrawShoe(take.shoe);
+  let playback;
+  if (view === "giv") {
+    card.visible = false; // KORT-02 and its bending track are embedded in this take.
+    const { loadDeal } = await import("./giv.mjs");
+    playback = await loadDeal(scene);
+  } else if (study) {
     await study.placePaulina(scene, take, draw);
   } else {
     draw(take.frames[0].card_curve_zy_m);
   }
   scene.add(table, shoe);
-  return { table, layout, seat: calibration.cameras[seatId] };
+  return { table, layout, playback, seat: calibration.cameras[seatId] };
 }

@@ -17,12 +17,12 @@ async function start() {
   scene.add(globe);
   const home = new T.Vector3().fromArray(canvas.dataset.eye ? canvas.dataset.eye.split(",").map(Number) : [1, .13, -1.05]);
   if (canvas.dataset.seat) {
-    const placement = canvas.dataset.view === "paulina";
-    status.textContent = placement ? "Läser Paulina, bordet och kortskon…" : "Läser bordet och kortskon…";
+    const view = canvas.dataset.view;
+    status.textContent = view === "paulina" || view === "giv" ? "Läser Paulina, bordet och kortskon…" : "Läser bordet och kortskon…";
     const { placeTable } = await import("./bord.mjs");
     // Align the centre seat with the studio view Jakob chose.
     globe.rotation.y = -Math.atan2(home.x, home.z);
-    const { seat, table, layout } = await placeTable(scene, renderer, canvas.dataset.seat, placement);
+    const { seat, table, layout, playback } = await placeTable(scene, renderer, canvas.dataset.seat, view);
     camera.position.fromArray(seat.eye);
     globe.position.copy(camera.position);
     home.copy(camera.position).sub(new T.Vector3().fromArray(seat.aim));
@@ -32,6 +32,7 @@ async function start() {
       const { bindTableFinishes } = await import("./materialval.mjs");
       await bindTableFinishes(panel, table, layout, renderer, () => renderer.render(scene, camera));
     }
+    if (playback) playback(document.querySelector("#givkontroll"), () => renderer.render(scene, camera));
     const shadowControl = document.querySelector("#kontaktskugga");
     if (shadowControl) {
       const { createContactShadows } = await import("./golv-v2.mjs");

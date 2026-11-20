@@ -17,8 +17,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       const selectedSeat = query.get("stol");
       const seat = selectedSeat === "4" || selectedSeat === "1" ? selectedSeat : "";
       const requestedView = query.get("vy");
-      const view = seat && (requestedView === "golv" || requestedView === "paulina") ? requestedView : "";
-      const viewQuery = view ? "&amp;vy=" + view : "";
+      const view = seat && (requestedView === "golv" || requestedView === "paulina" || requestedView === "giv") ? requestedView : "";
+      const frame = Number(query.get("ruta"));
+      const frameQuery = view === "giv" && Number.isInteger(frame) && frame > 0 ? "&amp;ruta=" + Math.min(53, frame) : "";
+      const viewQuery = view ? "&amp;vy=" + view + frameQuery : "";
       const materials = tableFinishes.map(surface => ({
         ...surface, active: surface.options.find(option => option.value === query.get(surface.key)) ?? surface.options[0],
       }));
@@ -41,16 +43,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
         `<a data-room="${candidate.id}" href="/bordsprov/panorama/${candidate.id}${roomQuery}">${candidate.label}</a>`
       ).join("");
       let controls = "";
+      const dealLink = view === "giv" ? "" : `<a href="?stol=${seat || "4"}&amp;vy=giv${matQuery}">Paulinas giv till plats 4</a>`;
       if (seat) {
         controls = view === "golv"
           ? `<a href="?stol=${seat}${matQuery}">Visa bordsskivan</a><label><input id="kontaktskugga" type="checkbox" checked> Kontaktskugga</label>`
           : `<a href="?stol=${seat}&amp;vy=golv${matQuery}">Visa bordsfötterna</a>`;
+        if (view === "giv") controls += `<a href="?stol=${seat}${matQuery}">Visa bordet utan Paulina</a>`;
         controls += view === "paulina"
           ? `<a href="?stol=${seat}${matQuery}">Visa bordet utan Paulina</a>`
           : `<a href="?stol=${seat}&amp;vy=paulina${matQuery}">Placeringsprov med Paulina</a>`;
       }
-      const title = view === "paulina" ? "Placeringsprov · Paulina v2 · pose 17" : room.name;
-      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye.join(",")).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{matta}}", materials.find(surface => surface.key === "matta")!.active.value).replace("{{materialval}}", panel).replace("{{platser}}", seatMenu).replace("{{rumslankar}}", roomLinks).replace("{{standardsynfalt}}", seat ? "48" : "63").replace("{{kontroller}}", controls), {
+      controls = dealLink + controls;
+      const playback = view === "giv" ? `<fieldset id="givkontroll" disabled><legend>Giv till plats 4</legend>
+        <button type="button" id="spela">Spela upp</button>
+        <label>Bildruta <input type="range" id="giv-ruta" min="0" max="53" value="0" step="1"></label><output for="giv-ruta" id="giv-tid">0 / 53</output>
+        <button type="button" data-frame="15">Handbyte</button><button type="button" data-frame="26">Landning</button><button type="button" data-frame="46">Blinkning</button></fieldset>` : "";
+      const title = view === "giv" ? "Paulinas giv · " + room.name : view === "paulina" ? "Placeringsprov · Paulina v2 · pose 17" : room.name;
+      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye.join(",")).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{matta}}", materials.find(surface => surface.key === "matta")!.active.value).replace("{{materialval}}", panel).replace("{{givkontroll}}", playback).replace("{{platser}}", seatMenu).replace("{{rumslankar}}", roomLinks).replace("{{standardsynfalt}}", seat ? "48" : "63").replace("{{kontroller}}", controls), {
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-cache" },
       });
     }
@@ -59,6 +68,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       ["bord.mjs", ["test/bakgrund/panorama/bord.mjs", "text/javascript"]],
       ["golv-v2.mjs", ["test/bakgrund/panorama/golv-v2/kontaktskugga.mjs", "text/javascript"]],
       ["placering.mjs", ["test/bakgrund/panorama/paulina-placering-v1/placering.mjs", "text/javascript"]],
+      ["giv.mjs", ["test/bakgrund/panorama/paulina-giv-v1/giv.mjs", "text/javascript"]],
       ["grasmatta.mjs", ["test/bakgrund/polyhaven/grass-ground-v1/grasmatta.mjs", "text/javascript"]],
       ["materialval.mjs", ["test/bord/materialval-v1/materialval.mjs", "text/javascript"]],
       ["studio.hdr", [room.photo, "application/octet-stream"]],

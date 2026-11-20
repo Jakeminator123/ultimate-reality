@@ -79,5 +79,5 @@ export function buildDrawShoe(cfg) {
     g.setIndex([...face,...sides]);g.addGroup(0,face.length,0);g.addGroup(face.length,sides.length,1);
     g.computeVertexNormals();card.geometry.dispose();card.geometry=g;
   }
-  return { shoe, draw };
+  return { shoe, draw, card };
 }

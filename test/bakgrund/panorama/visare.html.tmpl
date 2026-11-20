@@ -18,8 +18,10 @@
     footer {margin:.65rem 0;color:#d5dbd4}
     .return {display:inline-block; color:#e1cda9; margin-bottom:.7rem}
     select {font:inherit; color:inherit; background:#202e29; border:1px solid #6d7b74; border-radius:.35rem; padding:.3rem}
-    #bordsmaterial {display:flex; align-items:center; flex-wrap:wrap; gap:.55rem 1.2rem; margin:0 0 .8rem; border:1px solid #53675d; border-radius:.5rem; min-width:0}
-    #bordsmaterial legend {padding:0 .3rem; color:#e1cda9}
+    fieldset {display:flex; align-items:center; flex-wrap:wrap; gap:.55rem 1.2rem; margin:0 0 .8rem; border:1px solid #53675d; border-radius:.5rem; min-width:0}
+    legend {padding:0 .3rem; color:#e1cda9}
+    #givkontroll {gap:.4rem .8rem} #givkontroll input {vertical-align:middle;accent-color:#e1cda9}
+    #giv-tid {font-variant-numeric:tabular-nums; min-width:3.6em}
     #bordsmaterial output:empty {display:none}
     #status {margin:0} #status:empty {display:none}
     main:fullscreen {background:#17201d; display:flex; flex-direction:column; height:100%; max-width:none}
@@ -37,6 +39,7 @@
       </nav>
     </header>
     {{materialval}}
+    {{givkontroll}}
     <canvas id="panorama" data-eye="{{blick}}" data-seat="{{plats}}" data-view="{{vy}}" data-mat="{{matta}}" tabindex="0" aria-label="Se dig omkring i {{rum}}"></canvas>
     <footer aria-label="Blickriktning">
       <button id="left">Vrid åt vänster</button><button id="right">Vrid åt höger</button>

@@ -122,7 +122,9 @@ test(
           const card = page.locator(`main a[href="${route}"]`);
           assert.ok((await card.innerText()).includes(room.name));
           for (const seat of ["4", "1"]) {
-            const query = new URLSearchParams({ stol: seat, vy: "paulina", matta: "gras", tra: "furu", reling: "denim" });
+            const view = seat === "4" ? "paulina" : "giv";
+            const query = new URLSearchParams({ stol: seat, vy: view, matta: "gras", tra: "furu", reling: "denim" });
+            if (view === "giv") query.set("ruta", "26");
             const response = await page.request.get(origin + route + "?" + query);
             assert.equal(response.status(), 200);
             const state = await page.evaluate(html => {
@@ -131,11 +133,13 @@ test(
               return {
                 seat: canvas?.dataset.seat, view: canvas?.dataset.view, mat: canvas?.dataset.mat,
                 finishes: [...doc.querySelectorAll("#bordsmaterial select")].map(select => select.value),
+                frames: [...doc.querySelectorAll("#givkontroll [data-frame]")].map(button => button.dataset.frame),
                 rooms: [...doc.querySelectorAll("a[data-room]")].map(link => link.getAttribute("href")),
                 back: !!doc.querySelector('a[href="/scenmiljo/bakgrund/fotopanorama"]'),
               };
             }, await response.text());
-            assert.deepEqual([state.seat, state.view, state.mat, state.back], [seat, "paulina", "gras", true], room.name);
+            assert.deepEqual([state.seat, state.view, state.mat, state.back], [seat, view, "gras", true], room.name);
+            assert.deepEqual(state.frames, view === "giv" ? ["15", "26", "46"] : []);
             assert.deepEqual(state.finishes, ["gras", "furu", "denim"]);
             const destinations = state.rooms.map(href => new URL(href, origin + route));
             assert.deepEqual(destinations.map(link => link.pathname).sort(), roomHrefs);

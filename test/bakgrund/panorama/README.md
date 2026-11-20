@@ -39,6 +39,8 @@ Skuggornas lägen och storlek följer 3D-modellens lägsta cylindrar. Skuggstyrk
 
 ## Paulina v2 vid bordet
 
+**Paulinas giv till plats 4** spelar den registrerade tagningen `samspel-v2-v1` i valfritt rum. Byt stol på samma bildruta eller använd knapparna för handbyte, landning och blinkning. [Spela från Stol 4](http://127.0.0.1:4317/bordsprov/panorama/gothic-manor?stol=4&vy=giv) · [Se handbytet från Stol 1](http://127.0.0.1:4317/bordsprov/panorama/gothic-manor?stol=1&vy=giv&ruta=15) · [Granskning och bildrutor](paulina-giv-v1/README.md)
+
 Placeringsprovet `paulina-placering-v1` använder RUM-02 från `panorama-v1` och export E från LJUS-05. Riggen använder exportens egna bordskoordinater med skalfaktor 1. De båda kamerorna fryser pose 17 av 33 vid 16/24 s. Bord, filt och sko är BORD-02, YTA-02 och SKO-03. Det första rödryggade KORT-02 har färdats 54 mm längs 70/30-tagningens bana. [Stol 4](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4&vy=paulina) · [Stol 1](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=1&vy=paulina)
 
 | Kamera | Synligt i pose 17 | Fryst bild |
