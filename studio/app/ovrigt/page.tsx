@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ModelingArchive from "./ModelingArchive";
+import { StudioSubpage } from "../StudioSidebar";
 import styles from "../modeling.module.css";
 
 export const metadata = {
@@ -8,7 +9,7 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <main className={styles.archive}>
+  return <StudioSubpage area="ovrigt"><main className={styles.archive}>
     <nav className={styles.archiveNav} aria-label="Studionavigering">
       <a href="/#modellering"><ArrowLeft size={15}/> Till 3D-modellering</a>
       <a href="/#film">Filmutkast <ArrowRight size={15}/></a>
@@ -18,5 +19,5 @@ export default function Page() {
       <p>Sparade kroppsprov, äldre riggar och arbetsbilder från labbet.</p>
     </header>
     <ModelingArchive/>
-  </main>;
+  </main></StudioSubpage>;
 }

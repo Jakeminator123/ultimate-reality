@@ -38,7 +38,7 @@ async function regularFile(kind: keyof typeof filenames) {
 export async function currentModel(): Promise<ActiveDealerModel | null> {
   const version = await release();
   if (!version || !await regularFile("geometry")) return null;
-  const model: ActiveDealerModel = { id, name: "Paulina · Fas 1 v2", url };
+  const model: ActiveDealerModel = { id, name: "Paulina · sittmodell v2", url };
   if (version.appearanceSha256 && await regularFile("appearance")) model.appearanceUrl = url + "&yta=foto";
   return model;
 }

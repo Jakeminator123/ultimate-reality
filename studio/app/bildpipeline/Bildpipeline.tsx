@@ -255,6 +255,7 @@ export default function Bildpipeline() {
     <main className={s.page}>
       <nav className={s.nav} aria-label="Studio"><a href="/">← Dealerstudio</a><a href="/bildstandard">Bildstandard ↗</a></nav>
       <header className={s.heading}>
+        <p className="phase-caption">Fas 1 · Bildpipeline</p>
         <h1>Beställ en bildserie</h1>
         <p>Välj original av samma person. En ny stående helfigur framifrån skapas först, oavsett vilka vinklar du lägger in. Granska ståfronten separat eller beställ alla tolv bilder direkt.</p>
       </header>

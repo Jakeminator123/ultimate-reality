@@ -1,4 +1,5 @@
 import Bildpipeline from "./Bildpipeline";
+import { StudioSubpage } from "../StudioSidebar";
 
 export const metadata = {
   title: "Bildbeställning · Dealerstudio",
@@ -6,5 +7,5 @@ export const metadata = {
 };
 
 export default function Page() {
-  return <Bildpipeline />;
+  return <StudioSubpage area="bilder"><Bildpipeline/></StudioSubpage>;
 }

@@ -3,6 +3,7 @@ import path from "node:path";
 import { headers } from "next/headers";
 import { LocalError, requireLocal } from "../../../lib/storage";
 import SittingScale, { type MeasuredPhoto } from "./SittingScale";
+import { StudioSubpage } from "../../StudioSidebar";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Sittande bildskala · Paulina" };
@@ -26,5 +27,5 @@ async function loadMeasurements(): Promise<MeasuredPhoto[]> {
 }
 
 export default async function Page() {
-  return <SittingScale views={await loadMeasurements()}/>;
+  return <StudioSubpage area="bilder"><SittingScale views={await loadMeasurements()}/></StudioSubpage>;
 }

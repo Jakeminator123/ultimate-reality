@@ -81,6 +81,27 @@ test(
           remote.push(req.url());
       });
       await page.goto(origin);
+      await t.test("dealervalet öppnar Paulinas rigg eller ett tomt bildutkast och faserna följer med", async () => {
+        async function mobileWidth() {
+          await page.setViewportSize({ width: 320, height: 800 });
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+          await page.setViewportSize({ width: 1280, height: 900 });
+        }
+        await page.getByRole("heading", { name: "Välj din dealer" }).waitFor();
+        await mobileWidth();
+        await page.getByRole("link", { name: "Börja med egna foton" }).click();
+        assert.equal(await page.getByLabel("Version", { exact: true }).inputValue(), "");
+        const work = page.getByRole("navigation", { name: "Arbetsyta" });
+        await work.getByRole("link", { name: /Fas 1.*Bildpipeline/ }).click();
+        await page.getByRole("heading", { name: "Bildstandard för en dealer" }).waitFor();
+        await mobileWidth();
+        assert.equal(await work.getByRole("link", { name: /Fas 1.*Bildpipeline/ }).getAttribute("aria-current"), "page");
+        await work.getByRole("link", { name: "Översikt" }).click();
+        await page.getByRole("link", { name: "Öppna Paulinas modell" }).click();
+        await page.getByRole("heading", { name: "3D-modellering" }).waitFor();
+        await mobileWidth();
+        assert.equal(await work.getByRole("link", { name: /Fas 2.*3D-modell/ }).getAttribute("aria-current"), "page");
+      });
       await page.getByRole("heading", { name: "Paulinas bildserie" }).waitFor();
       assert.equal(await page.getByRole("region", { name: "Paulinas bildserie" }).getByRole("button").count(), 12);
       await t.test("sittbilderna kan jämföras i originalens utsnitt och i frontens skala", async () => {
@@ -118,6 +139,40 @@ test(
         assert.notDeepEqual(await canvas.screenshot(), neutralPixels);
         await page.getByRole("button", { name: "Sittande i trekvart" }).click();
         assert.equal(await look.getAttribute("aria-pressed"), "true");
+        const lookPixels = await canvas.screenshot();
+        await page.getByRole("button", { name: "Endast rigg" }).click();
+        assert.equal(await look.getAttribute("aria-pressed"), "false");
+        assert.equal(await page.getByRole("button", { name: "Skelett", exact: true }).getAttribute("aria-pressed"), "true");
+        await page.getByRole("checkbox", { name: "Alla 127 leder" }).check();
+        await page.getByText("127 visas", { exact: true }).waitFor();
+        const rigPixels = await canvas.screenshot();
+        assert.notDeepEqual(rigPixels, lookPixels);
+        await page.locator("summary").filter({ hasText: "Prova armar och fingrar" }).click();
+        const measurements = page.locator(".rig-joint-measurements");
+        const restAngle = await measurements.locator("dd").first().innerText();
+        await page.getByRole("slider", { name: /Böjning/ }).press("End");
+        assert.notDeepEqual(await canvas.screenshot(), rigPixels);
+        assert.notEqual(await measurements.locator("dd").first().innerText(), restAngle);
+        await page.getByLabel("Led att prova").selectOption("r_index1");
+        await measurements.getByText("Led till fingertopp", { exact: true }).waitFor();
+        await page.locator("summary").filter({ hasText: "Kameravärden" }).click();
+        await page.getByRole("slider", { name: "Avstånd till riktpunkt" }).press("End");
+        assert.match(await page.locator(".rig-camera summary").innerText(), /6 m/);
+        await page.getByRole("slider", { name: "Vridning" }).press("Home");
+        assert.match(await page.locator(".rig-camera summary").innerText(), /Bakifrån/);
+        await page.getByRole("button", { name: "Trekvart", exact: true }).click();
+        assert.match(await page.locator(".rig-camera summary").innerText(), /Vänster trekvart · 45° · 3 m/);
+        await look.click();
+        assert.equal(await page.getByRole("button", { name: "Leder", exact: true }).getAttribute("aria-pressed"), "true");
+        await page.getByRole("button", { name: "Återställ leder" }).click();
+        if (process.env.STUDIO_RIG_QA_SCREEN) {
+          await page.getByRole("checkbox", { name: "Alla 127 leder" }).uncheck();
+          await page.locator("summary").filter({ hasText: "Prova armar och fingrar" }).click();
+          await page.setViewportSize({ width: 1360, height: 1120 });
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.screenshot({ path: process.env.STUDIO_RIG_QA_SCREEN });
+          await page.setViewportSize({ width: 1280, height: 900 });
+        }
         const file = origin + current.activeModel.appearanceUrl;
         await page.route(file, route => route.fulfill({ status: 404, body: "" }));
         try {
@@ -183,7 +238,7 @@ test(
       await page.locator(".estimate-total").getByText("165 krediter").waitFor();
       await page.setViewportSize({ width: 375, height: 840 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      await page.getByRole("link", { name: "3D-modellering" }).click();
+      await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: /Fas 2.*3D-modell/ }).click();
       const archiveOpened = page.waitForEvent("popup");
       await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Övrigt", exact: true }).click();
       const archive = await archiveOpened;
@@ -231,7 +286,7 @@ test(
       await archive.close();
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.getByRole("link", { name: "Filmutkast" }).click();
-      await page.locator("summary").click();
+      await page.locator("summary").filter({ hasText: "Headers och JSON-kropp" }).click();
       await page.getByLabel("Visa fullständiga bilddata").check();
       const payload = JSON.parse(await page.locator("pre").innerText());
       assert.equal(payload.promptImage.length, 2);

@@ -3,11 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { defaultBlocking } from "../lib/blocking";
 import {
-  Aperture,
-  Box,
-  Calculator,
   BookOpen,
-  Clapperboard,
+  FolderOpen,
+  Layers3,
   ImageIcon,
   Film as FilmIcon,
   Save,
@@ -21,8 +19,6 @@ import {
   X,
   ChevronDown,
   Monitor,
-  FolderOpen,
-  Layers3,
   RotateCcw,
   ArrowUpRight,
 } from "lucide-react";
@@ -51,6 +47,8 @@ import ModelGuide from "./ModelGuide";
 import PromptLibrary from "./PromptLibrary";
 import RunwayConnection from "./RunwayConnection";
 import ModelingStudio from "./ModelingStudio";
+import DealerOverview from "./DealerOverview";
+import { StudioSidebar, secondaryWorkspaces, type Workspace } from "./StudioSidebar";
 import { money, quote } from "../lib/runway-prices";
 const SceneStudio = dynamic(() => import("./SceneStudio"), {
   ssr: false,
@@ -58,14 +56,6 @@ const SceneStudio = dynamic(() => import("./SceneStudio"), {
 });
 
 type Slot = "first" | "last";
-const workspaces = [
-  { id: "modellering", name: "3D-modellering", icon: Box },
-  { id: "scen", name: "3D-scen", icon: Layers3 },
-  { id: "film", name: "Filmutkast", icon: Clapperboard },
-  { id: "modeller", name: "Modeller och pris", icon: Calculator },
-  { id: "promptmallar", name: "Startprompter", icon: BookOpen },
-] as const;
-type Workspace = (typeof workspaces)[number]["id"];
 type RecordData = { draft: Draft; request: { body: Payload } };
 async function readJson(res: Response) {
   const data = await res.json();
@@ -104,11 +94,13 @@ function usePicture(
   return result.key === key ? result : { key, uri: "", error: "" };
 }
 export default function Editor() {
-  const [mode, setMode] = useState<Workspace>("modellering");
+  const [mode, setMode] = useState<Workspace>("oversikt");
+  const usesDraft = mode !== "oversikt" && mode !== "modellering";
   useEffect(() => {
     const select = () => {
       const hash = window.location.hash.slice(1);
-      setMode(workspaces.find(entry => entry.id === hash)?.id ?? "modellering");
+      const next = secondaryWorkspaces.find(entry => entry.id === hash)?.id;
+      setMode(next ?? (hash === "modellering" || (!hash && new URLSearchParams(window.location.search).has("pose")) ? "modellering" : "oversikt"));
     };
     select();
     window.addEventListener("hashchange", select);
@@ -167,12 +159,12 @@ export default function Editor() {
   }
   const draftRequested = useRef(false);
   useEffect(() => {
-    if (mode === "modellering" || draftRequested.current) return;
+    if (!usesDraft || draftRequested.current) return;
     draftRequested.current = true;
     Promise.all([load(), fetch("/api/assets").then(readJson).then(setAssets)])
       .then(() => setReady(true))
       .catch((e) => { draftRequested.current = false; setError(e.message); });
-  }, [mode]);
+  }, [mode, usesDraft]);
   useEffect(() => {
     if (picker) dialog.current?.showModal();
     else dialog.current?.close();
@@ -285,27 +277,13 @@ export default function Editor() {
   return (
     <>
       <div className="studio-shell">
-      <header className="studio-sidebar">
-        <div className="studio-brand">
-          <span className="studio-mark"><Aperture size={24} /></span>
-          <div><b>Ultimate Reality</b><small>Dealerstudio</small></div>
-        </div>
-        <nav className="workspace-nav" aria-label="Arbetsyta">
-          {workspaces.map(({ id, name, icon: Icon }) => <a key={id} href={"#" + id} aria-current={mode === id ? "page" : undefined}>
-            <Icon size={18} strokeWidth={1.7}/>{name}
-          </a>)}
-          <a href="/bildstandard" target={dirty ? "_blank" : undefined} rel="noreferrer"><ImageIcon size={18} strokeWidth={1.7}/> Bildstandard</a>
-          <a href="/bildpipeline" target={dirty ? "_blank" : undefined} rel="noreferrer"><Aperture size={18} strokeWidth={1.7}/> Bildpipeline</a>
-          <a href="/ovrigt" target={dirty ? "_blank" : undefined} rel="noreferrer"><FolderOpen size={18} strokeWidth={1.7}/> Övrigt</a>
-        </nav>
-        <span className="workspace-local"><i/> Lokal arbetsyta</span>
-      </header>
+      <StudioSidebar area={mode} editor dirty={dirty}/>
       <main>
         <section className="hero">
           <div>
-            <h1>
-              {mode === "film" ? draft.clipName || "Giv till plats 4" : workspaces.find(entry => entry.id === mode)?.name}
-            </h1>
+            {mode === "modellering" && <p className="phase-caption">Fas 2 · Paulina</p>}
+            <h1>{mode === "oversikt" ? "Välj din dealer" : mode === "modellering" ? "3D-modellering" :
+              mode === "film" ? draft.clipName || "Giv till plats 4" : secondaryWorkspaces.find(entry => entry.id === mode)?.name}</h1>
           </div>
           {(mode === "film" || mode === "scen") && <div className="save-group">
             {!!versions.length && (
@@ -340,12 +318,12 @@ export default function Editor() {
             </button>
           </div>}
         </section>
-        {mode !== "modellering" && (error || a.error || b.error) && (
+        {usesDraft && (error || a.error || b.error) && (
           <div className="alert" role="alert">
             {error || a.error || b.error}
           </div>
         )}
-        {mode === "modellering" ? <ModelingStudio/> : mode === "promptmallar" ? <PromptLibrary draft={draft} ready={ready} apply={(p) => {
+        {mode === "oversikt" ? <DealerOverview dirty={dirty}/> : mode === "modellering" ? <ModelingStudio/> : mode === "promptmallar" ? <PromptLibrary draft={draft} ready={ready} apply={(p) => {
           edit({ prompt: p.prompt, model: p.model, duration: p.duration,
             clipName: p.id === "@draft" ? draft.clipName : p.name });
           setSlot("first");
@@ -638,7 +616,7 @@ export default function Editor() {
           <span>
             <Monitor size={14} /> Ultimate Reality · Dealerstudio
           </span>
-          {mode !== "modellering" && <span role="status">
+          {usesDraft && <span role="status">
             {status ||
               (dirty
                 ? "Osparade ändringar"

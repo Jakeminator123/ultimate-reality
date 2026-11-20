@@ -79,7 +79,7 @@ function CurrentModelingStudio() {
 
     <section className={styles.modelPanel} aria-labelledby="current-model">
       <header className={styles.panelHeader}>
-        <div><p className={styles.meta}>3D-arbetsmodell</p><h2 id="current-model">{model?.name ?? "Paulina · Fas 1 v2"}</h2></div>
+        <div><p className={styles.meta}>3D-arbetsmodell</p><h2 id="current-model">{model?.name ?? "Paulina · sittmodell v2"}</h2></div>
         <Box size={23} strokeWidth={1.5} aria-hidden/>
       </header>
       <div className={styles.modelSurface}>
@@ -89,7 +89,7 @@ function CurrentModelingStudio() {
           {!loading && <button onClick={refresh}><RefreshCw size={14}/> Läs in igen</button>}
         </div>}
       </div>
-      <div className={styles.rail}><span>Sittande kropp · Fas 1</span>{model && <span>Dra för att vrida</span>}</div>
+      <div className={styles.rail}><span>Sittande arbetsmodell · v2</span>{model && <span>Dra för att vrida</span>}</div>
       {model && error && <p role="alert" className="alert">{error}</p>}
     </section>
 
@@ -114,6 +114,15 @@ function CurrentModelingStudio() {
         </section>
       )}</div>
     </section>
+
+    <details className={styles.roadmap}>
+      <summary>Från Paulinas rigg till dealerfilm</summary>
+      <ol>
+        <li><strong>Styr kroppen.</strong> Sittfronten gav den poserbara kroppen. Sju Fas 1-bilder gav fotoutseendet. Hår och kläder på baksidan är delvis uppskattade.</li>
+        <li><strong>Passa handen mot kortet.</strong> Nästa prov är ett utdrag från skon. Granska greppet, kortet på kant och släppet vid samma bildrutor från stol 4 och stol 1. <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1">Öppna bordsprovet med 08-riggen</a></li>
+        <li><strong>Välj filmens utseende.</strong> Rendera båda kamerorna från samma rörelse. Om hud eller tyg ser konstgjorda ut, jämför fototexturen med film projicerad på den rörliga kroppen från en känd kamera.</li>
+      </ol>
+    </details>
 
     <nav className={styles.resources} aria-label="Bildverktyg och tidigare prov">
       <a href="/bildstandard"><BookOpen size={20}/><span><b>Bildstandard</b><small>Kamera, pose och prompt för varje vy</small></span><ArrowRight size={17}/></a>

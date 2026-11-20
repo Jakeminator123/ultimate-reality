@@ -4,6 +4,8 @@ import * as T from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { resultUrl, type ActiveDealerModel, type SamPose, type PoseVersion as Version } from "../lib/modeling";
+import { makeRigOverlay, measureRigJoint, initialRigLayers, type RigLayers } from "../lib/rig-overlay";
+import RigCamera, { frontCamera, type CameraValues } from "./RigCamera";
 
 const poseJoints = [["l_lowarm", "Vänster armbåge"], ["r_lowarm", "Höger armbåge"],
   ["l_index1", "Vänster pekfinger"], ["l_middle1", "Vänster långfinger"],
@@ -11,6 +13,9 @@ const poseJoints = [["l_lowarm", "Vänster armbåge"], ["r_lowarm", "Höger armb
 type Viewport = {
   changePose: (version: Version) => void;
   showGrid: (visible: boolean) => void;
+  showLayers: (layers: RigLayers) => void;
+  adjustCamera: (values: Partial<CameraValues>) => void;
+  measureJoint: () => void;
   face: (degrees: number) => void;
   detail: (part: "ansikte" | "händer") => void;
   bend: (joint: string, degrees: number) => void;
@@ -34,8 +39,13 @@ export default function PoseReview(props: ReviewProps) {
   const [unavailable, setUnavailable] = useState<Version[]>([]);
   const [error, setError] = useState("");
   const [joint, setJoint] = useState<string>("l_lowarm");
+  const selectedJoint = useRef(joint);
+  const [jointReading, setJointReading] = useState<ReturnType<typeof measureRigJoint>>(null);
   const [angles, setAngles] = useState<Record<string, number>>({});
   const [canPose, setCanPose] = useState(false);
+  const [layers, setLayers] = useState<RigLayers>(initialRigLayers);
+  const [rigCount, setRigCount] = useState<{ main: number; total: number } | null>(null);
+  const [cameraValues, setCameraValues] = useState<CameraValues>(frontCamera);
   const frontUrl = pose ? resultUrl(pose, "front") : model.url;
   const tableUrl = pose?.hasTablePose ? resultUrl(pose, "bordsvila") : "";
   const lookUrl = pose?.hasAppearance ? resultUrl(pose, "utseende") : model?.appearanceUrl ?? "";
@@ -46,6 +56,12 @@ export default function PoseReview(props: ReviewProps) {
     selectedAngle.current = props.cameraAngle;
     viewport.current?.face(props.cameraAngle);
   }, [props.cameraAngle]);
+  useEffect(() => {
+    if (ready) viewport.current?.showLayers(layers);
+  }, [layers, ready]);
+  useEffect(() => {
+    if (ready) viewport.current?.showGrid(grid);
+  }, [grid, ready]);
 
   useEffect(() => {
     const host = surface.current;
@@ -72,6 +88,29 @@ export default function PoseReview(props: ReviewProps) {
     controls.maxPolarAngle = Math.PI * 0.89;
     controls.minZoom = 0.55;
     controls.maxZoom = 7;
+    let overlay: ReturnType<typeof makeRigOverlay> = null;
+    const offset = new T.Vector3();
+    const orbit = new T.Spherical();
+    function reportCamera() {
+      if (!activeRig) return;
+      orbit.setFromVector3(offset.subVectors(camera.position, controls.target));
+      const azimuth = Math.round(T.MathUtils.radToDeg(orbit.theta)) || 0;
+      const elevation = Math.round(90 - T.MathUtils.radToDeg(orbit.phi)) || 0;
+      const distance = Math.round(orbit.radius * 100) / 100, zoom = Math.round(camera.zoom * 100) / 100;
+      setCameraValues(previous => previous.azimuth === azimuth && previous.elevation === elevation
+        && previous.distance === distance && previous.zoom === zoom ? previous : { azimuth, elevation, distance, zoom });
+    }
+    function adjustCamera(update: Partial<CameraValues>) {
+      orbit.setFromVector3(offset.subVectors(camera.position, controls.target));
+      if (update.azimuth !== undefined) orbit.theta = T.MathUtils.degToRad(update.azimuth);
+      if (update.elevation !== undefined) orbit.phi = T.MathUtils.degToRad(90 - update.elevation);
+      if (update.distance !== undefined) orbit.radius = update.distance;
+      if (update.zoom !== undefined) camera.zoom = update.zoom;
+      camera.position.copy(controls.target).add(offset.setFromSpherical(orbit));
+      camera.updateProjectionMatrix();
+      controls.update();
+      cameraMoved();
+    }
     const light = new T.DirectionalLight(0xfff4e2, 2.1);
     light.position.set(-2.5, 4, 3);
     scene.add(light, new T.HemisphereLight(0xfffcf4, 0x718579, 1.65));
@@ -94,6 +133,7 @@ export default function PoseReview(props: ReviewProps) {
       wall.rotation.y = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
       renderer.render(scene, camera);
     }
+    function cameraMoved() { reportCamera(); draw(); }
     let height = 1.8;
     let width = 1;
     const wholeBodyTarget = new T.Vector3();
@@ -115,7 +155,7 @@ export default function PoseReview(props: ReviewProps) {
       camera.zoom = 1;
       camera.updateProjectionMatrix();
       controls.update();
-      draw();
+      cameraMoved();
     }
     const loader = new GLTFLoader();
     const bodies = new Map<Version, T.Group>();
@@ -134,7 +174,7 @@ export default function PoseReview(props: ReviewProps) {
       camera.zoom = Math.min(controls.maxZoom, 2 * Math.min(camera.top, camera.right) / span);
       camera.updateProjectionMatrix();
       controls.update();
-      draw();
+      cameraMoved();
     }
     const joints = new Map<string, { bone: T.Bone; rest: T.Quaternion; axis: T.Vector3 }[]>();
     function prepareJoints(body: T.Group) {
@@ -198,9 +238,15 @@ export default function PoseReview(props: ReviewProps) {
     }
     function changePose(selected: Version) {
       for (const [key, body] of bodies) body.visible = key === selected;
+      measureJoint();
       draw();
     }
-    controls.addEventListener("change", draw);
+    function measureJoint() {
+      if (!activeRig) return;
+      const body = bodies.get(selectedVersion.current);
+      setJointReading(body ? measureRigJoint(body, selectedJoint.current) : null);
+    }
+    controls.addEventListener("change", cameraMoved);
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     const sources: [Version, string][] = [["front", frontUrl]];
@@ -221,13 +267,29 @@ export default function PoseReview(props: ReviewProps) {
       controls.target.copy(wholeBodyTarget);
       for (const [key, body] of bodies) if (activeRig || key !== "front") prepareJoints(body);
       setCanPose(joints.size === poseJoints.length);
+      if (activeRig) {
+        overlay = makeRigOverlay(bodies.get("front")!);
+        if (overlay) scene.add(overlay.group);
+        setRigCount(overlay ? { main: overlay.mainCount, total: overlay.total } : null);
+      }
       viewport.current = {
-        changePose, showGrid: on => { guides.visible = on; draw(); }, face, detail,
-        bend: (name, degrees) => {
-          for (const j of joints.get(name) ?? []) j.bone.quaternion.copy(j.rest).multiply(new T.Quaternion().setFromAxisAngle(j.axis, T.MathUtils.degToRad(degrees)));
+        changePose, adjustCamera, measureJoint, showGrid: on => { guides.visible = on; draw(); }, face, detail,
+        showLayers: next => {
+          if (!overlay) return;
+          bodies.forEach(body => body.traverse(object => { if (object instanceof T.Mesh) object.visible = next.surface; }));
+          overlay.show(next);
           draw();
         },
-        resetJoints: () => { for (const group of joints.values()) for (const j of group) j.bone.quaternion.copy(j.rest); draw(); },
+        bend: (name, degrees) => {
+          for (const j of joints.get(name) ?? []) j.bone.quaternion.copy(j.rest).multiply(new T.Quaternion().setFromAxisAngle(j.axis, T.MathUtils.degToRad(degrees)));
+          overlay?.refresh();
+          measureJoint();
+          draw();
+        },
+        resetJoints: () => {
+          for (const group of joints.values()) for (const j of group) j.bone.quaternion.copy(j.rest);
+          overlay?.refresh(); measureJoint(); draw();
+        },
       };
       const visible = bodies.has(selectedVersion.current) ? selectedVersion.current : "front";
       selectedVersion.current = visible;
@@ -241,7 +303,9 @@ export default function PoseReview(props: ReviewProps) {
       abort.abort();
       viewport.current = null;
       observer.disconnect();
+      controls.removeEventListener("change", cameraMoved);
       controls.dispose();
+      overlay?.dispose();
       bodies.forEach(releaseBody);
       guides.traverse(obj => {
         if (obj instanceof T.Line) {
@@ -257,14 +321,20 @@ export default function PoseReview(props: ReviewProps) {
     };
   }, [frontUrl, tableUrl, lookUrl, uprightUrl, initialVersion, activeRig]);
 
-  function choose(v: Version) { selectedVersion.current = v; selectVersion(v); viewport.current?.changePose(v); }
+  function choose(v: Version) {
+    if (!layers.surface) setLayers(state => ({ ...state, surface: true }));
+    selectedVersion.current = v; selectVersion(v); viewport.current?.changePose(v);
+  }
   return <div className="pose-review">
     <div className="pose-tools" aria-label="Kontroller för kroppsprov">
-      {(tableUrl || lookUrl || uprightUrl) && <span className="view-switch" role="group" aria-label="Pose">
-        <button disabled={!ready} aria-pressed={version === "front"} onClick={() => choose("front")}>{activeRig ? "Kroppsform" : "SAM-pose"}</button>
+      {(activeRig || tableUrl || lookUrl || uprightUrl) && <span className="view-switch" role="group" aria-label={activeRig ? "Kroppsyta" : "Pose"}>
+        <button disabled={!ready} aria-pressed={layers.surface && version === "front"} onClick={() => choose("front")}>{activeRig ? "Kroppsform" : "SAM-pose"}</button>
         {tableUrl && <button disabled={!ready || unavailable.includes("bordsvila")} aria-pressed={version === "bordsvila"} onClick={() => choose("bordsvila")}>Bordsvila</button>}
-        {lookUrl && <button disabled={!ready || unavailable.includes("utseende")} aria-pressed={version === "utseende"} onClick={() => choose("utseende")}>{activeRig ? "Fotoutseende · prov" : "Med utseende"}</button>}
+        {lookUrl && <button disabled={!ready || unavailable.includes("utseende")} aria-pressed={layers.surface && version === "utseende"} onClick={() => choose("utseende")}>{activeRig ? "Fotoutseende · prov" : "Med utseende"}</button>}
         {uprightUrl && <button disabled={!ready || unavailable.includes("rak")} aria-pressed={version === "rak"} onClick={() => choose("rak")}>Helt upprätad</button>}
+        {activeRig && <button disabled={!ready || !rigCount} aria-pressed={!layers.surface} onClick={() => setLayers(state => ({
+          ...state, surface: false, skeleton: true, joints: true,
+        }))}>Endast rigg</button>}
       </span>}
       <span className="view-switch" role="group" aria-label="Kamera">
         <button disabled={!ready} onClick={() => viewport.current?.face(0)}>Framifrån</button>
@@ -273,12 +343,29 @@ export default function PoseReview(props: ReviewProps) {
         {(activeRig || version === "utseende" || version === "rak") && <><button disabled={!ready} onClick={() => viewport.current?.detail("ansikte")}>Ansikte</button>
           <button disabled={!ready} onClick={() => viewport.current?.detail("händer")}>Handryggar</button></>}
       </span>
-      <button disabled={!ready} aria-pressed={grid} onClick={() => { setGrid(!grid); viewport.current?.showGrid(!grid); }}>Rutnät · 10 cm</button>
+      <div className="rig-layer-tools" role="group" aria-label="Visningslager">
+        {activeRig && <>
+          <button disabled={!ready || !rigCount || (!layers.surface && !layers.joints)} aria-pressed={layers.skeleton}
+            onClick={() => setLayers(state => ({ ...state, skeleton: !state.skeleton }))}>Skelett</button>
+          <button disabled={!ready || !rigCount || (!layers.surface && !layers.skeleton)} aria-pressed={layers.joints}
+            onClick={() => setLayers(state => ({ ...state, joints: !state.joints }))}>Leder</button>
+        </>}
+        <button disabled={!ready} aria-pressed={grid} onClick={() => setGrid(!grid)}>Rutnät · 10 cm</button>
+      </div>
+      {rigCount && (layers.skeleton || layers.joints) && <div className="rig-legend">
+        <label><input type="checkbox" checked={layers.all} onChange={e => setLayers(state => ({ ...state, all: e.target.checked }))}/>
+          Alla {rigCount.total} leder</label>
+        <span>{layers.all ? rigCount.total : rigCount.main} visas</span>
+        <span className="rig-left">Vänster</span><span className="rig-right">Höger</span><span className="rig-centre">Mittlinje</span>
+      </div>}
     </div>
+    {activeRig && <RigCamera ready={ready} values={cameraValues} adjust={v => viewport.current?.adjustCamera(v)}/>}
     {canPose && (activeRig || version !== "front") && <details className="pose-joints">
       <summary>Prova armar och fingrar</summary>
       <div>
-        <select aria-label="Led att prova" value={joint} onChange={e => setJoint(e.target.value)}>
+        <select aria-label="Led att prova" value={joint} onChange={e => {
+          selectedJoint.current = e.target.value; setJoint(e.target.value); viewport.current?.measureJoint();
+        }}>
           {poseJoints.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
         </select>
         <label>Böjning <input type="range" min="-25" max="70" step="1" value={angles[joint] ?? 0} onChange={e => {
@@ -286,6 +373,12 @@ export default function PoseReview(props: ReviewProps) {
         }}/> <output>{angles[joint] ?? 0}°</output></label>
         <button onClick={() => { viewport.current?.resetJoints(); setAngles({}); }}>Återställ leder</button>
       </div>
+      {jointReading && <dl className="rig-joint-measurements">
+        <div><dt>{jointReading.segments}</dt><dd>{Math.round(jointReading.angle)}°</dd></div>
+        <div><dt>Led till {jointReading.target}</dt><dd>{jointReading.distance.toLocaleString("sv-SE", {maximumFractionDigits: 1})} cm</dd></div>
+        <div><dt>Mot {jointReading.target} · vänster / upp / framåt</dt>
+          <dd>{jointReading.offset.map(value => value.toLocaleString("sv-SE", {maximumFractionDigits: 1})).join(" / ")} cm</dd></div>
+      </dl>}
     </details>}
     <div className="pose-canvas" ref={surface}/>
     {ready && unavailable.length > 0 && <p role="status">En alternativ modellfil kunde inte läsas på den här datorn.</p>}

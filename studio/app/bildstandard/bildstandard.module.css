@@ -46,6 +46,8 @@
   color: var(--muted);
   font-size: 1rem;
 }
+.upplosning { margin-top: 13px; max-width: 74ch; }
+.upplosning summary { color: var(--pine); font-size: 15px; font-weight: 650; }
 .valrad {
   margin: 0 0 18px;
   padding: 12px 16px;

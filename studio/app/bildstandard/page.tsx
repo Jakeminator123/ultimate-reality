@@ -6,6 +6,7 @@ import { bildrecept } from "../../fotomall/bildrecept";
 import type { GranskadVy } from "../../fotomall/bildserie";
 import { LocalError, requireLocal } from "../../lib/storage";
 import Bildstandard from "./Bildstandard";
+import { StudioSubpage } from "../StudioSidebar";
 import type { PaulinaExempel } from "./exempeltyp";
 
 export const dynamic = "force-dynamic";
@@ -58,5 +59,5 @@ async function localExamples(): Promise<PaulinaExempel[]> {
 }
 
 export default async function Page() {
-  return <Bildstandard exempel={await localExamples()} />;
+  return <StudioSubpage area="bilder"><Bildstandard exempel={await localExamples()}/></StudioSubpage>;
 }

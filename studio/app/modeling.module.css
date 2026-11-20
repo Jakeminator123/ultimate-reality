@@ -1,7 +1,7 @@
 .workspace {
   --view-height: clamp(350px, 47svh, 530px);
   display: grid;
-  grid-template-areas: "photo model" "gallery gallery" "resources resources";
+  grid-template-areas: "photo model" "gallery gallery" "roadmap roadmap" "resources resources";
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
@@ -54,10 +54,17 @@
 .modelSurface :global(.pose-review) { height: auto; }
 .modelSurface :global(.pose-canvas) { order: 0; flex: none; height: var(--view-height); }
 .modelSurface :global(.pose-tools) { order: 1; border-top: 1px solid var(--line); }
-.modelSurface :global(.pose-joints) { order: 2; }
+.modelSurface :global(.rig-camera) { order: 2; }
+.modelSurface :global(.pose-joints) { order: 3; }
+.modelSurface :global(.pose-message) { z-index: 1; }
 .modelSurface > .empty { margin: auto; min-height: var(--view-height); align-content: center; }
 .sourceNote { padding: 11px 14px; margin: 0; font-size: 12px; color: var(--muted); }
 .sourceNote a { color: var(--pine); text-underline-offset: 2px; }
+.roadmap { grid-area: roadmap; padding: 13px 17px; border: 1px solid var(--line); border-radius: 12px; background: var(--white); }
+.roadmap summary { font-size: 16px; font-weight: 650; color: var(--pine); }
+.roadmap ol { padding-left: 23px; margin: 12px 0 0; max-width: 92ch; font-size: 15px; }
+.roadmap li + li { margin-top: 8px; }
+.roadmap a { color: var(--pine); text-underline-offset: 3px; }
 .empty {
   display: grid;
   justify-items: center;
@@ -167,7 +174,7 @@
   .resources a { padding: 11px; gap: 6px; }
 }
 @media (max-width: 700px) {
-  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "gallery" "model" "resources"; gap: 12px; }
+  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "model" "gallery" "roadmap" "resources"; gap: 12px; }
   .panelHeader { min-height: 64px; padding: 10px 13px; }
   .workspace { --view-height: clamp(280px, 40svh, 365px); }
   .gallery { padding: 13px; }

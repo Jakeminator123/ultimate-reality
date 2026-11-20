@@ -36,7 +36,9 @@ I [Runways bildpipeline](http://127.0.0.1:4317/bildpipeline) kan du lägga in ex
 
 [Bildstandarden för en dealer](http://127.0.0.1:4317/bildstandard) visar elva grundvyer och en extra kortvändning. Varje vy har en kopierbar prompt för egna foton och ett granskat exempel från Paulina. Hämta Paulinas ifyllda mall eller en tom mall för nästa avatars bildmått, observationer och osäkerheter. Båda använder samma JSON-format.
 
-Studion öppnar Paulinas elva grundbilder och extra kortvändning bredvid den poserbara sittmodellen v2. Välj **Fotoutseende · prov** för att visa Paulinas hår, ansikte och kostym på kroppen. Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen i Codex skapade de tre sittbilderna. Hjässa till skosula upptar cirka 1 340, 1 340 och 1 288 px. [3D-modellering](http://127.0.0.1:4317/#modellering) · [Jämför originalen och bildskalan](http://127.0.0.1:4317/bildstandard/sitthojd)
+Startsidan låter dig öppna Paulina eller börja med en ny dealers egna foton. **Fas 1 · Bildpipeline** samlar bildstandarden, Paulinas tolv vyer och Runways beställningsflöde. **Fas 2 · 3D-modell** visar sittmodellen v2 och dess fotoreferenser. Välj kroppsform, fotoutseende eller enbart rigg. Skelett, ledpunkter och rutnät kan slås på var för sig. Kameravärden visar vridning, höjdvinkel, avstånd till riktpunkten och zoom. [Dealerval](http://127.0.0.1:4317/) · [Paulinas modell](http://127.0.0.1:4317/#modellering)
+
+Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen i Codex skapade de tre sittbilderna. Hjässa till skosula upptar cirka 1 340, 1 340 och 1 288 px. [Jämför originalen och bildskalan](http://127.0.0.1:4317/bildstandard/sitthojd) · [Från kroppsskattning till fler kameror](studio/PLAN.md#från-paulinas-rigg-till-dealerfilm)
 
 [Övrigt](http://127.0.0.1:4317/ovrigt) innehåller sittbasen v1, tidigare 08-riggar, labbets bildinkorg och parkerade rums- och ljusprov. Välj **Foto**, **Överlägg** eller **3D** för ett sparat prov. [Den äldre dockmallen](http://127.0.0.1:4317/ovrigt/fotomall) kan fortfarande sparas som fristående HTML.
 

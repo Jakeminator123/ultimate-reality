@@ -79,11 +79,17 @@ export default function Bildstandard({ exempel }: { exempel: PaulinaExempel[] })
       <nav className={styles.nav} aria-label="Studionavigering">
         <a href="/"><ArrowLeft size={16} aria-hidden /> Dealerstudion</a>
         <a href="/bildpipeline">Beställ bildserie i Runway <ArrowUpRight size={16} aria-hidden /></a>
-          <a href="/bildstandard/sitthojd">Jämför sittbilderna <ArrowUpRight size={16} aria-hidden /></a>
+        <a href="/bildstandard/sitthojd">Jämför sittbilderna <ArrowUpRight size={16} aria-hidden /></a>
       </nav>
       <header className={styles.huvud}>
+        <p className="phase-caption">Fas 1 · Bildpipeline</p>
         <h1>Bildstandard för en dealer</h1>
-        <p>Elva grundbilder och en extra rörelsebild ingår i serien. Jämför fotomallen med Paulinas bilder och skapa en prompt för dina egna referensfoton.</p>
+        <p>Paulinas serie består av elva grundbilder och en extra kortvändning. Här kan du granska hennes bilder och förbereda referenser för nästa dealer. Runways beställningsflöde är i beta.</p>
+        <details className={styles.upplosning}>
+          <summary>Behöver Paulinas bilder högre upplösning?</summary>
+          <p>Behåll nuvarande helbilder på 1083 × 1452 px för kroppens pose. I den sparade körningen lästes de in som 955 × 1280 px. Kroppsmodellen arbetade sedan med ett utsnitt på 512 × 512 px. Varje hand fick ett eget utsnitt.</p>
+          <p>Fototexturen använder originalfilerna. Komplettera med skarpa närbilder där detaljer saknas, i första hand bakhuvudet och fingrarnas kontakt med kortet. En samtidig sidofilm av utdraget ger underlag för handens djup och släpptid. <a href="https://github.com/facebookresearch/sam-3d-body">Meta SAM 3D Body</a></p>
+        </details>
       </header>
       <section aria-label="Välj en bildvy" className={styles.valrad}>
         <label htmlFor="bildvy">Bildvy</label>
