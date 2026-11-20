@@ -123,6 +123,39 @@ $ut = Join-Path $env:TEMP ('paulina-film-' + [Guid]::NewGuid())
 
 Välj din egen versionsmapp till `$spar`. Spara filmoriginalet tillsammans med motsvarande rörelse-JSON. Om Gradio har gallrat den refererade originalfilen kan importören läsa ett äldre källkvitto med båda kontrollsummorna via `--source-register`. Spela den exporterade `filmrorelse.glb` i en glTF-spelare. Studions registrerade filmprov har en egen inbyggd webbsida.
 
+### Jakobs ZIP från den längre kasinofilmen
+
+Skrivbordsfilen `2026-11-20_135617_video.zip` har SHA-256 `a20d587f247a9ef5e75c52790605ed1d090979207b262d5e06044de21737ee63`. Alla elva poster matchar dashboardens sparade körning. Filmoriginalet `mera.mp4` har **2 983 rutor**, 1 464 × 790 bildpunkter, 30 b/s och en längd på 99,43 s. Originalets sökväg återfanns i JSON-exporten och filmbytesen kontrollerades separat. Råfilens SHA-256 börjar `ecb548dc`.
+
+| Fil i exporten | Vad den berättar |
+| --- | --- |
+| `meshes/ruta000000_person00.glb` | Ytan för en person i första rutan, med 18 439 hörn och 36 874 trianglar. GLB:n har noll skin och noll animationsklipp. |
+| `rorelse.json` | 40 uppskattade poser, en person i varje vald ruta. Rutsteg 5 vid 30 b/s ger sex analyserade poser per sekund. Första källtiden är 0,000 s och sista är 6,500 s. |
+| `rorelse.npz` och `overlay.mp4` | Ett kompakt numeriskt utdrag och en visuell överlagring av SAM:s tolkning. Överlagringen är exporterad med 6 b/s. |
+
+Spelarens tidslinje omfattar källrutor 0–195. **40 poser** har underlag från exakt de analyserade källrutorna. **156 mellanrutor** visar interpolering på V4-riggen. I visaren betyder *mätt* att SAM analyserade just den källbilden. Handens startläge passas därefter mot V4:s sko och filt. Den sista visade posen har underlag från ruta 195. De övriga 2 787 källrutorna hör till filmoriginalet. [Jämför Jakobs film med den animerade riggen](http://127.0.0.1:4317/giv-plats-4/dashboardklipp?ruta=0)
+
+Kasinobordet skymmer benen i källfilmen. V4 har sin egen sittställning, filt och kortsko. I källruta 0 möter vänster tumme och pekfinger det gula kortet vid skon. På V4 ligger samma fingers hud cirka 12,8 respektive 15,9 mm från kortet. Där syns handens rörelse mot skon, men det fotograferade nypet återstår att passa. Det blå kortet vid handen i exempelvis källruta 70 har ingen bana i SAM:s personspår. Ett separat kortspår behövs för en spelbar giv med just den rekvisitan.
+
+Den spelbara GLB:n har SHA-256 `da46ad2b0830409cd802ae337e2736a0d48660510ba3cc60a03d37a51dbc4bcd`. Handhudens hörn går fria från bord och skoföremål i alla 196 kontroller. Tummarna går fria från den egna handen. Vänster lång- och ringfinger korsas i ruta 35. Övriga 195 poser klarade fingerkontrollen. [Spela vid det synliga kortet i källruta 70](http://127.0.0.1:4317/giv-plats-4/dashboardklipp?ruta=70) · [Hela rörelsekvittot](http://127.0.0.1:4317/giv-plats-4/dashboardklipp/v1/rorelsematning.json)
+
+Åt andra hållet kan V4:s animation renderas till en film som dashboarden kan analysera, eller till ett startankare för Runway. För att animera själva grå GLB:n från ZIP krävs först ett skelett och hudvikter som binder ytan till lederna. De hör till Paulina V4 och saknas i den exporterade enrutemodellen.
+
+Den här körningen använder källfilmen som JSON-exporten pekar på. Spara ZIP:en tillsammans med det kontrollerade MP4-originalet så att båda går att hitta efter att Gradio har rensat sin arbetsyta. Den registrerade källkopian på labbdatorn ligger i `dashboardklipp/v1/kalla/original.mp4`.
+
+```powershell
+$zip = Join-Path ([Environment]::GetFolderPath('Desktop')) '2026-11-20_135617_video.zip'
+$utgava = 'avatars/paulina/giv-plats-4/dashboardklipp/v1'
+& $samPy tools/paulina_dashboard_clip.py --source $zip --out-dir $utgava --start-anchors shoe-left-table-right
+Push-Location studio
+& $node tools/filma-dashboardklipp.mjs
+Pop-Location
+```
+
+För ett annat klipp finns läget `absolute`, där startposen kommer från filmspåret. Startankarna till sko och filt valdes för just Jakobs film. Det andra kommandot renderar riggen i studions frontkamera till en vanlig MP4 i 1 280 × 720 vid 30 b/s. Filmens sista bildruta har tidsstämpeln 6,500 s. [Importören för dashboard-ZIP och glesa rutor](../tools/paulina_dashboard_clip.py) · [SAM:s statiska förstaruta](http://127.0.0.1:4317/giv-plats-4/dashboardklipp/v1/sam-ruta-000.glb) · [SAM:s överlagring](http://127.0.0.1:4317/giv-plats-4/dashboardklipp/v1/overlay.mp4) · [Spela V4:s renderade rörelse som MP4](http://127.0.0.1:4317/giv-plats-4/dashboardklipp/v1/v4-front.mp4)
+
+Om Gradio har rensat sin cache, använd `--video "$utgava/kalla/original.mp4" --source-register "$utgava/kalla/kallregister.json"` och ange en ny `--out-dir`. Då beskriver det nya mätkvittot hur de sparade film- och JSON-kontrollsummorna verifierades.
+
 **Film till rörelse.** Kling 4-filmen som beställdes via Runway innehåller 121 bildrutor vid 24 b/s. Den sparade filmen har SHA-256 som börjar `9e05f279`. För varje avkodad ruta registrerar `sam_video_motion.py` en person, källtid, kamerauppgifter, ledpunkter och fulla MHR-parametrar. Den registrerade filmrekonstruktionen `60744fff` driver överkropp och fingrar och har ett eget rött kort. V4 och källriggen har identiska lednamn, föräldrar och bindmatriser för alla 127 leder. [SAM-spårning per bildruta](../tools/sam_video_motion.py) · [Filmens pose, grepp och kort](../tools/paulina_motion_trial.py)
 
 **Rörelse relativt V4:s vila.** Filmöverföring v1 tillämpar ledrotationernas förändring från första källrutan på V4:s befintliga sittpose. Bäcken och fötter behåller sittstödet. Bordets filt begränsar för låga handlägen. Höger handled korrigerades som mest 190,87 mm och fingrarna begränsades i 116 av 121 rutor. V1 startar därför med händerna vid filten och lämnar filmens hållna föremål utanför klippet. Den här historiska GLB:n är `086e8b39`. Samma metod kan användas för en ny dashboardfilm vars rörelse ska starta i figurens egen vilopose. [Relativ V4-överföring](../tools/paulina_film_motion.py) · [Kvittot för v1](http://127.0.0.1:4317/giv-plats-4/filmrorelse/v1/rorelsematning.json)

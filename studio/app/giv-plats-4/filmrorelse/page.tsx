@@ -17,6 +17,7 @@ export default function Page() {
       <a href="/giv-plats-4/filmrorelse/v2/filmrorelse.glb" download="paulina-v4-filmgrepp.glb">Hämta V4 med det röda kortet</a>
       <a href="/prov-70/v1/kallfilm.mp4">Öppna originalfilmen</a>
       <a href="/giv-plats-4/filmrorelse/v2/rorelsematning.json">Öppna rörelsemätningen</a>
+      <a href="/giv-plats-4/dashboardklipp?ruta=0">Öppna dashboardfilmens 40 mätningar</a>
       <a href="/giv-plats-4/metod/bildutgava.pdf">Läs bildmetoden med Paulina</a>
     </nav>
   </main>;

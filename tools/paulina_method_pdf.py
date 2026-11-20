@@ -31,6 +31,7 @@ REPO = "https://github.com/Jakeminator123/ultimate-reality/blob/main/"
 LINKS = {
     "deal": STUDIO + "v4?kamera=120&ruta=73&vinkel=0&utsnitt=hander",
     "film": STUDIO + "filmrorelse?ruta=0",
+    "dashboard_film": STUDIO + "dashboardklipp?ruta=0",
     "gaze": STUDIO + "blick?riktning=vanster",
     "face": STUDIO + "minspel",
     "sam": "http://127.0.0.1:7860",
@@ -400,14 +401,17 @@ def film(p):
            "I ruta 42 är armen utsträckt. Kortet ligger plant i ruta 62 och hon släpper "
            "i ruta 73. Rörelsen och landningen anpassas till V4-bordets filthöjd. "
            "I skon ligger ett annat kort. Dess framsida är helt gul ända ut till kanten.", 115, dark=True)
-    p.text(MARGIN, 681, "Dashboarden på labbdatorn", 14, True)
-    p.paragraph(MARGIN, 707, "Starta START.bat i sam-3d-body/jakob-start. Välj video med "
-                "rutsteg 1. Spara den rika rorelse.json och importera den till V4. I ett "
-                "97-rutorsprov återskapades 204 MHR-parametrar per ruta. Det största "
-                "avståndet mellan motsvarande leder var 0,00025 mm för de 127 jämförda lederna.",
-                INNER, 10.5, 15)
-    p.link(MARGIN, 770, "Jämför startgreppet i ruta 0", "film")
-    p.link(330, 770, "Öppna SAM-dashboarden", "sam")
+    p.text(MARGIN, 667, "Dashboarden på labbdatorn", 14, True)
+    after_dashboard = p.paragraph(MARGIN, 693, "Starta START.bat i sam-3d-body/jakob-start. "
+                                  "Välj video med rutsteg 1, spara rorelse.json och importera "
+                                  "till V4. I ett 97-rutorsprov återskapades 204 MHR-parametrar "
+                                  "per ruta. För de 127 jämförda lederna var största avståndet "
+                                  "mellan motsvarande leder 0,00025 mm.", INNER, 10.5, 14.1)
+    p.paragraph(MARGIN, after_dashboard + 5, "I Jakobs eget dealerklipp mättes 40 poser, var "
+                "femte ruta från 0 till 195. De 156 mellanrutorna interpolerades. Den sista "
+                "uppmätta posen ligger vid 6,500 s. Kortets egen bana återstår.", INNER, 10.3, 14.1)
+    p.link(MARGIN, 778, "Jämför startgreppet i ruta 0", "film")
+    p.link(330, 778, "Öppna SAM-dashboarden", "sam")
     p.footer(4)
 
 
@@ -597,12 +601,13 @@ def links(p):
     local = [
         ("Given till plats 4", "deal", "V4 · händer, frontkamera och ruta 73"),
         ("Kling 4 och V4", "film", "Upphållet rött kort i högerhanden · ruta 0"),
+        ("Jakobs dealerklipp och V4", "dashboard_film", "40 mätta poser, 156 mellanrutor · 0–6,500 s"),
         ("Blicken", "gaze", "Ögon och huvud · Paulinas egen vänster"),
         ("Minspelet", "face", "Sneda leendet · 3D-reglage och film"),
         ("SAM-dashboarden", "sam", "Foto till statisk GLB och film till rörelsedata"),
     ]
     for i, (label, key, caption) in enumerate(local):
-        y = 224 + 32 * i
+        y = 221 + 27 * i
         p.line(MARGIN, y - 9, W - MARGIN, y - 9)
         p.link(MARGIN, y, label, key, 10.5)
         p.text(273, y + 1, caption, 9.5, color=MUTE)

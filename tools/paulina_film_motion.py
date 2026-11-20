@@ -247,7 +247,9 @@ def static_signature(g):
     return sig
 
 
-def dashboard_track(json_file, model, video_hash, clock, end, size, register):
+def dashboard_track(
+    json_file, model, video_hash, clock, end, size, register, *, expected_indices=None
+):
     meta = json.loads(json_file.read_text(encoding="utf8"))
     cached = Path(meta["source"])
     if cached.is_file():
@@ -268,8 +270,23 @@ def dashboard_track(json_file, model, video_hash, clock, end, size, register):
         binding = "Verifierade SHA-256 för MP4 och rörelse-JSON enligt det sparade parkvittot."
     rows = meta["frames"]
     indices = np.asarray([row["frame_index"] for row in rows], dtype=int)
-    if not np.array_equal(indices, np.arange(len(clock))):
-        raise ValueError("Jakob-start behöver behandla hela filmen med rutsteg 1.")
+    required = (
+        np.arange(len(clock))
+        if expected_indices is None
+        else np.asarray(expected_indices)
+    )
+    if (
+        len(indices) < 2
+        or np.any(np.diff(indices) <= 0)
+        or indices[0] < 0
+        or indices[-1] >= len(clock)
+        or not np.array_equal(indices, required)
+    ):
+        raise ValueError(
+            "Jakob-start behöver behandla hela filmen med rutsteg 1."
+            if expected_indices is None
+            else "Mätningens valda källrutor stämmer inte mot klockan."
+        )
     if any(len(row["people"]) != 1 for row in rows):
         raise ValueError(
             "Rörelseprovet behöver exakt en identifierad person i varje ruta."
@@ -311,7 +328,7 @@ def dashboard_track(json_file, model, video_hash, clock, end, size, register):
         source_clock=clock,
         source_end=end,
         frame_indices=indices,
-        times=clock - clock[0],
+        times=clock[indices] - clock[indices[0]],
         frame_size=np.asarray(size),
         video_sha256=video_hash,
         mhr_sha256=sha(model),
@@ -323,7 +340,7 @@ def dashboard_track(json_file, model, video_hash, clock, end, size, register):
         kind="Jakob-start rorelse.json",
         sourceBinding=binding,
         actorCountPerFrame=1,
-        frameStep=1,
+        frameStep=int(meta.get("frame_step", 1)),
         checkpoint=ck.parent.name,
     )
 
