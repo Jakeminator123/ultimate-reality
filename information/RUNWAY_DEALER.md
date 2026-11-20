@@ -48,12 +48,14 @@ Använd samma vilobild som utgångspunkt för varje tagning. Ange kortmål, givh
 
 Byt referensnamn mot syntaxen i den valda modellen. Om Seedance-mallen används, ange en tagning på fem sekunder och granska dess omskrivning före sparning. [Runways promptmall](https://d3phaj0sisr2ct.cloudfront.net/site/assets/runway-sd-enhancer-skill.md) · [Runways exempel](https://runway.com/prompts/a-game-of-horse)
 
-## Anslutningar och första verkliga provet
+## Anslutningar och filmorder
 
 | Väg | Uppgift |
 | --- | --- |
 | Runway MCP · `mcp.runwayml.com/mcp` | Generering från en agent med Runway-appens krediter. [Appens MCP och krediter](https://help.runwayml.com/hc/en-us/articles/51931843164691-Connecting-to-Runway-MCP) |
 | Runway Dev-plugin och Dev MCP · `dev.runwayml.com/mcp` | Modellkontrakt, projekttillgång, pris och diagnostik. Claude Code har en särskild MCP-sökväg. Guiden beskriver även installation för Codex och Cursor samt färdigheten `runway-dev-models`. [Plugin](https://docs.dev.runwayml.com/guides/plugin/) · [Dev MCP](https://docs.dev.runwayml.com/guides/mcp/) |
-| Runway API via studion | Servernyckel finns för den lokala anslutningskontrollen. Knappen läser `GET /v1/organization`. Genereringsunderlagen är lokala utkast och visar modellens API-pris. När beställning införs ska skickad revision, jobb-ID och mottaget original bevaras tillsammans. [API](https://docs.dev.runwayml.com/api/) · [Priser](https://docs.dev.runwayml.com/guides/pricing/) |
+| Runway API via studion | **Testa API-anslutning** läser organisationens åtkomst. **Skicka version N till Runway** beställer filmen med den sparade versionens startbild, prompt, längd och modell. **Hämta jobbstatus** följer samma jobb och sparar det levererade originalet. [Filmutkast och beställning](http://127.0.0.1:4317/#film) · [API](https://docs.dev.runwayml.com/api/) · [Priser](https://docs.dev.runwayml.com/guides/pricing/) |
 
-**När är det läge?** När Jakob sett en trovärdig kontakt från båda stolarna, valt identitetsunderlag och bestämt om kortet ska ligga i filmen eller spelas som ett separat lager. Föreslå då **en** femsekundersgiv från en stol, med referenser, modell, fält och aktuell kostnad synliga. Vänta på Jakobs besked före generering. Granska först i normal hastighet, sedan ruta för ruta. Dokumentera första felrutan och kontrollera kortets ocklusion, skala, släpp och kvarliggande slutläge.
+**Skicka en vald version.** Importera startbilden, granska beskärningen, ange prompt, modell och längd och välj **Spara version**. **Skicka version N till Runway** visar uppskattade krediter och använder bildbytesen från just vN. Med Grok Imagine Video 1.5 Lite i 720p kostar fem sekunder med en startbild 16 krediter enligt prislistan den 20 november 2026. [Runways modellkontrakt](https://docs.dev.runwayml.com/api.md) · [Prislista](https://docs.dev.runwayml.com/guides/pricing/)
+
+**Återöppna och hämta filmen.** Välj samma version och hämta jobbstatus. Vid ett osäkert beställningssvar kan ett befintligt jobb-ID från Runway kopplas till den versionen. Leveransen finns i labbets `orders/giv-plats-4/vN-runway/`. Där bevaras den skickade begäran, jobb-ID, `original.mp4`, bildrutornas tider och kvittot med SHA-256, storlek, kodek, bildmått och uppmätt bildfrekvens. Granska givens kontakt, släpp och kvarliggande kort i det sparade originalet. [Runways resultathantering](https://docs.dev.runwayml.com/assets/outputs/)

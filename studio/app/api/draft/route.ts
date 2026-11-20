@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { requestHash } from "../../../lib/film-order-server";
 import {
   API_VERSION,
   Draft,
@@ -52,7 +53,7 @@ export async function GET(req: Request) {
         )
       : null;
     return Response.json(
-      { record, versions: ids },
+      { record: record ? { ...record, requestSha256: requestHash(record.request.body) } : null, versions: ids },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (e) {
@@ -156,7 +157,7 @@ export async function POST(req: Request) {
       `v${base + 1}.json`,
       JSON.stringify(record),
     );
-    return Response.json({ version: base + 1 });
+    return Response.json({ version: base + 1, requestSha256: requestHash(exact) });
   } catch (e) {
     return errorResponse(e);
   }

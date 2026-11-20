@@ -2,11 +2,12 @@ import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
-import { API_VERSION, ENDPOINT } from "./model";
+import { ENDPOINT } from "./model";
+import { fetchOutput, getTask, jobState, observeTask, runwayOptions, submitTaskOnce, validTaskId } from "./runway-tasks";
 import { LocalError, assetFile } from "./storage";
 import { referenskort } from "../fotomall/kortstandard";
 import {
-  bildpipelinePlan, runwayPayload, type PipelineJob, type PipelineRevision, type PipelineStep,
+  bildpipelinePlan, runwayPayload, type PipelineRevision, type PipelineStep,
 } from "./bildpipeline";
 import {
   checkFolder, dataUri, digest, imageMime, optionalJson, pipelineFolder, record,
@@ -14,7 +15,6 @@ import {
 
 const createUrl = new URL("/v1/text_to_image", ENDPOINT).href;
 const uuid = /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i;
-const timeout = 30_000;
 
 type SavedImage = { filename: string; mime: string; sha256: string };
 type Manifest = Pick<PipelineRevision, "id" | "created" | "files" | "steps"> & {
@@ -91,20 +91,6 @@ export async function pipelineList() {
   return { revisions: revisions.sort((a, b) => b.created.localeCompare(a.created)) };
 }
 
-async function jobState(dir: string): Promise<PipelineJob> {
-  await checkFolder(dir);
-  const entries = new Set(await fs.readdir(/* turbopackIgnore: true */ dir));
-  const taskId = entries.has("task.json") ? await optionalJson<string>(dir, "task.json") : undefined;
-  if (entries.has("output.json")) return { status: "succeeded", taskId };
-  if (entries.has("failed.json")) return { status: "failed", taskId, error: await optionalJson<string>(dir, "failed.json") };
-  if (taskId) return { status: entries.has("running.json") ? "running" : "queued", taskId };
-  if (!entries.has("request.json")) return { status: "waiting" };
-  const stat = await fs.stat(/* turbopackIgnore: true */ path.join(dir, "request.json"));
-  if (entries.has("unknown.json") || Date.now() - stat.mtimeMs > timeout + 10_000)
-    return { status: "unknown", error: "Runway kan ha tagit emot beställningen. Koppla jobb-ID från Runway." };
-  return { status: "submitting" };
-}
-
 async function revisionState(dir: string, m: Manifest): Promise<PipelineRevision> {
   const files = await fs.readdir(/* turbopackIgnore: true */ dir);
   const mode = files.includes("series.json") ? "series" : files.includes("front.json") ? "front" : "draft";
@@ -141,45 +127,6 @@ export async function pipelineImage(id: string, selection: string | number) {
   } });
 }
 
-function runwayOptions() {
-  const key = process.env.RUNWAYML_API_SECRET?.trim();
-  if (!key) throw new LocalError("Runway-nyckeln saknas på servern.", 503);
-  return {
-    headers: { Authorization: "Bearer " + key, "X-Runway-Version": API_VERSION, "Content-Type": "application/json" },
-    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(timeout),
-  } satisfies RequestInit;
-}
-
-function validTaskId(id: unknown): id is string {
-  return typeof id === "string" && uuid.test(id);
-}
-
-async function getTask(id: string, remote: typeof fetch) {
-  if (!validTaskId(id)) throw new LocalError("Ange ett giltigt Runway-jobb-ID.");
-  const opts = runwayOptions();
-  const response = await remote(new URL("/v1/tasks/" + id, ENDPOINT).href, opts)
-    .catch(() => { throw new LocalError("Runways jobbstatus kunde inte hämtas. Kontrollera samma jobb igen.", 502); });
-  if (!response.ok) throw new LocalError("Runways jobbstatus kunde inte hämtas (HTTP " + response.status + ").", 502);
-  const task = await response.json();
-  if (task.id !== id || typeof task.status !== "string")
-    throw new LocalError("Runways svar matchar inte det valda jobbet.", 502);
-  return task as { id: string; status: string; output?: string[]; failureCode?: string };
-}
-
-// The only external asset URL accepted here comes from a verified Runway task response.
-async function downloadOutput(rawUrl: string | undefined, remote: typeof fetch) {
-  const url = rawUrl ? URL.parse(rawUrl) : null;
-  if (url?.protocol !== "https:" || url.username || url.password)
-    throw new LocalError("Runway saknar en giltig resultatlänk. Kontrollera samma jobb igen.", 502);
-  try {
-    const response = await remote(url.href, { cache: "no-store", redirect: "error", signal: AbortSignal.timeout(timeout) });
-    if (!response.ok) throw new Error();
-    return Buffer.from(await response.arrayBuffer());
-  } catch {
-    throw new LocalError("Resultatbilden kunde inte hämtas. Kontrollera samma jobb igen.", 502);
-  }
-}
-
 async function submit(dir: string, m: Manifest, step: PipelineStep, remote: typeof fetch) {
   const folder = stepDir(dir, m, step.id);
   const template = m.templates[m.steps.findIndex((s) => s.id === step.id)];
@@ -204,23 +151,7 @@ async function submit(dir: string, m: Manifest, step: PipelineStep, remote: type
   // Large references can take time to prepare. A sibling might have received
   // an uncertain acknowledgement since these slots were reserved.
   if (Object.values((await revisionState(dir, m)).jobs).some((job) => job.status === "unknown")) return;
-  const opts = runwayOptions();
-  // Publishing the exact wire payload is also the permanent claim for this billable call.
-  if (!(await record(folder, "request.json", payload))) return;
-  try {
-    const response = await remote(createUrl, { ...opts, method: "POST", body: JSON.stringify(payload) });
-    if (!response.ok) {
-      await response.body?.cancel();
-      const definite = response.status >= 400 && response.status < 500 && response.status !== 408;
-      await record(folder, definite ? "failed.json" : "unknown.json", "Runway svarade HTTP " + response.status + ".");
-      return;
-    }
-    const { id } = await response.json();
-    if (!validTaskId(id)) throw new Error();
-    await record(folder, "task.json", id);
-  } catch {
-    await record(folder, "unknown.json", true);
-  }
+  await submitTaskOnce(folder, createUrl, payload, remote);
 }
 
 async function saveResult(folder: string, bytes: Buffer, step: PipelineStep) {
@@ -263,25 +194,10 @@ async function saveResult(folder: string, bytes: Buffer, step: PipelineStep) {
 }
 
 async function observe(folder: string, step: PipelineStep, task: Awaited<ReturnType<typeof getTask>>, remote: typeof fetch) {
-  switch (task.status) {
-    case "PENDING":
-    case "THROTTLED":
-      return;
-    case "RUNNING":
-      await record(folder, "running.json", true);
-      return;
-    case "FAILED":
-    case "CANCELED":
-    case "CANCELLED":
-      await record(folder, "failed.json", "Runway avslutade jobbet med " + task.status + ".");
-      return;
-    case "SUCCEEDED": {
-      await saveResult(folder, await downloadOutput(task.output?.[0], remote), step);
-      return;
-    }
-    default:
-      throw new LocalError("Runway returnerade ett okänt jobbläge. Kontrollera samma jobb igen.", 502);
-  }
+  return observeTask(folder, task, async (url) => {
+    const response = await fetchOutput(url, remote);
+    await saveResult(folder, Buffer.from(await response.arrayBuffer()), step);
+  });
 }
 
 async function advance(dir: string, m: Manifest, remote: typeof fetch) {

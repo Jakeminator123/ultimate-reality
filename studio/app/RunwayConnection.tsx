@@ -40,7 +40,7 @@ export default function RunwayConnection() {
   }
 
   return <div className="runway-connection">
-    <div><strong>Runway API · lokalt utkast</strong>
+    <div><strong>Runway API · anslutning</strong>
       <p role="status">{messages[state]}</p>
       <small>Kontrollen läser kontots åtkomst. En film via Runway MCP använder appens krediter.</small>
     </div>

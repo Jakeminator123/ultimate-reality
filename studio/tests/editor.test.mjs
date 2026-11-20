@@ -601,6 +601,35 @@ test(
       await page.getByRole("button", { name: "Markera", exact: true }).click();
       await page.getByRole("button", { name: "Spara version" }).click();
       await page.getByText("Sparad som version 1").waitFor();
+      await t.test("filmknappen skickar den valda revisionen och spärrar osparade ändringar", async () => {
+        const send = page.getByRole("button", { name: /Skicka version 1 till Runway/ });
+        await send.waitFor();
+        assert.equal(await send.isEnabled(), true);
+        const prompt = page.locator("textarea").first();
+        const savedPrompt = await prompt.inputValue();
+        await prompt.fill(savedPrompt + " Ändring.");
+        assert.equal(await send.isDisabled(), true);
+        await prompt.fill(savedPrompt);
+        const requests = [];
+        const filmEndpoint = origin + "/api/runway/film";
+        const stored = await (await page.request.get(origin + "/api/draft?v=1")).json();
+        await page.route(filmEndpoint, async route => {
+          requests.push(route.request().postDataJSON());
+          return route.fulfill({ json: { version: 1, job: { status: "queued", taskId: "lokalt-filmjobb" } } });
+        });
+        try {
+          await send.click();
+          await page.getByText("lokalt-filmjobb", { exact: true }).waitFor();
+          assert.equal(requests.length, 1);
+          assert.equal(requests[0].version, 1);
+          assert.equal(requests[0].action, "start");
+          assert.equal(requests[0].requestSha256, stored.record.requestSha256);
+          assert.match(requests[0].requestSha256, /^[0-9a-f]{64}$/);
+          assert.equal(await send.count(), 0);
+        } finally {
+          await page.unroute(filmEndpoint);
+        }
+      });
       await page.reload();
       await page.waitForFunction(
         () =>

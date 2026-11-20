@@ -46,6 +46,7 @@ import Film from "./Film";
 import ModelGuide from "./ModelGuide";
 import PromptLibrary from "./PromptLibrary";
 import RunwayConnection from "./RunwayConnection";
+import FilmOrderPanel from "./FilmOrderPanel";
 import ModelingStudio from "./ModelingStudio";
 import DealerOverview from "./DealerOverview";
 import { StudioSidebar, gripWorkspace, secondaryWorkspaces, type Workspace } from "./StudioSidebar";
@@ -56,7 +57,7 @@ const SceneStudio = dynamic(() => import("./SceneStudio"), {
 });
 
 type Slot = "first" | "last";
-type RecordData = { draft: Draft; request: { body: Payload } };
+type RecordData = { draft: Draft; request: { body: Payload }; requestSha256: string };
 async function readJson(res: Response) {
   const data = await res.json();
   if (!res.ok) throw Error(data.error || "Det lokala anropet misslyckades.");
@@ -218,7 +219,7 @@ export default function Editor() {
     setBusy(true);
     setError("");
     try {
-      const { version } = await readJson(
+      const { version, requestSha256 } = await readJson(
         await fetch("/api/draft", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -226,7 +227,7 @@ export default function Editor() {
         }),
       );
       const next = { ...draft, version };
-      setSaved({ draft: next, request: { body: payload } });
+      setSaved({ draft: next, request: { body: payload }, requestSha256 });
       setDraft((current) => ({ ...current, version }));
       setBase(version);
       setVersions((v) => [version, ...v]);
@@ -577,9 +578,11 @@ export default function Editor() {
               <div className="endpoint">
                 <b>POST</b>
                 <code>{ENDPOINT}</code>
-                <span>Lokalt utkast</span>
+                <span>Bild till video</span>
               </div>
               <RunwayConnection />
+              <FilmOrderPanel key={draft.version} version={draft.version}
+                requestSha256={saved?.requestSha256} dirty={dirty} credits={draftCredits}/>
               <details>
                 <summary>
                   Headers och JSON-kropp <ChevronDown size={15} />
