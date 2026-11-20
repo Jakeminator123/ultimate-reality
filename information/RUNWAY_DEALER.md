@@ -37,6 +37,12 @@ För dealerns handrörelse påverkar valet av underlag kostnaden. Fem sekunder S
 
 ## Från scen till prompt
 
+### Paulinas gula kort
+
+Den gula framsidan är helt gul ända ut till alla fyra kanter. Allt vitt som syns i kortskon tillhör korten som ligger bakom. Använd samma beskrivning när kortet dras ut och läggs på filten.
+
+*The visible front of the yellow card is solid yellow, edge to edge. Any white visible in the shoe belongs only to the cards stacked behind it. The visible front stays uniformly yellow when the card is drawn and laid on the felt.*
+
 ### Två kort från samma REDO-bild
 
 Använd samma vilobild som utgångspunkt för varje tagning. Ange kortmål, givhand och när handen återgår till vila. Granska kontakt, släpp och skarv vid uppspelning.

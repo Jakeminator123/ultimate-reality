@@ -4,7 +4,11 @@ Arbetskopian är `C:\Users\jakem\dev\ultimate-reality` på lokal `main`. Rörels
 
 ## Ankare vid kortskon
 
-**Börja med rutan vid 2,625 s i de två Grok-givarna.** Utifrån samma pose och instruktion landade kortet på två punkter 19,4 cm isär. Byt därefter mellan A1 och A2.3 i kameravisaren. Samma Paulina-rigg `ae129ea1…` bär 127 leder och de två handposerna i 120 kameravinklar. I fotoprovet når Kling 4 med uttrycklig slutbild rätt handfördelning i ruta 72. Kostnaden i beställningsvyn var sammanlagt 69 krediter för version 3–6. Nästa prov kan låsa kortbanan till en vald spelplats och använda samma rutor för att jämföra hud, naglar och hår med fotona. [Välj ankarpose och kameravinkel](http://127.0.0.1:4317/prov-ankare/v1) · [Fyra filmer sida vid sida](http://127.0.0.1:4317/prov-ankare/v1/film.mp4) · [Provrapport och mätningar](ANKARPROV_V1.md) · [RFGCA och beställbar 4D](RFGCA_OCH_ANKARBILDER.md)
+Jakob har godkänt materialet kring A1 och A2.3. Skillnader i bildstorlek hanteras i efterbehandlingen. I kommande prompter är kortets gula framsida helt gul till kanten och allt synligt vitt i skon tillhör korten bakom. [Kortets exakta prompttext](RUNWAY_DEALER.md#paulinas-gula-kort)
+
+Förslag för nästa giv till plats 4 är att sänka frontkameran från 1,79 till 1,40 m över golvet och rikta om viloblicken i A1 till det nya objektivet. Med samma kameraavstånd blir blickriktningen 7,1° uppåt i stället för 18,9°. I A2.3 följer blicken redan skon, 50,2° nedåt. Ett lokalt test av samma pose och utsnitt visade 1 388 gula pixlar framifrån vid 1,40 m, jämfört med 1 395 vid 1,79 m. Kontrollkameran vid +70° såg 21 respektive 247 gula pixlar. Den högre sidovyn lämpar sig därför för att kontrollera kortet och fingertopparna. [Godkänd riggfilm](http://127.0.0.1:4317/prov-ankare/v1/rigg.mp4) · [Blickmätningen i A1 och A2.3](../avatars/paulina/prov-ankare/v1/rigg/posematning.json)
+
+I ruta 63 (2,625 s) i de två Grok-givarna landade kortet på två punkter 19,4 cm isär trots gemensam startpose och instruktion. Samma Paulina-rigg `ae129ea1…` bär 127 leder och de två handposerna i 120 kameravinklar. I fotoprovet når Kling 4 med uttrycklig slutbild rätt handfördelning i ruta 72. Kostnaden i beställningsvyn var sammanlagt 69 krediter för version 3–6. [Välj ankarpose och kameravinkel](http://127.0.0.1:4317/prov-ankare/v1) · [Fyra filmer sida vid sida](http://127.0.0.1:4317/prov-ankare/v1/film.mp4) · [Provrapport och mätningar](ANKARPROV_V1.md) · [RFGCA och beställbar 4D](RFGCA_OCH_ANKARBILDER.md)
 
 ## Rörelseprov v1
 
