@@ -27,6 +27,7 @@ const paulinaTrials = [
   { field: "seat4DealUrl", url: "/giv-plats-4/v1", receipt: "giv-plats-4/v1/visning/rendering.json" },
   { field: "seat4DealUrl", url: "/giv-plats-4/v2", receipt: "giv-plats-4/v2/visning/rendering.json" },
   { field: "seat4DealUrl", url: "/giv-plats-4/v3", receipt: "giv-plats-4/v3/visning/rendering.json" },
+  { field: "seat4DealUrl", url: "/giv-plats-4/v4", receipt: "giv-plats-4/v4/visning/rendering.json" },
 ] as const;
 function bad(message: string): never { throw new LocalError(message, 409); }
 function avatarDir(dealer: string) {

@@ -73,6 +73,12 @@
 .scrub label { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .scrub output { font-weight: 650; }
 .scrub input { flex: 1; min-width: 50px; accent-color: var(--pine); }
+.material { margin-top: 2rem; }
+.material h2 { font-size: 1.4rem; }
+.material dl { display: grid; grid-template-columns: auto 1fr; gap: .6rem 1.5rem; }
+.material dt { font-weight: 600; }
+.material a { color: var(--pine); text-underline-offset: .2em; }
+.material dd { margin: 0; }
 @media (max-width: 600px) {
   .main { padding: 15px 12px; }
   .header { align-items: flex-start; }
@@ -85,4 +91,6 @@
   }
   .scrub input { grid-column: 1 / -1; grid-row: 2; width: 100%; min-width: 0; }
   .scrub button:last-child { grid-column: 3; grid-row: 1; }
+  .material dl { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+  .material dt:not(:first-child) { margin-top: .5rem; }
 }

@@ -10,7 +10,8 @@ const root = "/giv-plats-4/";
 const related: Record<DealVersion, [DealVersion, string][]> = {
   v1: [["v2", "Se de uppdaterade händerna och rörelsen"], ["v3", "Öppna giv V3"]],
   v2: [["v1", "Jämför med den första given"], ["v3", "Öppna giv V3"]],
-  v3: [["v2", "Jämför samma ruta i V2"]],
+  v3: [["v2", "Jämför samma ruta i V2"], ["v4", "Se samma ruta med rättade tummar"]],
+  v4: [["v3", "Jämför samma ruta i V3"]],
 };
 const handFrame = 92;
 const cameras = {
@@ -209,6 +210,7 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
   return <main ref={stage} className={styles.main}>
     <nav className={styles.navigation} aria-label="Dealerversion">
       <a href="/" className={styles.back}><ArrowLeft size={16} aria-hidden /> Till dealerstudion</a>
+      {(version === "v3" || version === "v4") && <a className={styles.back} href={root + "minspel"}>Prova Paulinas minspel</a>}
       {otherVersions.map(([id, label]) => <a key={id} className={styles.back}
         href={root + id + selection(camera, frame, angle, cut)}>{label}</a>)}
     </nav>
@@ -260,15 +262,21 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
       <div className={styles.moments} role="group" aria-label="Gå till ett moment i given">
         {orderedMoments.map(([key, label]) => <button key={key} type="button"
           aria-pressed={frame === timeline.keyframes[key]} onClick={() => seekFrame(timeline.keyframes[key])}>
-          {version === "v3" && key === "present" ? "Högerhanden tar emot" : label}
+          {(version === "v3" || version === "v4") && key === "present" ? "Högerhanden tar emot" : label}
         </button>)}
         <button type="button" onClick={inspectHands}>Granska händerna i ruta 92</button>
       </div>
-      {version !== "v1" && <nav className={styles.references} aria-label="Fotografiska jämförelser">
+      {(version === "v2" || version === "v3") && <nav className={styles.references} aria-label="Fotografiska jämförelser">
         <a href={base + "/tre-poser.jpg"}>{version === "v3" ? "Jämför högerhandens rörelse" : "Jämför de tre rörelseposerna"}</a>
         {version === "v2" && <a href={base + "/hander-ruta-92.jpg"}>Jämför handen med fotot</a>}
         <a href={base + "/ansikte-original.jpg"}>Jämför ansiktet med original 03</a>
         {version === "v3" && <a href={base + "/blickprov.jpg"}>Se vad som rör sig när Paulina byter blick</a>}
+      </nav>}
+      {version === "v4" && <nav className={styles.references} aria-label="Tummar och material">
+        <a href={base + "/tummar.jpg"}>Jämför tummarna med originalfotot och V3</a>
+        <a href={base + "?kamera=120&ruta=73&vinkel=0&utsnitt=hander"}>Vänster tumme vid kortdraget</a>
+        <a href={base + "?kamera=120&ruta=92&vinkel=0&utsnitt=hander"}>Höger tumme när kortet skjuts fram</a>
+        <a href={base + "/giv.glb"} download="paulina-giv-v4.glb">Hämta den animerade modellen</a>
       </nav>}
     </div>}
   </main>;

@@ -7,7 +7,7 @@ import { digest, publish } from "./publicera-kamerafil.mjs";
 import { sideFieldOfView } from "../app/giv-plats-4/orbit-cameras.mjs";
 
 const edition = process.argv[2] ?? "v2";
-assert.ok(["v1", "v2", "v3"].includes(edition), "Ange v1, v2 eller v3.");
+assert.ok(["v1", "v2", "v3", "v4"].includes(edition), "Ange v1, v2, v3 eller v4.");
 const repo = fileURLToPath(new URL("../../", import.meta.url));
 const trial = path.join(repo, "avatars/paulina/giv-plats-4");
 const folder = path.join(trial, edition, "rigg"), rig = path.join(folder, "giv.glb");

@@ -13,13 +13,16 @@ export type OrbitViewerProps = {
   initialAngle?: number;
   onAngleChange?: (index: number) => void;
   cut: OrbitCut;
-  onCutChange: (cut: OrbitCut) => void;
+  onCutChange?: (cut: OrbitCut) => void;
+  onReadyChange?: (ready: boolean) => void;
+  label?: string;
 };
 
 type Runtime = Awaited<ReturnType<typeof import("./orbit-runtime.mjs")["createOrbitScene"]>>;
 
 export function OrbitViewer({
-  sceneUrl, frame, fps, initialAngle = 0, cut, onAngleChange, onCutChange,
+  sceneUrl, frame, fps, initialAngle = 0, cut, onAngleChange, onCutChange, onReadyChange,
+  label = "Paulinas giv från 120 vinklar",
 }: OrbitViewerProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const runtime = useRef<Runtime | null>(null);
@@ -48,12 +51,14 @@ export function OrbitViewer({
     if (!element) return;
     const controller = new AbortController();
     setStatus("loading");
+    onReadyChange?.(false);
     setProblem("");
     const observer = new ResizeObserver(paint);
     observer.observe(element);
     const failure = (error: unknown) => {
       if (controller.signal.aborted) return;
       setStatus("failed");
+      onReadyChange?.(false);
       setProblem(error instanceof Error ? error.message : "3D-visaren kunde inte öppnas.");
     };
     const contextLost = (event: Event) => {
@@ -71,6 +76,7 @@ export function OrbitViewer({
       runtime.current = loaded;
       paint();
       setStatus("ready");
+      onReadyChange?.(true);
     })().catch(failure);
     return () => {
       controller.abort();
@@ -81,7 +87,7 @@ export function OrbitViewer({
       runtime.current = null;
       gesture.current = null;
     };
-  }, [sceneUrl, attempt, paint]);
+  }, [sceneUrl, attempt, paint, onReadyChange]);
 
   function selectAngle(number: number) {
     const next = orbitIndex(number);
@@ -91,7 +97,7 @@ export function OrbitViewer({
     onAngleChange?.(next);
   }
 
-  return <section className={styles.viewer} aria-label="Paulinas giv från 120 vinklar" data-orbit-state={status}>
+  return <section className={styles.viewer} aria-label={label} data-orbit-state={status}>
     <div className={styles.stage}>
       <canvas key={sceneUrl + ":" + attempt} ref={canvas} className={styles.canvas} tabIndex={0} aria-label="3D-vy. Dra i sidled eller vrid med piltangenterna."
         data-orbit-angle={angle * stepDeg} data-orbit-frame={frame} data-orbit-cut={cut}
@@ -112,18 +118,18 @@ export function OrbitViewer({
             e.preventDefault();
             selectAngle(e.key === "Home" ? 0 : e.key === "End" ? positions - 1 : angle + (e.key === "ArrowRight" ? 1 : -1));
           }
-        }}>Använd vinkelreglaget eller pilarna för att granska given från andra håll.</canvas>
+        }}>Använd vinkelreglaget eller pilarna för att se modellen från andra håll.</canvas>
       {status !== "ready" && <div className={styles.notice} role="status">
         {status === "loading" ? "Läser Paulinas 3D-scen…" : <>{problem}
           <button type="button" onClick={() => setAttempt(value => value + 1)}>Försök igen</button></>}
       </div>}
     </div>
     <div className={styles.controls}>
-      <div className={styles.zoom} role="group" aria-label="Utsnitt">
+      {onCutChange && <div className={styles.zoom} role="group" aria-label="Utsnitt">
         <button type="button" aria-pressed={cut === "helbild"} onClick={() => onCutChange("helbild")}>Helbild</button>
         <button type="button" aria-pressed={cut === "hander"} onClick={() => onCutChange("hander")}>Händer</button>
         <button type="button" aria-pressed={cut === "ansikte"} onClick={() => onCutChange("ansikte")}>Ansikte</button>
-      </div>
+      </div>}
       <div className={styles.angle}>
         <label htmlFor={inputId}>Vinkel <strong>{angle * stepDeg}°</strong></label>
         <button type="button" aria-label="Föregående vinkel" onClick={() => selectAngle(angle - 1)}><ChevronLeft size={18} aria-hidden /></button>
