@@ -1,6 +1,9 @@
 import { headers } from "next/headers";
-import { dealerMaterial, readDealingStudies, type DealingStudy } from "../../../lib/dealer-material";
-import { dealReferences, referencesForTake } from "../../../lib/deal-references";
+import { currentSeatedTrial, dealerMaterial, readDealingStudies, reviewedTakeForLink, type DealingStudy } from "../../../lib/dealer-material";
+import { bodyLabel, dealLabel } from "../../../lib/deal-versions";
+import { reviewedDealChoices } from "../../../lib/reviewed-deal-versions";
+import { listBlackjackSequences } from "../../../lib/blackjack-sequence-store";
+import { dealReferences, placedCardReference, referencesForTake } from "../../../lib/deal-references";
 import type { DealerMaterial } from "../../../lib/material-types";
 import { LocalError, requireLocal } from "../../../lib/storage";
 import { FilmEvidence } from "../../MaterialEvidence";
@@ -93,8 +96,8 @@ function Trial({ id, title, description, films, material, audits, comparedMovie,
   </section>;
 }
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ dealer?: string; revision?: string; tagning?: string; referenser?: string }> }) {
-  const { dealer = "paulina", revision, tagning, referenser } = await searchParams;
+export default async function Page({ searchParams }: { searchParams: Promise<{ dealer?: string; revision?: string; tagning?: string; referenser?: string; kvitto?: string }> }) {
+  const { dealer = "paulina", revision, tagning, referenser, kvitto } = await searchParams;
   let material: DealerMaterial | undefined, message = "";
   let studies: DealingStudy[] = [];
   try {
@@ -113,16 +116,64 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
     const audit = studies.find(study => matchesStudy(film, study));
     if (audit) audits.set(film.sha256, audit);
   }
-  const selected = films.find(f => f.take === tagning);
+  const selected = films.find(f => f.take === tagning && (kvitto === undefined || new URL(f.url, "http://localhost").searchParams.get("film") === kvitto));
+  const body = material && await currentSeatedTrial(material);
+  const reviewed = body?.reviewedTakes ?? [];
+  const choices = reviewedDealChoices(dealer, reviewed, body?.receipt);
+  const isExact = tagning !== undefined || kvitto !== undefined;
+  const matched = reviewed.filter(row => row.film.take === tagning && (kvitto === undefined || row.receipt === kvitto));
+  const pinned = matched.length === 1 ? matched[0] :
+    tagning && !selected && body ? await reviewedTakeForLink(dealer, body.id, tagning, kvitto) : undefined;
+  const shown = isExact ? pinned : reviewed.find(row => row.receipt === choices.defaultAction?.receipt);
+  const shownFilm = shown?.film;
+  const mark = (re: RegExp) => shownFilm?.marks.find(m => re.test(m.label))?.seconds;
+  const handover = mark(/tar emot kortkanten|handbyte/i);
+  const release = mark(/lämnar kortet|släpp/i);
+  const modelLabel = shownFilm && body ? dealLabel(body.name, shownFilm.take, shownFilm.poses?.end) : "";
+  const current = choices.current.some(a => a.receipt === shown?.receipt);
   const audited = films.filter(f => audits.has(f.sha256));
-  const comparedMovie = (selected ?? audited.find(f => f.take.startsWith("samspel-")) ?? audited.find(f => f.take.startsWith("tvahandsgiv-")))?.sha256;
-  const trialProps = { audits, comparedMovie, selectedMovie: selected?.sha256, compareHowcastVip: referenser === "howcast-vip" };
+  const earlyStudy = audited.findLast(f => f.take.startsWith("samspel-") && referencesForTake(audits.get(f.sha256)?.timing.referenceSha256) === dealReferences);
+  const placedStudy = audited.find(f => f.take === "samspel-v2-v4" && audits.get(f.sha256)?.timing.referenceSha256 === placedCardReference.sha256);
+  const savedSequences = material && !isExact ? await listBlackjackSequences(dealer) : [];
+  const comparedMovie = shown || (isExact && !selected) ? undefined :
+    (selected ?? audited.find(f => f.take.startsWith("samspel-")) ?? audited.find(f => f.take.startsWith("tvahandsgiv-")))?.sha256;
+  const trialProps = { audits, comparedMovie, selectedMovie: selected?.sha256, compareHowcastVip: referenser === "howcast-vip" || (!tagning && referenser !== "original") };
   return <StudioSubpage area="rorelseprov"><main className={styles.archive}>
     <nav className={styles.archiveNav}><a href={"/?" + query + "#modellering"}>← Bildserie och 3D-modell</a></nav>
     <header className={styles.archiveHeader}><h1>Rörelseprov</h1>
-      {material?.activeModel && <p>Gemensam kroppsmodell · {material.activeModel.name}{material.geometry && " · " + material.geometry.joints + " leder"}</p>}</header>
-    {material && tagning && !selected && <p role="status">Tagningen {tagning} finns inte registrerad för den här modellutgåvan.</p>}
+      {material?.activeModel && <p>Bildutgåvans grundmodell · {bodyLabel(material.activeModel.name)}{material.geometry && " · " + material.geometry.joints + " leder"}</p>}</header>
+    {material && isExact && !selected && !shown && <p role="status">Tagningen {tagning} finns inte registrerad med det här versionsvalet.</p>}
     {material ? <div className={styles.proofGrid}>
+      {!isExact && <section className={styles.combinedProof + " " + styles.proof}>
+        <h2>Rörelsemönster från referensfilm</h2>
+        <p>Följ en tvåhandsgiv i fyra steg. Vänstern skjuter ut kortet, högern tar emot kanten, vänder upp kortet och släpper på filten.</p>
+        <ol>
+          <li><b>Howcast och VIP.</b> Howcasts spader två gav ordningen och tiderna till de första v2-proven. VIP:s klöver nio visar samma handbyte från snett framifrån och en landning på knekten.
+            {earlyStudy && <> <a href={takeLink(material, earlyStudy.take, "howcast-vip")}>Jämför det första givprovet med båda klippen</a>.</>}</li>
+          {dealer === "paulina" && placedStudy && <li><b>Jakobs giv till plats 4.</b> Handtiderna i <code>pos4-v.mp4</code> styrde prov 4 på Paulinas sittmodell 2. Högern tar emot på ruta 9 och lämnar kortet på ruta 25.
+            {" "}<a href={takeLink(material, placedStudy.take, "original")}>Jämför modellrörelsen med Jakobs film</a>.</li>}
+          {dealer === "paulina" && reviewed.some(row => row.film.take === "giv-sam-v4-v7") && <li><b>Paulinas sittmodell 4.</b> Rörelsen från prov 4 överfördes till den nya kroppen. I givprov 7 återgår hon till REDO med en mjukare handledsrörelse. Kortet ligger kvar på plats 4.</li>}
+        </ol>
+        {shown && <a href="#jamfor-giv">Se rörelsemönstret i {modelLabel}</a>}
+        {savedSequences.length > 0 && <details><summary>Sparade givsekvenser i 3D</summary>
+          <ul>{savedSequences.map(row => <li key={row.id}><a href={"/modellering/sekvens?" + new URLSearchParams({ dealer, id: row.id })}>
+            {row.name} · {row.stepCount} givningar</a></li>)}</ul>
+        </details>}
+      </section>}
+      {body && (shown || choices.current.length > 0) && <section className={styles.combinedProof + " " + styles.proof}>
+        <h2>{bodyLabel(body.name)} · giv från stol 4 och stol 1</h2>
+        <nav className={styles.archiveJumps} aria-label="Aktuella givprov">
+          {choices.current.map(a => <a key={a.receipt} aria-current={a.receipt === shown?.receipt ? "page" : undefined}
+            href={"?" + new URLSearchParams({ dealer, ...(material.revision && { revision: material.revision }), tagning: a.take, kvitto: a.receipt }) + "#jamfor-giv"}>
+            {dealLabel(body.name, a.take, a.endPose)}</a>)}
+        </nav>
+        {shownFilm && <FilmEvidence key={shown?.receipt} film={shownFilm} expanded displayName={modelLabel}
+          context={<p>{current ? "Aktuell tagning" : "Tidigare tagning"}</p>}
+          comparison={handover !== undefined && release !== undefined ? { clips: dealReferences, modelLabel,
+            times: { draw: 0, handover, release } } : undefined}
+          viewGuide={dealer === "paulina" && shownFilm.cameras[0]?.id === "Stol 4" && shownFilm.cameras[1]?.id === "Stol 1"
+            ? "Stol 4 visas till vänster och stol 1 till höger. Detaljutsnitten under helbilderna följer samma bildruta." : undefined}/>}
+      </section>}
       {films.some(f => f.take.startsWith("samspel-")) && <Trial id="samspel" title="Ansikte och händer i samma giv" material={material} {...trialProps}
         description="Följ kortet från skon till filten och se blinkningen under återgången."
         films={films.filter(f => f.take.startsWith("samspel-"))}/>}

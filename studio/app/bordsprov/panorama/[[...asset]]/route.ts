@@ -3,7 +3,9 @@ import path from "node:path";
 import { LocalError, requireLocal } from "../../../../lib/storage";
 import { panoramaRooms } from "../../../../lib/panorama-rooms";
 import { panoramaDeals, pinnedSamTakes, samPanoramaDeals, seatedPaulina } from "../../../../lib/panorama-deals";
-import { currentSeatedTrial, dealerMaterial, readDealingStudies, reviewedTrialFilm } from "../../../../lib/dealer-material";
+import { currentSeatedTrial, dealerMaterial, readDealingStudies, reviewedTakeForLink, reviewedTrialFilm } from "../../../../lib/dealer-material";
+import { dealLabel, versionRule } from "../../../../lib/deal-versions";
+import { reviewedDealChoices } from "../../../../lib/reviewed-deal-versions";
 import { tableFinishes } from "../../../../lib/table-finishes";
 
 export async function GET(request: Request, { params }: { params: Promise<{ asset?: string[] }> }) {
@@ -21,6 +23,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       const requestedView = query.get("vy");
       const view = seat && (requestedView === "golv" || requestedView === "paulina" || requestedView === "giv") ? requestedView : "";
       let deals: ReturnType<typeof panoramaDeals> = [];
+      const requestedTake = query.get("tagning");
+      const requestedReceipt = query.get("kvitto");
+      const active = new Set<string>();
+      let preferred: string | undefined;
       if (view === "giv") {
         const [material, studies] = await Promise.all([dealerMaterial("paulina", seatedPaulina), readDealingStudies("paulina")]);
         const candidate = await currentSeatedTrial(material);
@@ -31,14 +37,28 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
           const registered = current?.receipt === pin.receipt ? current : alternatives.find(t => t.receipt === pin.receipt);
           return registered ?? reviewedTrialFilm("paulina", pin.geometry, pin.appearance, pin.motion, pin.receipt);
         }));
-        deals = [...samPanoramaDeals(current, alternatives, history), ...panoramaDeals(material, studies)];
+        const sam = samPanoramaDeals(current, alternatives, history);
+        const playable = new Set(sam.map(row => row.receipt));
+        const choices = reviewedDealChoices(material.dealer, alternatives.filter(row => playable.has(row.receipt)), current?.receipt);
+        for (const row of choices.current) active.add(row.receipt);
+        preferred = choices.defaultAction?.receipt;
+        const older = panoramaDeals(material, studies);
+        if (requestedTake && candidate && ![...sam, ...older].some(d => d.take === requestedTake && (!requestedReceipt || d.receipt === requestedReceipt))) {
+          const exact = await reviewedTakeForLink(material.dealer, candidate.id, requestedTake, requestedReceipt ?? undefined);
+          if (exact) sam.push(...samPanoramaDeals(exact, [], []));
+        }
+        for (const item of sam) if (candidate) item.label = dealLabel(candidate.name, item.take, item.end);
+        for (const item of older) if (material.activeModel) item.label = dealLabel(material.activeModel.name, item.take, item.end);
+        deals = [...sam, ...older];
       }
-      const requestedTake = query.get("tagning");
-      const deal = requestedTake ? deals.find(candidate => candidate.take === requestedTake) : deals[0];
+      const matches = deals.filter(d => d.take === requestedTake && (requestedReceipt === null || d.receipt === requestedReceipt));
+      const deal = requestedTake !== null || requestedReceipt !== null ? (matches.length === 1 ? matches[0] : undefined) :
+        deals.find(d => d.receipt && d.receipt === preferred) ?? deals[0];
       if (view === "giv" && !deal) return new Response("Givtagningen saknar verifierat material i studion.", { status: 404 });
       const frame = Number(query.get("ruta"));
       const frameQuery = deal && Number.isInteger(frame) && frame > 0 ? "&amp;ruta=" + Math.min(deal.lastFrame, frame) : "";
-      const viewQuery = view ? "&amp;vy=" + view + (deal ? "&amp;tagning=" + deal.take : "") + frameQuery : "";
+      const takeQuery = (row: typeof deals[number]) => "&amp;tagning=" + encodeURIComponent(row.take) + (row.receipt ? "&amp;kvitto=" + row.receipt : "");
+      const viewQuery = view ? "&amp;vy=" + view + (deal ? takeQuery(deal) : "") + frameQuery : "";
       const materials = tableFinishes.map(surface => ({
         ...surface, active: surface.options.find(option => option.value === query.get(surface.key)) ?? surface.options[0],
       }));
@@ -72,9 +92,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
           : `<a href="?stol=${seat}&amp;vy=paulina${matQuery}">Placeringsprov med Paulina</a>`;
       }
       controls = dealLink + controls;
-      const takeMenu = deals.length > 1 ? `<nav aria-label="Tagning">${deals.map(candidate =>
-        `<a${candidate === deal ? ' aria-current="page"' : ""} href="?stol=${seat}&amp;vy=giv&amp;tagning=${candidate.take}${frameQuery}${matQuery}">${candidate.label}</a>`).join("")}</nav>` : "";
-      const playback = deal ? `<fieldset id="givkontroll" disabled data-take="${deal.take}" data-motion="${deal.motion}" data-fps="${deal.fps}"><legend>Giv till plats 4 · ${deal.label}</legend>${takeMenu}
+      const escapeText = (s: string) => s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+      const takeAnchor = (row: typeof deals[number]) => `<a${row === deal ? ' aria-current="page"' : ""} href="?stol=${seat}&amp;vy=giv${takeQuery(row)}${frameQuery}${matQuery}">${escapeText(row.label)}</a>`;
+      const currentRows = deals.filter(d => d.receipt && active.has(d.receipt)).sort((a,b) => Number(b.receipt === preferred) - Number(a.receipt === preferred));
+      const previousRows = deals.filter(d => !currentRows.includes(d));
+      const isCurrent = !!deal && currentRows.includes(deal);
+      const takeMenu = deals.length > 1 ? `<nav aria-label="Tagning">${currentRows.length ? "<b>Aktuella givningar</b>" + currentRows.map(takeAnchor).join("") : ""}
+        ${previousRows.length ? '<details' + (isCurrent ? '' : ' open') + '><summary>Tidigare tagningar</summary>' + previousRows.map(takeAnchor).join("") + '</details>' : ""}
+        <details><summary>Versionsval</summary>${versionRule}</details></nav>` : "";
+      const playback = deal ? `<fieldset id="givkontroll" disabled data-take="${deal.take}" data-receipt="${deal.receipt ?? ""}" data-motion="${deal.motion}" data-fps="${deal.fps}"><legend>${isCurrent ? "Aktuell" : "Tidigare"} · ${escapeText(deal.label)} · ${deal.appearance ? "Fotoyta" : "Neutral yta"}</legend>${takeMenu}
         <button type="button" id="spela">Spela upp</button>
         <label>Bildruta <input type="range" id="giv-ruta" min="0" max="${deal.lastFrame}" value="0" step="1"></label><output for="giv-ruta" id="giv-tid">0 / ${deal.lastFrame}</output>
         ${deal.jumps.map(jump => `<button type="button" data-frame="${jump.frame}">${jump.label}</button>`).join("")}</fieldset>` : "";

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { ActiveDealerModel } from "../../../lib/modeling";
 import type { DealerMaterial, Photo } from "../../../lib/material-types";
+import { bodyLabel, dealLabel, versionRule } from "../../../lib/deal-versions";
 import { bodyPixels, checkSeatedFrame, seatedStandard, type SeatedMeasurement } from "../../../lib/seated-review";
 import { FilmEvidence, PhotoCameraGuides } from "../../MaterialEvidence";
 import styles from "../../modeling.module.css";
@@ -13,15 +14,18 @@ export type ComparisonPhoto = Photo & { seated: SeatedMeasurement };
 type Film = DealerMaterial["films"][number];
 const number = (n: number) => n.toLocaleString("sv-SE", { maximumFractionDigits: 2 });
 
-function filmLink(take: string) {
-  return "/bildstandard/sittprofil?" + new URLSearchParams({ modell: "prov", tagning: take }) + "#givfilm";
+function filmLink(take: string, receipt?: string) {
+  const params = new URLSearchParams({ modell: "prov", tagning: take });
+  if (receipt) params.set("kvitto", receipt);
+  return "/bildstandard/sittprofil?" + params + "#givfilm";
 }
 
-export default function ProfileComparison({ trial, front, previous, model, candidate, candidateError, openCandidate, requestedTake, film, continuations }: {
+export default function ProfileComparison({ trial, front, previous, model, candidate, candidateError, openCandidate, requestedTake, film, continuations, previousTakes, selectedReceipt }: {
   trial: ComparisonPhoto; front: ComparisonPhoto; previous: ComparisonPhoto; model: ActiveDealerModel;
   candidate: (ActiveDealerModel & { run: string | null; appearanceError?: string; defaultTake?: string }) | null;
   candidateError: string; openCandidate: boolean; requestedTake?: string;
-  film?: Film; continuations: { take: string; end: NonNullable<Film["poses"]>["end"] }[];
+  film?: Film; continuations: { take: string; receipt: string; targetSeat: number; end: NonNullable<Film["poses"]>["end"] }[];
+  previousTakes: { take: string; receipt: string; end?: NonNullable<Film["poses"]>["end"] }[]; selectedReceipt?: string;
 }) {
   const [source, setSource] = useState<"trial" | "previous" | "front">("trial");
   const [guides, setGuides] = useState(false);
@@ -72,19 +76,25 @@ export default function ProfileComparison({ trial, front, previous, model, candi
       </div>
     </section>
     {body === "candidate" && candidate && (film || continuations.length > 0 || requestedTake !== undefined) && <section id="givfilm" className={styles.proof + " " + styles.combinedProof} aria-labelledby="provfilm-rubrik">
-      <h2 id="provfilm-rubrik">Givfilm på {candidate.name}</h2>
-      {continuations.length > 0 && <nav aria-label="Välj slutpose efter given till plats 4">
-        <p>Från REDO A2.3 till plats 4</p>
+      <h2 id="provfilm-rubrik">Givfilm på {bodyLabel(candidate.name)}</h2>
+      {continuations.length > 0 && <nav aria-label="Välj aktuell giv efter slutpose">
+        <p><strong>Aktuella givningar från REDO A2.3</strong> · {versionRule}</p>
         <div className={styles.archiveLinks}>{continuations.map(option => {
-          const label = option.end === "A1" ? "Till VILA A1" : "Till REDO A2.3 för nästa kort";
-          const current = option.take === film?.take;
-          return <Link key={option.take} href={filmLink(option.take)} prefetch={false} scroll={false} aria-current={current ? "page" : undefined}>
+          const label = dealLabel(candidate.name, option.take, option.end) + " · plats " + option.targetSeat;
+          const current = option.receipt === selectedReceipt;
+          return <Link key={option.receipt} href={filmLink(option.take, option.receipt)} prefetch={false} scroll={false} aria-current={current ? "page" : undefined}>
             {current ? <strong>{label}</strong> : label}</Link>;
         })}</div>
       </nav>}
+      {previousTakes.length > 0 && <details open={previousTakes.some(row => row.receipt === selectedReceipt)}>
+        <summary>Tidigare tagningar</summary>
+        <div className={styles.archiveLinks}>{previousTakes.map(row => <Link key={row.receipt} href={filmLink(row.take, row.receipt)} scroll={false}
+          prefetch={false} aria-current={row.receipt === selectedReceipt ? "page" : undefined}>{dealLabel(candidate.name, row.take, row.end)}</Link>)}</div>
+      </details>}
       {film ? <>
-        <p>Stol 4 och stol 1 visar samma tagning på provkroppens egen fotoyta.</p>
-        <FilmEvidence film={film} expanded/>
+        <p><strong>{continuations.some(row => row.receipt === selectedReceipt) ? "Aktuell tagning" : "Tidigare tagning"}</strong>
+          {" · "}{dealLabel(candidate.name, film.take, film.poses?.end)} · {film.appearance ? "Fotoyta" : "Neutral yta"} · stol 4 och stol 1.</p>
+        <FilmEvidence film={film} displayName={dealLabel(candidate.name, film.take, film.poses?.end)} expanded/>
       </> : requestedTake !== undefined ? <p role="status">Tagningen <code>{requestedTake}</code> finns inte bland den här kroppens granskade filmer.
         {candidate.defaultTake && <> <Link href={filmLink(candidate.defaultTake)} prefetch={false}>Öppna studions valda tagning</Link></>}</p>
         : <p>Välj en granskad tagning ovan.</p>}

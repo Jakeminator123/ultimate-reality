@@ -52,15 +52,15 @@ export function PhotoEvidence({ photo, project, reviewedDeal }: { photo: Photo; 
   </div>;
 }
 
-export function FilmEvidence({ film, expanded, context, children, comparison, anchorId, viewGuide }: {
+export function FilmEvidence({ film, expanded, context, children, comparison, anchorId, viewGuide, displayName }: {
   film: DealerMaterial["films"][number]; expanded?: boolean; context?: ReactNode; children?: ReactNode;
-  anchorId?: string; viewGuide?: string;
+  anchorId?: string; viewGuide?: string; displayName?: string;
   comparison?: TakeComparison;
 }) {
   const player = useRef<HTMLVideoElement>(null);
   const [speed, setSpeed] = useState(1);
   const frameHeading = useId();
-  const name = takeLabel(film.take, film.title);
+  const name = displayName ?? takeLabel(film.take, film.title);
   const start = film.poses?.start;
   const marks = start && !film.marks.some(mark => mark.frame === 0)
     ? [{ frame: 0, seconds: 0, label: start === "A2.3" ? "Start i REDO A2.3" : "Start i VILA A1" }, ...film.marks]
@@ -68,7 +68,11 @@ export function FilmEvidence({ film, expanded, context, children, comparison, an
   return <details open={expanded} id={anchorId}>
     <summary>{name}</summary>
     {name !== film.title && <p>{film.title}</p>}
-    <p>Tagning <code>{film.take}</code> · {dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
+    <p>{dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
+    <details><summary>Versionsunderlag för filmen</summary>
+      <p>Tagning <code>{film.take}</code> · kropp <code>{film.geometry}</code>
+        {film.appearance && <> · fotoyta <code>{film.appearance}</code></>} · <a href={film.url}>Öppna exakt film</a></p>
+    </details>
     {context}
     {comparison ? <DealComparison film={film} modelPlayer={player} {...comparison} viewGuide={viewGuide}/> :
       <>{viewGuide && <p>{viewGuide}</p>}
@@ -81,8 +85,8 @@ export function FilmEvidence({ film, expanded, context, children, comparison, an
         }}/>
         <video controls playsInline preload="metadata" ref={player} aria-label={film.title} src={film.url}
           onRateChange={event => setSpeed(event.currentTarget.playbackRate)}/></>}
-    {comparison && <><h3 id={frameHeading}>Bildrutor i Paulinas film</h3>
-      <p>Knapparna nedan pausar Paulinas film på den valda rutan. Första bildrutan är 0.</p></>}
+    {comparison && <><h3 id={frameHeading}>Bildrutor i modellens film</h3>
+      <p>Knapparna nedan pausar modellens film på den valda rutan. Första bildrutan är 0.</p></>}
     <div className={styles.frameMarks} role={comparison ? "group" : undefined} aria-labelledby={comparison ? frameHeading : undefined}>
       {marks.map(m => m.seconds === undefined ?
       <span key={m.frame}>{m.label} · ruta {m.frame}</span> :

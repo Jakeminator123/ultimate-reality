@@ -20,13 +20,13 @@ export const pinnedSamTakes = [
   samPanoramaTake,
 ];
 
-function playableDeal(film: FilmRecord, animation: MotionRecord, jumps: { label: string; frame?: number }[], label = film.take) {
+function playableDeal(film: FilmRecord, animation: MotionRecord, jumps: { label: string; frame?: number }[], label = film.take, receipt?: string) {
   const [numerator, denominator = 1] = film.fps.split("/").map(Number);
   const fps = numerator / denominator;
   const lastFrame = film.frames - 1;
   if (!Number.isFinite(fps) || fps <= 0 || !Number.isInteger(lastFrame) || lastFrame < 1 ||
       animation.motion.start !== 0 || Math.round(animation.motion.end * fps) !== lastFrame) return [];
-  return [{ take: film.take, label, motion: animation.sha256, fps, lastFrame,
+  return [{ take: film.take, label, motion: animation.sha256, fps, lastFrame, receipt, appearance: film.appearance, end: film.poses?.end,
     jumps: jumps.filter(j => j.frame !== undefined && Number.isInteger(j.frame) && j.frame >= 0 && j.frame <= lastFrame) }];
 }
 
@@ -36,28 +36,28 @@ const poses = { A1: "VILA", "A2.3": "REDO" } as const;
 
 function samPanoramaDeal(reviewed: ReviewedSam) {
   const { film, animation, receipt } = reviewed;
-  const version = film.take.match(/^giv-sam-v4-v([1-9]\d*)$/)?.[1];
-  if (!version || Number(version) < 3 || film.card !== "KORT-02" || film.geometry !== samPanoramaTake.geometry ||
-      !film.appearance || animation.parent !== film.appearance ||
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(film.take) || film.card !== "KORT-02" || animation.parent !== (film.appearance ?? film.geometry) ||
       animation.sha256 !== film.motion || animation.joints !== 127 || animation.motion.take !== film.take ||
       animation.motion.geometry !== film.geometry || animation.motion.appearance !== film.appearance || animation.motion.card !== film.card) return [];
   if (!hasReviewedSeatCameras({ ...film, reviews: film.reviews.filter(review => review.film === receipt) })) return [];
   const pinned = pinnedSamTakes.find(p => p.take === film.take);
-  if (pinned && (receipt !== pinned.receipt || film.motion !== pinned.motion || film.appearance !== pinned.appearance)) return [];
-  let label = "SAM-sittmodell v4 · givprov " + version;
+  if (pinned && (receipt !== pinned.receipt || film.geometry !== pinned.geometry || film.motion !== pinned.motion || film.appearance !== pinned.appearance)) return [];
+  const series = /^giv-sam-v(\d+)-v(\d+)$/.exec(film.take);
+  let label = series ? "SAM-sittmodell v" + series[1] + " · givprov " + series[2] : film.take;
   if (film.poses) {
     const { start, end } = film.poses;
     if (!Object.hasOwn(poses, start) || !Object.hasOwn(poses, end)) return [];
     label += " · " + poses[start] + " → " + poses[end];
-  } else if (version === "5" || version === "6") return [];
+  } else if (!pinned) return [];
   const frameOf = (label: string) => film.marks.find(mark => mark.label === label)?.frame;
   return playableDeal(film, animation, [
     { label: "Utskjut", frame: frameOf("Utskjut ur skon") },
     { label: "Handbyte", frame: frameOf("Höger tar emot kortkanten") },
     { label: "Vändning", frame: frameOf("Höger vänder upp kortet") },
-    { label: "Landning", frame: frameOf("Landning på plats 4") },
+    { label: "Landning", frame: film.deal?.landingFrame ?? film.marks.find(mark => /^Landning på plats \d+$/.test(mark.label))?.frame },
+    { label: "Släpp", frame: film.deal?.releaseFrame ?? frameOf("Höger hand lämnar kortet") },
     { label: "Blinkning", frame: frameOf("Ögonlockens slutningsmaximum") },
-  ], label);
+  ], label, receipt);
 }
 
 export function samPanoramaDeals(current: ReviewedSam | undefined, alternatives: readonly ReviewedSam[], history: readonly (ReviewedSam | undefined)[]) {
@@ -65,9 +65,9 @@ export function samPanoramaDeals(current: ReviewedSam | undefined, alternatives:
   const remaining = [...alternatives, ...history].filter(take => take !== undefined)
     .sort((a, b) => b.film.take.localeCompare(a.film.take, "sv", { numeric: true }));
   for (const reviewed of [current, ...remaining]) {
-    if (!reviewed || choices.has(reviewed.film.take)) continue;
+    if (!reviewed || choices.has(reviewed.receipt)) continue;
     const [deal] = samPanoramaDeal(reviewed);
-    if (deal) choices.set(deal.take, deal);
+    if (deal) choices.set(reviewed.receipt, deal);
   }
   return [...choices.values()];
 }

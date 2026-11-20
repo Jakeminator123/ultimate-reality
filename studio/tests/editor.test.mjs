@@ -168,7 +168,7 @@ test(
           await view.goto(origin + "/bordsprov/panorama/gothic-manor?stol=4&vy=giv");
           await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
           const take = await view.locator("#givkontroll").getAttribute("data-take");
-          const samLinks = view.getByRole("navigation", { name: "Tagning" }).getByRole("link", { name: /^SAM-sittmodell v4 · givprov / });
+          const samLinks = view.getByRole("navigation", { name: "Tagning" }).getByRole("link", { name: /^Paulinas sittmodell 4 · givprov / });
           if (await samLinks.count()) {
             assert.equal(take, new URL(await samLinks.first().getAttribute("href"), view.url()).searchParams.get("tagning"));
             const report = await (await view.request.get(origin + "/api/material?report=json&dealer=paulina&revision=" + seatedPaulina)).json();
@@ -187,7 +187,9 @@ test(
           await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
           assert.equal(await view.locator("#givkontroll").getAttribute("data-take"), take);
           assert.equal(await view.locator("#giv-ruta").inputValue(), frame);
-          const frozen = view.getByRole("link", { name: "SAM-sittmodell v4 · givprov 3", exact: true });
+          const previous = view.locator("#givkontroll details").filter({ has: view.getByText("Tidigare tagningar", { exact: true }) });
+          if (await previous.count() && !(await previous.evaluate(el => el.open))) await previous.locator("summary").click();
+          const frozen = view.getByRole("link", { name: "Paulinas sittmodell 4 · givprov 3", exact: true });
           if (await frozen.count()) {
             await view.locator("#synfalt").selectOption("75");
             await view.locator("#panorama").press("ArrowLeft");
@@ -611,7 +613,11 @@ test(
       });
       assert.equal(conflict.status(), 409);
       // v1 was written without scene settings. It must still open and be editable.
-      await page.getByRole("link", { name: "Grepp och landning" }).click();
+      const workspaceNav = page.getByRole("navigation", { name: "Arbetsyta" });
+      assert.equal(await workspaceNav.getByRole("link", { name: /grepp och landning/i }).count(), 0);
+      await workspaceNav.getByRole("link", { name: "Övrigt", exact: true }).click();
+      await page.getByRole("link", { name: "Provdocka · grepp och landning" }).click();
+      await page.getByRole("heading", { name: "Provdocka · grepp och landning", level: 1 }).waitFor();
       const seat4 = page.locator('[data-seat="4"]'),
         seat1 = page.locator('[data-seat="1"]');
       await page.waitForFunction(

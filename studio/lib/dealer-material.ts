@@ -240,6 +240,23 @@ export async function reviewedTrialFilm(dealer: string, geometry: string, appear
   return takes.find(take => take.animation.sha256 === motion);
 }
 
+export async function reviewedTakeForLink(dealer: string, geometry: string, take: string, receipt?: string) {
+  if (!hex.test(geometry) || !slug.test(take) || (receipt !== undefined && !hex.test(receipt))) return;
+  const folder = path.join(avatarDir(dealer), "3d", "versioner", "filmer");
+  const keys = receipt ? [receipt] : (await records(folder)).map(name => name.slice(0, -5));
+  let match: ReviewedTrialTake | undefined;
+  for (const key of keys) {
+    const film = await optionalRecord<FilmRecord>(folder, key, []);
+    if (film?.take !== take || film.geometry !== geometry || (film.appearance !== null && !hex.test(film.appearance)) || !film.motion) continue;
+    const verified = await reviewedTrialFilm(dealer, geometry, film.appearance, film.motion, key);
+    if (!verified) continue;
+    // A name alone cannot identify two distinct film receipts.
+    if (match) return;
+    match = verified;
+  }
+  return match;
+}
+
 async function reviewedTrialTakes(dealer: string, geometry: string, appearance: string, issues: string[], receipt?: string): Promise<ReviewedTrialTake[]> {
   const store = path.join(avatarDir(dealer), "3d", "versioner");
   try {

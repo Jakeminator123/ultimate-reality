@@ -1,5 +1,6 @@
 import { currentSeatedTrial, dealerMaterial, materialFile, materialMarkdown, materialStamp } from "../../../lib/dealer-material";
 import type { TrialFilmSummary } from "../../../lib/material-types";
+import { reviewedDealChoices } from "../../../lib/reviewed-deal-versions";
 import { errorResponse, requireLocal } from "../../../lib/storage";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,10 @@ export async function GET(request: Request) {
     const candidate = await currentSeatedTrial(project);
     if (candidate) {
       project.seatedTrial = { id: candidate.id, name: candidate.name };
-      if (candidate.film) project.seatedTrial.film = filmSummary(candidate.film);
+      const reviewed = candidate.reviewedTakes ?? [];
+      const choices = reviewedDealChoices(project.dealer, reviewed, candidate.receipt);
+      const defaultFilm = reviewed.find(take => take.receipt === choices.defaultAction?.receipt)?.film ?? candidate.film;
+      if (defaultFilm) project.seatedTrial.film = filmSummary(defaultFilm);
       if (candidate.reviewedTakes?.length) project.seatedTrial.films = candidate.reviewedTakes.map(({ film }) => filmSummary(film));
     }
     if (query.get("report") === "md") {

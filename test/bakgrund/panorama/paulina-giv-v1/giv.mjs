@@ -48,6 +48,7 @@ function bindPlayer(panel, draw, lastFrame, fps) {
     for (const link of links) link.href = frameUrl(link.href).href;
     const address = frameUrl(location.href);
     address.searchParams.set("tagning", panel.dataset.take);
+    if (panel.dataset.receipt) address.searchParams.set("kvitto", panel.dataset.receipt);
     if (address.href !== location.href) history.replaceState(history.state, "", address);
   }
   function pause() {

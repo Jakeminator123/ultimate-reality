@@ -1,7 +1,7 @@
 .workspace {
   --view-height: clamp(350px, 47svh, 530px);
   display: grid;
-  grid-template-areas: "photo model" "gallery gallery" "evidence evidence" "roadmap roadmap" "resources resources";
+  grid-template-areas: "photo model" "gallery gallery" "sequence sequence" "evidence evidence" "roadmap roadmap" "resources resources";
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   align-items: stretch;
@@ -16,6 +16,16 @@
 }
 .photoPanel { grid-area: photo; }
 .modelPanel { grid-area: model; }
+.sequenceEditor { grid-area: sequence; min-width: 0; padding: 14px 18px; background: var(--white); border: 1px solid var(--line); border-radius: 13px; }
+.sequenceEditor summary { width: fit-content; cursor: pointer; font-size: 17px; font-weight: 650; }
+.sequenceEditor fieldset { min-width: 0; border: 0; padding: 0; margin: 12px 0 0; }
+.sequenceEditor legend { padding: 0; font-weight: 650; }
+.sequenceEditor p, .sequenceEditor li { font-size: 14px; margin: 5px 0; overflow-wrap: anywhere; }
+.sequenceEditor ol { padding-left: 24px; }
+.sequenceControls { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 8px 14px; margin-top: 12px; }
+.sequenceEditor label { display: grid; gap: 3px; max-width: 100%; font-size: 13px; }
+.sequenceEditor input, .sequenceEditor select { max-width: 100%; min-width: 0; }
+.sequenceEditor a { color: var(--pine); }
 .evidence { grid-area: evidence; padding: 15px 18px; background: var(--white); border: 1px solid var(--line); border-radius: 13px; min-width: 0; }
 .evidence h2 { margin: 0; font-size: 19px; }
 .evidence p, .sourceNote p { margin: 3px 0 5px; }
@@ -225,7 +235,7 @@
   .profilePair .panelHeader h2 { font-size: 16px; }
   .profilePair .sourceNote, .profilePair :global(.pose-tools) { padding: 7px; }
   .profilePair .rail { padding-inline: 7px; flex-wrap: wrap; }
-  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "model" "gallery" "evidence" "roadmap" "resources"; gap: 12px; }
+  .workspace { grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "model" "gallery" "sequence" "evidence" "roadmap" "resources"; gap: 12px; }
   .panelHeader { min-height: 64px; padding: 10px 13px; }
   .workspace { --view-height: clamp(280px, 40svh, 365px); }
   .gallery { padding: 13px; }

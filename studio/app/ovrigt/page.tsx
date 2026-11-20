@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import ModelingArchive from "./ModelingArchive";
-import { StudioSubpage } from "../StudioSidebar";
+import { gripWorkspace, StudioSubpage } from "../StudioSidebar";
 import styles from "../modeling.module.css";
 
 export const metadata = {
@@ -18,6 +18,10 @@ export default function Page() {
       <h1>Övrigt</h1>
       <p>Sparade kroppsprov, äldre riggar och arbetsbilder från labbet.</p>
     </header>
+    <section className={styles.proof}>
+      <h2><a href={"/#" + gripWorkspace.id}>{gripWorkspace.name}</a></h2>
+      <p>{gripWorkspace.description}</p>
+    </section>
     <ModelingArchive/>
   </main></StudioSubpage>;
 }

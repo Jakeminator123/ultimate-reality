@@ -7,7 +7,9 @@ import {
 } from "lucide-react";
 import { hasReviewedSeatCameras, seriesCount, type DealerMaterial } from "../lib/material-types";
 import MaterialEvidence, { PhotoCameraGuides, PhotoEvidence } from "./MaterialEvidence";
+import BlackjackSequenceEditor from "./BlackjackSequenceEditor";
 import { takeLink } from "./MotionTake";
+import { bodyLabel, dealLabel } from "../lib/deal-versions";
 import { useCurrentModel } from "./useModelingInventory";
 import styles from "./modeling.module.css";
 
@@ -109,16 +111,16 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
       </header>
       {inventory?.seatedTrial && <div className={styles.modelFilm}>
         <a className={styles.inlineLink} href="/bildstandard/sittprofil?modell=prov#jamforelse">
-          Öppna {inventory.seatedTrial.name} <ArrowRight size={15}/></a>
+          Öppna {bodyLabel(inventory.seatedTrial.name)} <ArrowRight size={15}/></a>
       </div>}
       {inventory?.seatedTrial?.film && <div className={styles.modelFilm}>
-        <a className={styles.inlineLink} href={inventory.seatedTrial.film.url}>Spela given på {inventory.seatedTrial.name} <ArrowRight size={15}/></a>
-        <span>Stol 4 och stol 1 · <code>{inventory.seatedTrial.film.take}</code></span>
+        <a className={styles.inlineLink} href={inventory.seatedTrial.film.url}>Spela {dealLabel(inventory.seatedTrial.name, inventory.seatedTrial.film.take, inventory.seatedTrial.film.poses?.end)} <ArrowRight size={15}/></a>
+        <span>Aktuell tagning · stol 4 och stol 1</span>
         <a className={styles.inlineLink} href="/bildstandard/sittprofil?modell=prov#givfilm">Granska i filmspelaren</a>
       </div>}
       {reviewedDeal && reviewedLink && model && <div className={styles.modelFilm}>
-        <a className={styles.inlineLink} href={reviewedLink}>Öppna senaste granskade given <ArrowRight size={15}/></a>
-        <span>Givfilmens kropp · {model.name} · <code>{reviewedDeal.take}</code></span>
+        <a className={styles.inlineLink} href={reviewedLink}>Öppna given på grundmodellen <ArrowRight size={15}/></a>
+        <span>{dealLabel(model.name, reviewedDeal.take)} · {reviewedDeal.appearance ? "Fotoyta" : "Neutral yta"}</span>
       </div>}
       <div className={styles.modelSurface}>
         {model ? <PoseReview key={model.url} model={model} cameraDetail={cameraDetail} cameraAngle={cameraDetail === "händer" ? undefined : selected?.targetAngle}
@@ -159,6 +161,7 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
       )}</div>
     </section>
 
+    {inventory && <BlackjackSequenceEditor key={inventory.dealer} project={inventory}/>}
     {inventory && <MaterialEvidence project={inventory}/>}
     <details className={styles.roadmap}>
       <summary>Från rigg till dealerfilm</summary>

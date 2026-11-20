@@ -48,7 +48,7 @@ import PromptLibrary from "./PromptLibrary";
 import RunwayConnection from "./RunwayConnection";
 import ModelingStudio from "./ModelingStudio";
 import DealerOverview from "./DealerOverview";
-import { StudioSidebar, secondaryWorkspaces, type Workspace } from "./StudioSidebar";
+import { StudioSidebar, gripWorkspace, secondaryWorkspaces, type Workspace } from "./StudioSidebar";
 import { money, quote } from "../lib/runway-prices";
 const SceneStudio = dynamic(() => import("./SceneStudio"), {
   ssr: false,
@@ -282,8 +282,10 @@ export default function Editor() {
         <section className="hero">
           <div>
             {mode === "modellering" && <p className="phase-caption">Fas 2 · Paulina</p>}
+            {mode === "scen" && <p className="phase-caption"><a href="/ovrigt">Övrigt</a> · Schematiskt prov</p>}
             <h1>{mode === "oversikt" ? "Välj din dealer" : mode === "modellering" ? "3D-modellering" :
               mode === "film" ? draft.clipName || "Giv till plats 4" : secondaryWorkspaces.find(entry => entry.id === mode)?.name}</h1>
+            {mode === "scen" && <p>{gripWorkspace.description}</p>}
           </div>
           {(mode === "film" || mode === "scen") && <div className="save-group">
             {!!versions.length && (

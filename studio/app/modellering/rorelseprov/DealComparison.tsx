@@ -7,7 +7,7 @@ import styles from "./comparison.module.css";
 
 type Film = DealerMaterial["films"][number];
 type ModelTimes = Pick<DealReference, "draw" | "push" | "handover" | "turn" | "release" | "rest">;
-export type TakeComparison = { clips: readonly DealReference[]; times: ModelTimes };
+export type TakeComparison = { clips: readonly DealReference[]; times: ModelTimes; modelLabel?: string };
 const speedKey = "rorelseprov:hastighet";
 const playbackSpeeds = [0.25, 0.5, 0.75, 1];
 
@@ -26,7 +26,7 @@ export function PlaybackSpeed({ speed, onChange }: { speed: number; onChange: (v
   </label>;
 }
 
-export default function DealComparison({ film, modelPlayer, clips, times, viewGuide }: TakeComparison & {
+export default function DealComparison({ film, modelPlayer, clips, times, viewGuide, modelLabel }: TakeComparison & {
   film: Film; modelPlayer: RefObject<HTMLVideoElement | null>; viewGuide?: string;
 }) {
   const references = useRef<(HTMLVideoElement | null)[]>([]);
@@ -90,10 +90,7 @@ export default function DealComparison({ film, modelPlayer, clips, times, viewGu
 
   return <section id="jamfor-giv" className={styles.comparison} aria-labelledby="jamfor-giv-rubrik">
     <h3 id="jamfor-giv-rubrik">{pair ? "Jämför given med originalfilmen" : "Jämför handbytet och släppet"}</h3>
-    <p><strong>Jämförelsematerial för tidigare givprov.</strong>{" "}
-      {clips.some(clip => clip.sha256 === placedCardReference.sha256) && "Jakob skickade filmen främst som exempel på delar av REDO. "}
-      Klippens tempo, givförlopp och viloposer gäller de visade tagningarna.
-      I dealerprojektets godkända REDO-ankare A2.3 är båda händerna vid skon och blicken sänkt mot tryckhanden.</p>
+    {clips.some(clip => clip.sha256 === placedCardReference.sha256) && <p>Jakobs film visar delar av REDO.</p>}
     <p>{pair ? "Välj en händelse för att pausa båda filmerna vid motsvarande rörelse. Hastigheten gäller båda. Kontaktkraften mellan fingrar och kort har inte mätts."
       : "Handbyte och Släpp pausar alla tre filmerna vid motsvarande rörelse. Hastigheten gäller också alla tre."}</p>
     <div className={styles.actions} role="group" aria-label={pair ? "Styr båda filmerna" : "Styr de tre filmerna"}>
@@ -113,7 +110,7 @@ export default function DealComparison({ film, modelPlayer, clips, times, viewGu
     {message && <p role="status">{message}</p>}
     <div className={pair ? styles.players + " " + styles.pair : styles.players}>
       <figure className={styles.model}>
-        <figcaption><strong>Paulina · konstruerad rörelsestudie</strong><span>{film.cameras.map(c => c.id).join(" och ")} · {film.take}</span></figcaption>
+        <figcaption><strong>{modelLabel ?? "Paulina · konstruerad rörelsestudie"}</strong><span>{film.cameras.map(c => c.id).join(" och ")} · {film.appearance ? "Fotoyta" : "Neutral yta"}</span></figcaption>
         {viewGuide && <p>{viewGuide}</p>}
         <video controls={filmControls} playsInline preload="auto" ref={modelPlayer} aria-label={film.title} src={film.url}/>
       </figure>

@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import { Aperture, BookOpen, Box, Calculator, Clapperboard, FolderOpen, LayoutGrid, Layers3 } from "lucide-react";
 import { panoramaCatalog, sceneViews, type SceneView } from "./scenmiljo/navigation";
 
-const gripWorkspace = { id: "scen", name: "Grepp och landning" } as const;
+export const gripWorkspace = { id: "scen", name: "Provdocka · grepp och landning",
+  description: "Den schematiska dockan visar hur greppet och kortets landningspunkt ändras från stol 4 och stol 1." } as const;
 const filmWorkspaces = [
   { id: "film", name: "Filmutkast", icon: Clapperboard },
   { id: "modeller", name: "Modeller och pris", icon: Calculator },
@@ -20,7 +21,6 @@ export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; edito
   const current = (id: StudioArea) => area === id ? "page" as const : undefined;
   const sceneChildren: Partial<Record<SceneView, ReactNode>> = {
     bakgrund: <a className="nav-child" href={panoramaCatalog.href} aria-current={current(panoramaCatalog.id)} {...external}>{panoramaCatalog.name}</a>,
-    scenprov: <a className="nav-child" href={root + gripWorkspace.id} aria-current={current(gripWorkspace.id)}>{gripWorkspace.name}</a>,
   };
   return <header className="studio-sidebar">
     <div className="studio-brand">
@@ -55,7 +55,7 @@ export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; edito
         {filmWorkspaces.map(({ id, name, icon: Icon }) => <a key={id} href={root + id} aria-current={current(id)}>
           <Icon size={17} strokeWidth={1.7} aria-hidden/>{name}
         </a>)}
-        <a href="/ovrigt" aria-current={current("ovrigt")} {...external}><FolderOpen size={17} aria-hidden/> Övrigt</a>
+        <a href="/ovrigt" aria-current={area === gripWorkspace.id ? "location" : current("ovrigt")} {...external}><FolderOpen size={17} aria-hidden/> Övrigt</a>
       </div>
     </nav>
     <span className="workspace-local"><i/> Lokal arbetsyta</span>
