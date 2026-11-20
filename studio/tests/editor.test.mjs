@@ -81,6 +81,28 @@ test(
           remote.push(req.url());
       });
       await page.goto(origin);
+      await t.test("scenmiljön visar rätt material från alla fyra ingångar även på mobil", async () => {
+        const nav = page.getByRole("navigation", { name: "Arbetsyta" });
+        await nav.getByRole("link", { name: "Scenmiljö", exact: true }).click();
+        await page.getByRole("heading", { level: 1, name: "Scenmiljö" }).waitFor();
+        assert.equal(await page.locator("main a").count(), 4);
+        await page.setViewportSize({ width: 320, height: 800 });
+        for (const [label, target] of [
+          ["Bakgrund och ljus", "/bordsprov/panorama"],
+          ["Bord och kortsko", "/bordsprov/panorama/fotostudio?stol=4"],
+          ["Kort och markeringar", "/bildstandard#referenskort"],
+          ["Scenprov", "/bordsprov/panorama/fotostudio?stol=4&vy=paulina"],
+        ]) {
+          await nav.getByRole("link", { name: label, exact: true }).click();
+          await page.getByRole("heading", { level: 1, name: label }).waitFor();
+          assert.equal(await nav.getByRole("link", { name: label, exact: true }).getAttribute("aria-current"), "page");
+          assert.ok(await page.locator("main a").evaluateAll((links, href) => links.some(link => link.getAttribute("href") === href), target));
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        }
+        assert.equal((await page.request.get(origin + "/scenmiljo/fel-vy")).status(), 404);
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await nav.getByRole("link", { name: "Översikt", exact: true }).click();
+      });
       await t.test("dealervalet öppnar Paulinas rigg eller ett tomt bildutkast och faserna följer med", async () => {
         async function mobileWidth() {
           await page.setViewportSize({ width: 320, height: 800 });
@@ -334,6 +356,8 @@ test(
       await page.setViewportSize({ width: 375, height: 840 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: /Fas 2.*3D-modell/ }).click();
+      const sceneEntry = page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Scenmiljö", exact: true });
+      assert.equal(await sceneEntry.getAttribute("target"), "_blank");
       const archiveOpened = page.waitForEvent("popup");
       await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Övrigt", exact: true }).click();
       const archive = await archiveOpened;
@@ -451,7 +475,7 @@ test(
       });
       assert.equal(conflict.status(), 409);
       // v1 was written without scene settings. It must still open and be editable.
-      await page.getByRole("link", { name: "3D-scen" }).click();
+      await page.getByRole("link", { name: "Grepp och landning" }).click();
       const seat4 = page.locator('[data-seat="4"]'),
         seat1 = page.locator('[data-seat="1"]');
       await page.waitForFunction(
@@ -628,6 +652,16 @@ test(
           await standard.waitForURL("**/bildstandard");
           const view = standard.getByLabel("Bildvy", { exact: true });
           assert.equal(await view.locator("option").count(), 12);
+          const summary = standard.getByRole("region", { name: "Kontroll av bildutgåvan" });
+          await summary.waitFor();
+          const edition = await (await standard.request.get(origin + "/api/material?dealer=paulina&report=json")).json();
+          assert.match(await summary.innerText(), new RegExp(edition.photos.length + "/12 verifierade mot registret"));
+          await summary.getByText("Se varje bilds användning och avvikelser").click();
+          assert.equal(await summary.locator("tbody tr").count(), 12);
+          for (const photo of edition.photos.filter(p => p.review)) {
+            await summary.getByText(photo.review.note, { exact: false }).waitFor();
+          }
+          await summary.getByText("Se varje bilds användning och avvikelser").click();
           await view.selectOption("hander/kortdrag-vanster");
           const prompt = standard.locator("#prompttext");
           assert.match(await prompt.inputValue(), /cirka 20° över den vita ytan/);
@@ -668,7 +702,7 @@ test(
           assert.equal(data.vyer.length, 12);
           assert.equal(data.vyer.filter((vy) => vy.recept.extra).length, 1);
           assert.equal(data.vyer.find((vy) => vy.recept.id === "hander/kortdrag-vanster").prompt, selected);
-          assert.ok(data.vyer.every((vy) => vy.filuppgifter.breddPx === null && vy.osakerhet === "" && vy.kalla === ""));
+          assert.ok(data.vyer.every((vy) => vy.filuppgifter.breddPx === null && vy.osakerhet === "" && vy.kalla === "" && !vy.bildbedomning));
           assert.doesNotMatch(JSON.stringify(data), /Paulina/i);
           const localExport = standard.getByRole("button", { name: "Hämta Paulinas ifyllda mall" });
           if (await localExport.count()) {
@@ -683,6 +717,7 @@ test(
             assert.deepEqual(Object.keys(record.filuppgifter), Object.keys(data.vyer[0].filuppgifter));
             assert.ok(record.filuppgifter.breddPx > 0 && record.observation.ljus && record.osakerhet);
             assert.match(record.filuppgifter.sha256, /^[a-f0-9]{64}$/);
+            assert.deepEqual(record.bildbedomning, edition.photos.find(photo => photo.id === record.id)?.review);
             assert.match(record.prompt, /tunn vit ram/);
           }
           await standard.getByLabel("Välj referensfoton").setInputFiles([

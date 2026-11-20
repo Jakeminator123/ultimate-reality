@@ -110,7 +110,8 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
     <section className={styles.gallery} aria-labelledby="phase-one">
       <header className={styles.galleryHeader}>
         <div><h2 id="phase-one">{dealer === "paulina" ? "Paulinas bildserie" : "Bildserie · " + name}</h2><p>{inventory ? inventory.edition + " · " + seriesCount(photos) : "Läser bildregistret…"}</p></div>
-        {photos.length > 0 && paulinaFirst && <a className={styles.inlineLink} href={gallery + "/index.html"}>Öppna galleriet <ArrowUpRight size={15}/></a>}
+        {photos.length > 0 && paulinaFirst && <div className={styles.galleryLinks}><a className={styles.inlineLink} href="/bildstandard#utgavekontroll">Kontroll av bildutgåvan</a>
+          <a className={styles.inlineLink} href={gallery + "/index.html"}>Öppna galleriet <ArrowUpRight size={15}/></a></div>}
       </header>
       <div className={styles.families}>{groups.map(group =>
         <section className={styles.family} key={group} aria-label={group}>
@@ -132,11 +133,12 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
     <details className={styles.roadmap}>
       <summary>Från rigg till dealerfilm</summary>
       <ol>
+        <li><strong>Placera riggen vid bordet.</strong> Jämför kroppens skala och handens läge vid kortskon från stol 4 och stol 1. <a href="/scenmiljo/scenprov">Se Paulinas frysta grepp i fotostudion</a></li>
         <li><strong>Filma ett kortdrag framifrån och från sidan samtidigt.</strong> Identifiera grepp, kort på kant och släpp i samma rutor. Sidovyn visar fingrarna när framsidan skyms.</li>
         <li><strong>{cardFilm ? "Jämför och förfina det animerade greppet." : "Passa handen mot kortet i 3D."}</strong> Styr handled, fingrar och ett gemensamt kort efter referensfilmen. Lägg till släpp och landning. Rendera samma tagning från stol 4 och stol 1. {cardFilm
           ? <a href={cardFilm.url}>Se utdraget med den valda modellversionen</a>
           : <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1">Öppna bordsprovet med 08-riggen</a>}</li>
-        <li><strong>Välj filmens utseende.</strong> Rendera båda kamerorna från samma rörelse. Om hud eller tyg ser konstgjorda ut, jämför fototexturen med film projicerad på den rörliga kroppen från en känd kamera.</li>
+        <li><strong>Spela upp en hel giv till plats 4.</strong> Låt riggen dra, släppa och återgå till vila medan kortet ligger kvar på filten. Rendera båda kamerorna från samma tidslinje. Jämför hud, hår, tyg och skuggor med referensfilmen.</li>
       </ol>
     </details>
 

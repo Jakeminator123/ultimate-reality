@@ -1,5 +1,6 @@
 import { bildrecept, skapaBildprompt, type Bildreferens } from "./bildrecept";
 import { referenskort, type Kortstandard } from "./kortstandard";
+import type { PhotoReview } from "../lib/photo-review";
 
 export type GranskadVy = {
   id: string;
@@ -17,6 +18,7 @@ export type GranskadVy = {
   observation: { riktning: string; ljus: string; iakttagelse: string };
   osakerhet: string;
   kalla: string;
+  bildbedomning?: PhotoReview;
 };
 
 export function skapaBildserie(referenser: Bildreferens[], avatar = "", granskade: GranskadVy[] = [], standard: Kortstandard = referenskort) {
@@ -39,6 +41,7 @@ export function skapaBildserie(referenser: Bildreferens[], avatar = "", granskad
         observation: bild?.observation ?? { riktning: "", ljus: "", iakttagelse: "" },
         osakerhet: bild?.osakerhet ?? "",
         kalla: bild?.kalla ?? "",
+        ...(bild?.bildbedomning && { bildbedomning: bild.bildbedomning }),
       };
     }),
   };

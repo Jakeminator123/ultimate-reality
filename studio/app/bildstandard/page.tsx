@@ -30,7 +30,7 @@ export default async function Page() {
   const examples: PaulinaExempel[] = [];
   for (const photo of project?.photos ?? []) {
     if (!photo.observed) continue;
-    const example: PaulinaExempel = { ...photo.observed, bildUrl: photo.url, filuppgifter: {
+    const example: PaulinaExempel = { ...photo.observed, bildUrl: photo.url, bildbedomning: photo.review, filuppgifter: {
       ...photo.observed.filuppgifter, breddPx: photo.width, hojdPx: photo.height, format: photo.format,
     } };
     if (project?.edition === "fas-1/v1" && photo.id === "rorelsereferens/kortvandning-hoger") {

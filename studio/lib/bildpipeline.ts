@@ -34,9 +34,7 @@ const basroller = {
 } as const;
 
 // Runway's 4K high-quality PNG prices before the charge of one credit per input image.
-const personformat = { ...bildformat.person, pris: 14 };
-const handformat = { ...bildformat.hand, pris: 13 };
-const dragformat = { ...bildformat.kortdrag, pris: 11 };
+const grundpris: Record<keyof typeof bildformat, number> = { person: 14, hand: 13, kortdrag: 11 };
 
 export function bildpipelinePlan(files: string[]): PipelineStep[] {
   if (!Array.isArray(files) || !files.length || files.length > MAX_ORIGINAL)
@@ -51,7 +49,6 @@ export function bildpipelinePlan(files: string[]): PipelineStep[] {
   return bildrecept.map((recept) => {
     const bas = recept.id === front ? undefined : recept.basvy ?? front;
     const kortvy = recept.grupp === "Händer" || recept.grupp === "Rörelsereferens";
-    const format = recept.id === "hander/kortdrag-vanster" ? dragformat : kortvy ? handformat : personformat;
     const refs: PipelineRef[] = [];
     if (bas) refs.push({ tag: basroller[bas], roll: basroller[bas], source: "step", step: bas });
     refs.push(...original);
@@ -59,7 +56,7 @@ export function bildpipelinePlan(files: string[]): PipelineStep[] {
     return {
       id: recept.id, namn: recept.namn, grupp: recept.grupp,
       dependsOn: bas ? [bas] : [],
-      ratio: format.ratio, credits: format.pris + refs.length,
+      ratio: bildformat[recept.formatnyckel].ratio, credits: grundpris[recept.formatnyckel] + refs.length,
       prompt: runwayBildprompt(recept.id, refs), refs,
     };
   });

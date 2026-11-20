@@ -1,15 +1,17 @@
 import type { ReactNode } from "react";
-import { Aperture, BookOpen, Box, Calculator, Clapperboard, FolderOpen, LayoutGrid, Layers3 } from "lucide-react";
+import { Aperture, BookOpen, Box, Calculator, Clapperboard, FolderOpen, Hand, LayoutGrid, Layers3 } from "lucide-react";
+import { sceneViews, type SceneView } from "./scenmiljo/navigation";
 
 export const secondaryWorkspaces = [
-  { id: "scen", name: "3D-scen", icon: Layers3 },
+  { id: "scen", name: "Grepp och landning", icon: Hand },
   { id: "film", name: "Filmutkast", icon: Clapperboard },
   { id: "modeller", name: "Modeller och pris", icon: Calculator },
   { id: "promptmallar", name: "Startprompter", icon: BookOpen },
 ] as const;
 
 export type Workspace = "oversikt" | "modellering" | (typeof secondaryWorkspaces)[number]["id"];
-type StudioArea = Workspace | "bilder" | "ovrigt";
+type SubpageArea = "bilder" | "ovrigt" | "scenmiljo" | SceneView;
+type StudioArea = Workspace | SubpageArea;
 
 export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; editor?: boolean; dirty?: boolean }) {
   const root = editor ? "#" : "/#";
@@ -27,6 +29,13 @@ export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; edito
         <a href="/bildstandard" aria-current={current("bilder")} {...external}><small>Fas 1</small> Bildpipeline</a>
         <a href={root + "modellering"} aria-current={current("modellering")}><small>Fas 2</small> 3D-modell</a>
       </div>
+      <div className="nav-environment" role="group" aria-label="Scenmiljö">
+        <a className="nav-environment-title" href="/scenmiljo" aria-current={current("scenmiljo")} {...external}>
+          <Layers3 size={18} aria-hidden/> Scenmiljö
+        </a>
+        {sceneViews.map(({ id, name }) => <a key={id} className="nav-environment-view" href={"/scenmiljo/" + id}
+          aria-current={current(id)} {...external}>{name}</a>)}
+      </div>
       <div className="nav-secondary" role="group" aria-label="Övriga verktyg">
         <p>Övriga verktyg</p>
         {secondaryWorkspaces.map(({ id, name, icon: Icon }) => <a key={id} href={root + id} aria-current={current(id)}>
@@ -39,6 +48,6 @@ export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; edito
   </header>;
 }
 
-export function StudioSubpage({ area, children }: { area: "bilder" | "ovrigt"; children: ReactNode }) {
+export function StudioSubpage({ area, children }: { area: SubpageArea; children: ReactNode }) {
   return <div className="studio-shell studio-subpage"><StudioSidebar area={area}/>{children}</div>;
 }

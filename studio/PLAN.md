@@ -4,6 +4,8 @@
 
 Redigeringsvyn och den gemensamma 3D-scenen är genomförda i Next.js, React och TypeScript. JSON-förhandsvisningen stöder Kling 2.5 Turbo Pro, Kling 4, WAN 3 och Grok Imagine Video 1.5 Lite på Runways bild-till-video-endpoint. Verklig beställning är en senare etapp.
 
+[Scenmiljö](http://127.0.0.1:4317/scenmiljo) samlar **Bakgrund och ljus**, **Bord och kortsko**, **Kort och markeringar** samt **Scenprov**. Skons placering och riktning hör till bordets geometri. Det utbytbara trycket hör till kortet. I Scenprov kan samma frysta grepp visas från stol 4 och stol 1 i fotostudion RUM-02. Filmen LJUS-05 visar utdraget i kasinorummet RUM-03. [Jämför poser och rörelse](http://127.0.0.1:4317/scenmiljo/scenprov)
+
 ## Grundbilder för en sittande dealer
 
 Använd [3D-modellering](http://127.0.0.1:4317/#modellering) för den aktiva Fas 1-serien och sittmodellen v2. [Bildstandarden](http://127.0.0.1:4317/bildstandard) anger kamera och pose för varje vy. [Övrigt](http://127.0.0.1:4317/ovrigt) innehåller den tidigare dockmallen och SAM-försöken.
@@ -36,7 +38,7 @@ Jakobs externa granskning i `3D-TIPS` avser projektet `3d-dealer`. I Ultimate Re
 | Spår | Underlag i Ultimate Reality | Föreslaget nästa prov |
 | --- | --- | --- |
 | Styrbar avatar | Sittfronten gav Paulinas v2-kropp med 127 MHR-leder. Tre sittbilder, tre porträtt och ett handfoto gav det valbara fotoutseendet. | Inspektera bakre hårfäste och kavajrygg från nya vinklar. Använd bakre trekvartsfoto om konturerna behöver rättas. |
-| Rörelse och kort | V2 drar KORT-02 ur 70/30-skon med vänster pek- och långfinger. Två stolar visar samma animerade kropp och kortbana. | Filma ett verkligt utdrag framifrån och från sidan samtidigt. Jämför handled, fria fingrar och tempo. Lägg till släpp och landning på filten. |
+| Rörelse och kort | V2 drar KORT-02 ur 70/30-skon med vänster pek- och långfinger. Pose 17 visar höga armbågar i fotostudion. | Filma ett verkligt utdrag framifrån och från sidan samtidigt. Passa armbågar, handled och fingrar. Animera hela given till plats 4 med släpp, landning och återgång till vila. Rendera samma tagning från stol 4 och stol 1 med kortet kvar på filten. |
 | Videokvalitet | Det versionsbundna Brown-provet visar hela scenen och handens grepp från stol 4 och stol 1 med samma fotoyta och ljus. | Jämför fryst ruta och rörelse med verklig film i spelarens utsnitt. Om hud eller tyg brister, prova filmprojektion från en känd kamera och fyll skymda ytor med avatarens textur. |
 
 **Upplösning per version.** Studions materialrapport visar filernas verkliga format, originalstorlek, SAM:s inlästa bild, kropps- och handutsnitt samt den inbäddade fototexturens mått. Körningens mätningar och uppgifter från en senare kontroll av modellkonfigurationen är märkta var för sig. Behåll Paulinas nuvarande helbilder för posen. Filma greppet samtidigt från sidan för att få fingrarnas djup. För hår eller textur behövs skarpa original av de ytor som ska synas. [Aktuell materialrapport](http://127.0.0.1:4317/api/material?dealer=paulina&report=md) · [Materialstandarden och nästa kortprov](../information/MATERIALVERSIONER.md)

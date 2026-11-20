@@ -1,0 +1,63 @@
+.page {
+  max-width: 1390px;
+  padding: 28px clamp(16px, 3vw, 46px) 40px;
+}
+.heading { margin: 0 0 20px; }
+.heading h1 { margin: 0; font-size: clamp(28px, 3.4vw, 46px); line-height: 1.1; letter-spacing: -.055em; }
+.heading > p { margin-top: 6px; font-size: 15px; color: var(--muted); }
+.back, .destinations a { display: inline-flex; align-items: center; gap: 6px; color: var(--pine); text-decoration: none; font-weight: 650; }
+.back { font-size: 13px; margin-bottom: 12px; }
+.back:hover { text-decoration: underline; }
+.page a:focus-visible, .archive summary:focus-visible { outline: 3px solid #a97831; outline-offset: 3px; }
+.overview, .studies { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.card, .featured, .study {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  overflow: hidden;
+  background: var(--white);
+}
+.card { display: block; color: var(--ink); text-decoration: none; }
+.card:hover { border-color: #869583; }
+.image {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #e9ede5;
+  overflow: hidden;
+}
+.image img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: cover; }
+.image img.contain { padding: 13px; object-fit: contain; background: #e9ede5; }
+.missing { display: inline-flex; gap: 7px; align-items: center; color: var(--muted); font-size: 13px; }
+.cardBody, .study { padding: 15px 19px; }
+.version { font: 11px/1.5 var(--mono); color: #506154; overflow-wrap: anywhere; }
+.cardBody h2 { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin: 3px 0; font-size: clamp(18px, 1.6vw, 24px); }
+.cardBody > p { color: var(--muted); font-size: 13px; }
+.featured { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .85fr); align-items: stretch; }
+.featured figure { margin: 0; min-width: 0; display: flex; flex-direction: column; background: #e9ede5; }
+.featured .image { flex: 1; aspect-ratio: 14/9; }
+.featured .image img:not(.contain) { object-fit: contain; }
+.featured figcaption { padding: 8px 13px; color: #e1e9d9; background: #22372b; font: 11px/1.5 var(--mono); }
+.featuredBody { display: grid; align-content: center; gap: 8px; padding: clamp(16px, 3vw, 42px); }
+.featuredBody h2 { font-size: clamp(22px, 2.65vw, 36px); }
+.featuredBody > p:not(.version), .study > p:not(.version) { color: #48594e; line-height: 1.55; }
+.destinations { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.destinations a { max-width: 100%; padding: 7px 11px; border: 1px solid #cdd7c8; border-radius: 7px; font-size: 13px; }
+.destinations a:hover { background: #eff4e9; border-color: #7c957b; }
+.featuredBody .destinations a:first-child { color: #f4f8ef; background: var(--pine); border-color: var(--pine); }
+.featuredBody .destinations a:first-child:hover { background: #356147; }
+.studies { margin-top: 16px; }
+.study h3 { margin: 3px 0 4px; font-size: 19px; line-height: 1.25; letter-spacing: -.04em; }
+.study > p:not(.version) { font-size: 14px; }
+.archive { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--line); }
+.archive summary { width: fit-content; color: #4a5a4d; font-size: 15px; font-weight: 650; }
+@media (max-width: 720px) {
+  .page { padding: 19px 13px 30px; }
+  .heading { margin-bottom: 13px; }
+  .overview, .studies, .featured { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .featured { gap: 0; }
+  .featuredBody { padding: 14px 15px 16px; }
+  .featured .image { aspect-ratio: 16/9; }
+  .cardBody, .study { padding: 12px 14px; }
+}

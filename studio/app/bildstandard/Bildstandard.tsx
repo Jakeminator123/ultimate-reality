@@ -7,6 +7,7 @@ import { basvyer, bildrecept, skapaBildprompt, valbaraRoller, type Bildreferens 
 import { skapaBildserie } from "../../fotomall/bildserie";
 import { kortMedVitRam, referenskort } from "../../fotomall/kortstandard";
 import type { PaulinaExempel } from "./exempeltyp";
+import Utgavekontroll from "./Utgavekontroll";
 import { cropSource, dimensions, seriesCount, type DealerMaterial } from "../../lib/material-types";
 import styles from "./bildstandard.module.css";
 
@@ -64,7 +65,9 @@ export default function Bildstandard({ exempel, project }: { exempel: PaulinaExe
   }
 
   function hamtaSerie(medExempel: boolean) {
-    const serie = medExempel ? skapaBildserie([], "Paulina", exempel, kortMedVitRam) : skapaBildserie(referenser);
+    const granskadeTryck = exempel.flatMap(bild => bild.bildbedomning?.cardPrint ? [bild.bildbedomning.cardPrint] : []);
+    const anvanderVitRam = granskadeTryck.length ? granskadeTryck.every(tryck => tryck === kortMedVitRam.id) : project?.edition === "fas-1/v1";
+    const serie = medExempel ? skapaBildserie([], "Paulina", exempel, anvanderVitRam ? kortMedVitRam : referenskort) : skapaBildserie(referenser);
     const fil = new Blob([JSON.stringify(serie, null, 2) + "\n"], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(fil);
     const lank = document.createElement("a");
@@ -107,6 +110,7 @@ export default function Bildstandard({ exempel, project }: { exempel: PaulinaExe
           ))}
         </select>
         <nav className={styles.genvagar} aria-label="Bildstandardens avsnitt">
+          {project && <a href="#utgavekontroll">Kontroll av utgåvan</a>}
           <a href="#bildordning">Bildordning</a>
           <a href="#referenskort">Referenskort</a>
           <a href="#bildprompt">Till prompten ↓</a>
@@ -161,6 +165,7 @@ export default function Bildstandard({ exempel, project }: { exempel: PaulinaExe
         </section>
       </div>
 
+      {project && <Utgavekontroll project={project}/>}
       <div className={styles.anvisningar}>
         <section className={styles.panel} id="bildordning" aria-labelledby="ordningsrubrik">
           <header className={styles.panelhuvud}><h2 id="ordningsrubrik">Bildordning från egna foton</h2></header>

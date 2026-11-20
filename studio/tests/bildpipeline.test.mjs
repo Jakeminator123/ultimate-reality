@@ -27,7 +27,31 @@ const hooks = registerHooks({
 });
 const { pipelineAction, pipelineImage, pipelineRevision } = await import("../lib/bildpipeline-server.ts");
 const { bildpipelinePlan } = await import("../lib/bildpipeline.ts");
+const { verifiedPhotoReview, reviewPhotoSeries } = await import("../lib/photo-review.ts");
 hooks.deregister();
+
+test("bildgranskning följer exakt utgåva och fil medan leveransmålen hämtas från bildpipelinen", () => {
+  const hash = "a".repeat(64), edition = "fas-1/v1", file = "hander/handryggar.png";
+  const entry = { file, sha256: hash, decision: "limited", note: "Tio fingertoppar syns.", cardPrint: "vit-ram-punkt-v1" };
+  const data = { schema: 1, edition, views: [entry] };
+  const review = verifiedPhotoReview(data, edition, file, hash);
+  assert.equal(review.cardPrint, entry.cardPrint);
+  assert.equal(verifiedPhotoReview(data, edition, file, "b".repeat(64)), undefined);
+  assert.equal(verifiedPhotoReview(data, "fas-1/v2", file, hash), undefined);
+  assert.equal(verifiedPhotoReview({ ...data, views: [entry, entry] }, edition, file, hash), undefined);
+  const photo = { id: "hander/handryggar", sha256: hash, format: "PNG", width: 1536, height: 1024, review };
+  const project = { photos: [photo], appearance: { sources: [{ sha256: hash, role: "surface" }] } };
+  const rows = reviewPhotoSeries(project);
+  const plan = bildpipelinePlan(["person.png"]);
+  assert.deepEqual(rows.map(r => r.target.ratio), plan.map(s => s.ratio));
+  const hand = rows.find(r => r.recipe.id === photo.id);
+  assert.deepEqual(hand.roles, ["surface"]);
+  assert.equal(hand.exactDelivery, false);
+  assert.equal(rows.filter(r => r.usesCard).length, 3);
+  const delivered = { ...photo, format: "PNG", width: 3504, height: 2336 };
+  assert.equal(reviewPhotoSeries({ ...project, photos: [delivered] }).filter(r => r.exactDelivery).length, 1);
+  assert.equal(reviewPhotoSeries({ ...project, photos: [{ ...delivered, format: "JPEG" }] }).filter(r => r.exactDelivery).length, 0);
+});
 
 test("en sparad revision genererar en ny ståfront, rätt barnbilder och aldrig två jobb för samma steg", async (t) => {
   const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "ultimate-bildpipeline-"));

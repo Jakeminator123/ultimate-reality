@@ -21,6 +21,9 @@
 .evidence p, .sourceNote p { margin: 3px 0 5px; }
 .evidence details { padding: 9px 0; border-top: 1px solid var(--line); font-size: 13px; }
 .evidence summary { cursor: pointer; font-weight: 650; }
+.photoOrigin { margin: 16px 0; }
+.photoOrigin h3 { margin: 0 0 4px; font-size: 16px; }
+.photoOrigin p { max-width: 88ch; line-height: 1.5; }
 .evidence video { display: block; width: min(100%, 520px); margin: 8px 0; }
 .evidence a, .evidence p { font-size: 13px; }
 .lineage { display: flex; flex-wrap: wrap; gap: 10px 35px; margin: 13px 0; }
@@ -123,6 +126,7 @@
 .galleryHeader { gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
 .galleryHeader p { color: var(--muted); margin-top: 2px; font-size: 13px; }
 .inlineLink { font-size: 13px; }
+.galleryLinks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .families { display: grid; grid-template-columns: 3fr 3fr 3fr 2fr 1.3fr; gap: clamp(10px, 1.5vw, 23px); }
 .family { min-width: 0; }
 .family h3 { margin: 0 0 6px; font-size: 12px; color: #415748; }

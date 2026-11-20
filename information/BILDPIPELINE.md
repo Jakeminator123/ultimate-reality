@@ -51,6 +51,10 @@ I varje bildutgåva hämtas hjässa, sula och synlig sitskant ur `sittande-bilds
 
 ## Granskning och fortsättning
 
+[Kontroll av bildutgåvan](http://127.0.0.1:4317/bildstandard#utgavekontroll) läser varje originalfils SHA-256 och verkliga pixelmått. I bildutgåvans `utgavegranskning-v1.json` kopplas bedömning, synlig avvikelse och eventuellt korttryck till utgåva, filnamn och samma SHA-256. En ersatt bild behöver granskas på nytt. Bildmålen hämtas från samma recept som beställningsvyn. Den ifyllda JSON-mallen innehåller originalens bildbedömningar.
+
+I Paulinas Fas 1 v1 är samtliga 12 original verifierade. Alla tre porträtt fungerar som referenser. De tre handbilderna visar kort med vit ram och vit punkt. Ingen har X-trycket som gäller för nya foton. Alla 12 har andra pixelmått än dagens leveransrecept. Sittfronten gav kroppen, och sittbilderna från sidan användes för att passa hållningen. Tre sittbilder, tre porträtt och båda handryggarna gav tillsammans fotoytan på v2. Stillbilder av kortgreppet hjälper oss att bedöma hur fingrarna omsluter kanten. Tidsförloppet kommer från den animerade riggen och kortets egen bana. [Bildens roll i modellen](http://127.0.0.1:4317/#modellering)
+
 1. Spara ett lokalt utkast. Varje steg visar modell, prompt, målformat, ordnade referenser och pris.
 2. Skicka ståfronten för ett första kvalitetsprov och välj **Fortsätt serien** när den ser rätt ut. **Skicka hela serien** beställer också ståfronten först och fortsätter på samma revision.
 3. Låt revisionen vara öppen under körningen. När vyn öppnas igen återupptas statuskontrollen. Studion behåller Runways jobb-ID och bildoriginal på labbdisken. Vid en osäker beställning kan rätt jobb-ID från Runway kopplas till steget. Efter ett definitivt fel går det att skapa ett nytt utkast från samma foton.

@@ -20,6 +20,7 @@ export type Bildrecept = {
   ljus: string;
   bakgrund: string;
   format: string;
+  formatnyckel: keyof typeof bildformat;
   kontroll: string;
   basvy?: keyof typeof basvyer;
   extra?: boolean;
@@ -49,6 +50,7 @@ const personbild = {
   ljus: "Använd en stor diffus ljuskälla snett framför personen och mjuk upplättning från motsatt sida. Behåll lampornas lägen, exponeringen och den neutrala vitbalansen genom serien.",
   bakgrund: "Använd en enfärgad, matt ljusgrå studiobakgrund.",
   format: leveransformat(bildformat.person),
+  formatnyckel: "person" as const,
 };
 
 const staende = {
@@ -160,6 +162,7 @@ export const bildrecept: Bildrecept[] = [
     ljus: handljus,
     bakgrund: handyta,
     format: leveransformat(bildformat.hand),
+    formatnyckel: "hand",
     kontroll: "Handryggar, naglar och fingertoppar ska synas tydligt. Lämna en glipa mellan händerna och kortet så att kortets fyra hörn är synliga.",
   },
   {
@@ -175,6 +178,7 @@ export const bildrecept: Bildrecept[] = [
     ljus: handljus,
     bakgrund: handyta,
     format: leveransformat(bildformat.kortdrag),
+    formatnyckel: "kortdrag",
     kontroll: "Visa var pek- och långfingrets konturer möter kortet. Kortkanten ska gå att följa längs den vita ytan.",
   },
   {
@@ -190,6 +194,7 @@ export const bildrecept: Bildrecept[] = [
     ljus: "Använd mjukt, neutralt sidoljus och skarp teckning av fingrar och kortkant. Låt kortets svaga skugga falla en bit från kortet på den vita ytan.",
     bakgrund: handyta,
     format: leveransformat(bildformat.hand),
+    formatnyckel: "hand",
     kontroll: "Kortkanten ska gå att följa fram till nypet. Visa tumme och pekfinger på motsatta sidor av samma hörn och luft under kortet.",
     extra: true,
   },

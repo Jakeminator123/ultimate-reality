@@ -8,6 +8,7 @@ import type { GranskadVy } from "../fotomall/bildserie";
 import { currentModel as legacyModel } from "./current-model";
 import { cropSource, dimensions, roleName } from "./material-types";
 import { bodyPixels, checkSeatedFrame, floorSpread, readSeatedMeasurement, seatedStandard } from "./seated-review";
+import { verifiedPhotoReview } from "./photo-review";
 import type { DealerMaterial, Edition, FilmRecord, FilmReview, ModelRecord, MotionRecord, Photo } from "./material-types";
 import { LocalError } from "./storage";
 
@@ -56,7 +57,7 @@ export async function materialStamp(dealer: string, revision: string | null = nu
     active ? JSON.parse(active.toString("utf8")) as Edition : null;
   const edition = release?.edition ?? "fas-1/v1";
   if (!editionPath.test(edition)) bad("Ogiltig bildutgåva.");
-  const observations = await Promise.all(["bildegenskaper.json", "sittande-bildskala.json", "sittande-kamerapunkter-v1.json"]
+  const observations = await Promise.all(["bildegenskaper.json", "sittande-bildskala.json", "sittande-kamerapunkter-v1.json", "utgavegranskning-v1.json"]
     .map(name => bytes(path.join(avatar, edition, name))));
   return digest(Buffer.from(JSON.stringify([active?.toString(), ...registered, revision, ...observations.map(b => b && digest(b))])));
 }
@@ -78,16 +79,17 @@ export async function readPhotoEdition(dealer: string, edition: string, snapshot
     try { return await record<unknown>(path.join(directory, name)); }
     catch (error) {
       if (!(error instanceof SyntaxError)) throw error;
-      issues.push(name + " kunde inte tolkas. Några mätpunkter kan saknas.");
+      issues.push(name + " kunde inte tolkas. Granskningsunderlag kan saknas.");
       return null;
     }
   }
   type Book = { avatar: string; fas: number; utgava: number; bilder: ImageRow[] };
-  const [book, assessments, scales, seatPoints] = await Promise.all([
+  const [book, assessments, scales, seatPoints, reviews] = await Promise.all([
     snapshot ? lockedRecord<Book>(path.join(store, "bildregister"), snapshot) : record<Book>(path.join(directory, "bildregister.json")),
     record<{ schemaVersion: number; vyer: GranskadVy[] }>(path.join(directory, "bildegenskaper.json")),
     optionalMeasurement("sittande-bildskala.json"),
     optionalMeasurement("sittande-kamerapunkter-v1.json"),
+    optionalMeasurement("utgavegranskning-v1.json"),
   ]);
   if (!book) return { photos, issues: ["Bildregistret för " + edition + " saknas lokalt."] };
   if (book.avatar.toLowerCase() !== dealer || "fas-" + book.fas + "/v" + book.utgava !== edition || !Array.isArray(book.bilder))
@@ -108,6 +110,7 @@ export async function readPhotoEdition(dealer: string, edition: string, snapshot
     photos.push({ id, file: row.fil, name: recipe?.namn ?? row.motiv, group: row.kategori, kind: row.typ,
       sha256: row.sha256, width, height, format: format.toUpperCase(),
       seated: id.startsWith("sittande/") ? readSeatedMeasurement({ file: row.fil, sha256: row.sha256, width, height }, edition, scales, seatPoints) : undefined,
+      review: verifiedPhotoReview(reviews, edition, row.fil, row.sha256),
       targetAngle: typeof row.vinkelGrader === "number" && Number.isFinite(row.vinkelGrader) ? row.vinkelGrader : recipe?.vinkelGrader, observed,
       url: url(dealer, { edition, photo: row.fil, sha: row.sha256 }) });
   }
@@ -247,6 +250,8 @@ export function materialMarkdown(project: DealerMaterial) {
       " · " + p.format + (p.targetAngle !== undefined ? " · målvinkel " + p.targetAngle + "°" : "") + " · " + p.sha256);
     if (p.observed) rows.push("  - " + p.observed.observation.riktning + " " + p.observed.observation.ljus,
       "  - Osäkerhet · " + p.observed.osakerhet);
+    if (p.review) rows.push("  - " + (p.review.decision === "usable" ? "Användbar som referens. " : "Användbar med förbehåll. ") +
+      p.review.note + (p.review.cardPrint ? " Korttryck " + p.review.cardPrint + "." : ""));
     if (p.seated && front?.seated) {
       const frame = { ...p, seated: p.seated };
       const check = checkSeatedFrame(frame, { ...front, seated: front.seated });

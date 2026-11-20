@@ -1,10 +1,11 @@
 import { useRef } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
 import { checkSeatedFrame, seatedStandard } from "../lib/seated-review";
+import { modelPhotoRoles } from "../lib/photo-review";
 import styles from "./modeling.module.css";
 
 export function PhotoEvidence({ photo, project }: { photo: Photo; project: DealerMaterial }) {
-  const sources = [...(project.geometry?.sources ?? []), ...(project.appearance?.sources ?? [])].filter(s => s.sha256 === photo.sha256);
+  const roles = modelPhotoRoles(photo, project);
   const front = project.photos.find(p => p.id === "sittande/front");
   const check = photo.seated && front?.seated ? checkSeatedFrame({ ...photo, seated: photo.seated }, { ...front, seated: front.seated }) : null;
   const edition = new URLSearchParams({ dealer: project.dealer, edition: project.edition });
@@ -13,14 +14,14 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   return <div className={styles.sourceNote}>
     <p><strong>{photo.format} · {dimensions([photo.width, photo.height])}</strong>{photo.targetAngle !== undefined &&
       (photo.group === "Sittande" ? " · receptets sidovinkel " : " · målvinkel ") + photo.targetAngle + "°"}</p>
-    <p>{sources.length ? sources.map(s => roleName[s.role]).join(" och ") : "Referens i bildserien"}</p>
+    <p>{roles.length ? roles.map(s => roleName[s]).join(" och ") : "Referens i bildserien"}</p>
     {photo.group === "Sittande" && <p>Fotokamerans höjd över golvet och faktiska lutning är okända.</p>}
     {check?.review && <p className={styles.photoWarning}>Granska utsnittet. {check.scaleDiffers &&
       "Kroppens bildskala avviker " + Math.abs(check.scaleDelta).toLocaleString("sv-SE", { maximumFractionDigits: 1 }) +
       " % från sittfronten (gräns " + seatedStandard.scalePercent + " %). "}
       {check.centreDiffers && "Kroppens mitt ligger på en annan bildhöjd. "}{check.formatDiffers && "Originalens pixelmått skiljer sig."}</p>}
-    {sources.some(s => s.role === "surface") && photo.group === "Ansikte" && <p>Porträttet ger hud, drag och tatueringar till huvudets fotoyta. Blick, blinkning och tal behöver egna rörelser.</p>}
-    {sources.some(s => s.role === "surface") && photo.id === "hander/handryggar" && <p>Handryggarna ger hud, naglar och tatueringar. Fingerlederna styr rörelsen i ett grepp.</p>}
+    {roles.includes("surface") && photo.group === "Ansikte" && <p>Porträttet ger hud, drag och tatueringar till huvudets fotoyta. Blick, blinkning och tal behöver egna rörelser.</p>}
+    {roles.includes("surface") && photo.id === "hander/handryggar" && <p>Handryggarna ger hud, naglar och tatueringar. Fingerlederna styr rörelsen i ett grepp.</p>}
     {(photo.id === "hander/kortdrag-vanster" || photo.id === "rorelsereferens/kortvandning-hoger") &&
       <p>Greppbilden visar hur fingrarna möter kortet. En synkad front- och sidofilm ger rörelsens tempo och visar fingrar som skyms från den andra kameran.</p>}
     {photo.observed && <><p>{photo.observed.kalla}</p><details>
@@ -49,6 +50,9 @@ function FilmEvidence({ film }: { film: DealerMaterial["films"][number] }) {
 
 export default function MaterialEvidence({ project }: { project: DealerMaterial }) {
   const model = project.geometry, look = project.appearance;
+  const geometryPhotos = project.photos.filter(p => modelPhotoRoles(p, project).includes("geometry"));
+  const posePhotos = project.photos.filter(p => modelPhotoRoles(p, project).includes("posture"));
+  const surfacePhotos = project.photos.filter(p => modelPhotoRoles(p, project).includes("surface"));
   const query = new URLSearchParams({ dealer: project.dealer });
   if (project.revision) query.set("revision", project.revision);
   const doc = "/api/material?" + query + "&report=";
@@ -61,6 +65,13 @@ export default function MaterialEvidence({ project }: { project: DealerMaterial 
       {look && <div><dt>Fotoyta</dt><dd>{look.sources.length} källbilder{look.atlas && " · " + dimensions(look.atlas)}</dd></div>}
       <div><dt>Filmer för modellen</dt><dd>{project.films.length}</dd></div>
     </dl>}
+    {geometryPhotos.length > 0 && <div className={styles.photoOrigin}>
+      <h3>Hur används vinklarna?</h3>
+      <p><strong>{geometryPhotos.map(p => p.name).join(", ")}</strong> ger kroppsgeometrin.
+        {posePhotos.length > 0 && " " + posePhotos.map(p => p.name).join(" och ") + " används för att jämföra hållningen från sidan."}</p>
+      {surfacePhotos.length > 0 && <p><strong>{surfacePhotos.length} foton ger modellens yta.</strong> De synliga delarna projiceras på kroppen och blandas i en gemensam textur. Underlaget är {surfacePhotos.map(p => p.name.toLocaleLowerCase("sv")).join(", ")}.</p>}
+      <p>Rörelsen skapas i riggens leder. Greppbilderna visar var fingrarna ska möta kortet. När kortbanan och lederna följer samma tidslinje kan samma giv renderas från båda stolarna.</p>
+    </div>}
     {project.issues.length > 0 && <ul>{project.issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul>}
     {project.motions.map(({ sha256, motion, url }) => <details key={sha256}><summary>Kortprov · {motion.take}</summary>
       <p>{motion.card} · {motion.keyframes} samplade lägen · {(motion.end - motion.start).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} s</p>
