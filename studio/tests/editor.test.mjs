@@ -9,6 +9,7 @@ import { pathToFileURL } from "node:url";
 import next from "next";
 import { chromium } from "playwright-core";
 import sharp from "sharp";
+import { samPanoramaTake, seatedPaulina } from "../lib/panorama-deals.ts";
 
 test(
   "två beskurna bilder, exakt JSON och filmgranskning återkommer från en sparad version",
@@ -167,7 +168,14 @@ test(
           await view.goto(origin + "/bordsprov/panorama/gothic-manor?stol=4&vy=giv");
           await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
           const take = await view.locator("#givkontroll").getAttribute("data-take");
-          assert.match(take, /^samspel-v2-v[1-9]\d*$/);
+          const samLinks = view.getByRole("navigation", { name: "Tagning" }).getByRole("link", { name: /^SAM-sittmodell v4 · givprov / });
+          if (await samLinks.count()) {
+            assert.equal(take, new URL(await samLinks.first().getAttribute("href"), view.url()).searchParams.get("tagning"));
+            const report = await (await view.request.get(origin + "/api/material?report=json&dealer=paulina&revision=" + seatedPaulina)).json();
+            const current = report.seatedTrial?.film?.take;
+            if (report.seatedTrial?.id === samPanoramaTake.geometry && Number(current?.match(/^giv-sam-v4-v([1-9]\d*)$/)?.[1]) >= 3)
+              assert.equal(take, current);
+          } else assert.match(take, /^samspel-v2-v[1-9]\d*$/);
           assert.equal(new URL(view.url()).searchParams.get("tagning"), take);
           const blink = view.getByRole("button", { name: "Blinkning", exact: true });
           const frame = await blink.getAttribute("data-frame");
@@ -179,6 +187,14 @@ test(
           await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
           assert.equal(await view.locator("#givkontroll").getAttribute("data-take"), take);
           assert.equal(await view.locator("#giv-ruta").inputValue(), frame);
+          const frozen = view.getByRole("link", { name: "SAM-sittmodell v4 · givprov 3", exact: true });
+          if (await frozen.count()) {
+            await frozen.click();
+            await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
+            assert.equal(await view.locator("#givkontroll").getAttribute("data-take"), "giv-sam-v4-v3");
+            assert.equal(await view.locator("#givkontroll").getAttribute("data-motion"), samPanoramaTake.motion);
+            assert.equal(await view.locator("#giv-ruta").inputValue(), frame);
+          }
         } finally {
           await view.close();
         }

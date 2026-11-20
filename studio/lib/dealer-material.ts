@@ -187,12 +187,26 @@ export async function seatedTrialModel(material: DealerMaterial, trial: Photo, i
     if (!look || look.parent !== model.sha256) bad("Sittmodellprovets fotoyta saknas eller tillhör en annan kropp.");
     const reviewed = includeFilm && candidate.motion && candidate.filmRecord ?
       await reviewedTrialFilm(material.dealer, model.sha256, look.sha256, candidate.motion, candidate.filmRecord) : undefined;
-    return { ...body, appearanceUrl: url(material.dealer, { model: look.sha256 }), film: reviewed?.film };
+    return { ...body, appearanceUrl: url(material.dealer, { model: look.sha256 }), ...reviewed };
   } catch (error) {
     if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
     return { ...body, appearanceError: "Fotoytan kunde inte verifieras för den här SAM-kroppen. Provet visas med neutral yta." };
   }
 }
+
+export async function currentSeatedTrial(project: DealerMaterial): Promise<Awaited<ReturnType<typeof seatedTrialModel>> | null> {
+  if (project.dealer !== "paulina" || project.edition !== "fas-1/v1" || !project.revision) return null;
+  try {
+    const trial = await readSeatedProfileTrial(project.dealer, project.edition);
+    if (trial?.revision === project.revision && project.photos.some(p => p.id === "sittande/front" && p.sha256 === trial.frontSha256 && p.seated))
+      return await seatedTrialModel(project, trial.photo, true);
+  } catch (error) {
+    if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
+    project.issues.push("SAM-provet med den nya sittprofilen kunde inte verifieras.");
+  }
+  return null;
+}
+
 export async function reviewedTrialFilm(dealer: string, geometry: string, appearance: string, motion: string, receipt: string) {
   if (!hex.test(motion) || !hex.test(receipt)) return;
   const store = path.join(avatarDir(dealer), "3d", "versioner");
@@ -201,7 +215,7 @@ export async function reviewedTrialFilm(dealer: string, geometry: string, appear
     const animation = motions.find(m => m.sha256 === motion && m.schema === 1 && m.parent === appearance && m.motion.appearance === appearance);
     if (!animation) return;
     const [film] = await filmsFor(dealer, store, geometry, appearance, [animation], [], receipt);
-    if (film?.appearance === appearance && film.motion === motion && hasReviewedSeatCameras(film)) return { film, animation };
+    if (film?.appearance === appearance && film.motion === motion && hasReviewedSeatCameras(film)) return { film, animation, receipt };
   } catch (error) {
     if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
   }

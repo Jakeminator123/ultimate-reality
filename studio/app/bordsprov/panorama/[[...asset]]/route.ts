@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { LocalError, requireLocal } from "../../../../lib/storage";
 import { panoramaRooms } from "../../../../lib/panorama-rooms";
-import { panoramaDeals, samPanoramaDeal, samPanoramaTake, seatedPaulina } from "../../../../lib/panorama-deals";
-import { dealerMaterial, readDealingStudies, reviewedTrialFilm } from "../../../../lib/dealer-material";
+import { panoramaDeals, samPanoramaDeals, samPanoramaTake, seatedPaulina } from "../../../../lib/panorama-deals";
+import { currentSeatedTrial, dealerMaterial, readDealingStudies, reviewedTrialFilm } from "../../../../lib/dealer-material";
 import { tableFinishes } from "../../../../lib/table-finishes";
 
 export async function GET(request: Request, { params }: { params: Promise<{ asset?: string[] }> }) {
@@ -23,11 +23,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       let deals: ReturnType<typeof panoramaDeals> = [];
       if (view === "giv") {
         const sam = samPanoramaTake;
-        const [material, studies, reviewed] = await Promise.all([
-          dealerMaterial("paulina", seatedPaulina), readDealingStudies("paulina"),
-          reviewedTrialFilm("paulina", sam.geometry, sam.appearance, sam.motion, sam.receipt),
-        ]);
-        deals = [...panoramaDeals(material, studies), ...samPanoramaDeal(reviewed)];
+        const [material, studies] = await Promise.all([dealerMaterial("paulina", seatedPaulina), readDealingStudies("paulina")]);
+        const candidate = await currentSeatedTrial(material);
+        const current = candidate && "film" in candidate && candidate.film && candidate.animation && candidate.receipt
+          ? { film: candidate.film, animation: candidate.animation, receipt: candidate.receipt } : undefined;
+        const frozen = current?.receipt === sam.receipt ? current :
+          await reviewedTrialFilm("paulina", sam.geometry, sam.appearance, sam.motion, sam.receipt);
+        deals = [...samPanoramaDeals(frozen, current), ...panoramaDeals(material, studies)];
       }
       const requestedTake = query.get("tagning");
       const deal = requestedTake ? deals.find(candidate => candidate.take === requestedTake) : deals[0];
@@ -69,7 +71,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       }
       controls = dealLink + controls;
       const takeMenu = deals.length > 1 ? `<nav aria-label="Tagning">${deals.map(candidate =>
-        `<a${candidate === deal ? ' aria-current="page"' : ""} href="?stol=${seat}&amp;vy=giv&amp;tagning=${candidate.take}${frameQuery}${matQuery}">${candidate.take === samPanoramaTake.take ? samPanoramaTake.label : candidate.take}</a>`).join("")}</nav>` : "";
+        `<a${candidate === deal ? ' aria-current="page"' : ""} href="?stol=${seat}&amp;vy=giv&amp;tagning=${candidate.take}${frameQuery}${matQuery}">${candidate.take.replace(/^giv-sam-v4-v(\d+)$/, "SAM-sittmodell v4 · givprov $1")}</a>`).join("")}</nav>` : "";
       const playback = deal ? `<fieldset id="givkontroll" disabled data-take="${deal.take}" data-motion="${deal.motion}" data-fps="${deal.fps}"><legend>Giv till plats 4 · ${deal.take}</legend>${takeMenu}
         <button type="button" id="spela">Spela upp</button>
         <label>Bildruta <input type="range" id="giv-ruta" min="0" max="${deal.lastFrame}" value="0" step="1"></label><output for="giv-ruta" id="giv-tid">0 / ${deal.lastFrame}</output>
