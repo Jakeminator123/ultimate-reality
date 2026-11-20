@@ -12,4 +12,4 @@
 
 I samma landningspose ligger höger pek- och långfinger 0,24 respektive 0,25 mm från kortet. Ring- och lillfinger ligger 7,33 respektive 7,30 mm från kortet. Vid fortsatt filmgranskning återstår handbytet från stol 1, hårkonturen vid nacken och ytan under nästippen. [Kortytornas mått](../test/dealer/paulina/handgranskning-v8-v9/kortytor.json) · [Studions plan](../studio/PLAN.md)
 
-[Repoöversikten](STUDIOSTRUKTUR.md) visar var bilder, modeller, rörelser och prov hör hemma. [Gallringsprotokollet](UNDERHALL.md#omtag-från-stillbilderna) anger vilka kopior som togs bort. De äldre försöksanteckningarna går att läsa i sin helhet med `git show 170e3d3:information/HANDOFF.md`.
+[Paulinas provkatalog](PAULINAS_PROV.md) knyter de 46 provmapparna till riggbygge, rörelse, jämförelse eller visning. [Scenkatalogen](../test/README.md) ger motsvarande ingång till bord, kortsko och rum. [Gallringsprotokollet](UNDERHALL.md#genomgång-av-hela-repot) anger vad som togs bort och var de äldre visarna finns. De tidigare försöksanteckningarna går att läsa i sin helhet med `git show 170e3d3:information/HANDOFF.md`.

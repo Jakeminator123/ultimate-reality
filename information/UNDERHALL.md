@@ -70,4 +70,20 @@ Vid genomgången den 20 november gallrades **35 kopior, 67 391 763 byte**. De be
 | Den fristående kopian `kasinorum-utdrag-100/ledvolym.html` | [Offlinevisaren för ledvolym](../test/artefakter/kasinorum-utdrag-100/handkandidat/ledvolym/granska.html) | 17 288 974 |
 | Tre äldre `kontur.json` i `skolage-v1/arbetskant`, `arbetskant-v2` och `arbetskant-v3` | [Den identiska v4-konturen](../test/artefakter/skolage-v1/arbetskant-v4/kontur.json). Varje historisk variant har sin egen bana. [Köranvisning](../test/artefakter/skolage-v1/README.md#återskapa) | 41 982 |
 
-`lab.ps1 clean --dry-run` hittade inga gallringsbara SAM-körningar eller Python-cacher. I givprov 1, 3 och 5 skiljer sig vissa mellanexporter från de registrerade filerna. I prov 3 läser blinkbygget sin mellanexport. Användningen av de avvikande versionerna i prov 1 och 5 är oklar. Likadana filmrutor kan också ha egna roller i två registrerade tagningar.
+`lab.ps1 clean --dry-run` hittade inga gallringsbara SAM-körningar eller Python-cacher. Mellanexporterna i givprov 1, 3 och 5 fick en separat källkontroll i genomgången nedan. Likadana filmrutor kan också ha egna roller i två registrerade tagningar.
+
+## Genomgång av hela repot
+
+Den fortsatta granskningen den 20 november omfattade 46 Paulina-provmappar, 23 scen- och bordprovfamiljer, 142 spårade studiofiler och åtta verktyg under `tools/`. Alla 68 mediafiler i Paulinas versionslager matchade SHA-256. För de 131 registerfilerna kontrollerades modellidentitet, filmkvitton, granskningsrutor och versionsrelationer enligt respektive registerformat. [Paulinas prov](PAULINAS_PROV.md) · [Scenprov och historiska visare](../test/README.md)
+
+| Ur arbetsytan | Hur underlaget bevarades | Byte |
+| --- | --- | ---: |
+| 32 filer i `giv-sam-v4-v5/filmprov-4ad4120c` | Varje fil matchade sitt namn och sin SHA-256 i tagningens rot. Rotens GLB och MP4 kontrollerades mot filmkvittot och versionslagret. | 18 153 667 |
+| Två kopior under `worldlabs/kasinorum-v1` | Rummets dokumentation öppnar nu samma punktmoln som studion och samma jämförelsebild som golvprovet. [Rumsfiler](../test/bakgrund/worldlabs/kasinorum-v1/README.md) | 31 432 630 |
+| Åtta filer i `giv-sam-v4-v4/forsta-filmens-kontaktprov` | Den separata varianten med handvila bevarar samtliga åtta filer, inklusive rörelsen `6d9bcf65`, och dess egen film och granskning. [Provets mätkvitto](../test/dealer/paulina/giv-sam-v4-v4/filmprov-handvila/capture.json) | 31 403 393 |
+| 59 WebP-mellanbilder i äldre skolägen och 100°-utdrag | 43 bilder från `mhr-ny` och 16 materialvyer i `riktig-arm` och tre arbetskantsprov matchade exakt samma ruta och kamera i de bevarade HTML-visarna. [MHR-arm](../test/artefakter/kasinorum-utdrag-100/handkandidat/mhr-arm/granska.html) · [100°-utdrag](../test/artefakter/kasinorum-utdrag-100/utdrag.html) | 3 355 458 |
+| 39 WebP i `skolage-v1/arbetskant-v2/bilder` | De nio sparade GLB-poserna gav exakt samma bildbytes vid omrendering. Mappen flyttades till Windows papperskorg. Där verifierades dess ursprungliga sökväg, alla filnamn och samtliga SHA-256. | 2 282 972 |
+
+Den andra genomgången tog bort **101 kopior på 84 345 148 byte** och lade **39 återbildade filer på 2 282 972 byte** i papperskorgen. De fyra fristående 100°-visarna med unika bildrutor flyttades oförändrade från `test/artefakter/kasinorum-utdrag-100/` till syskonmappen `utdrag-100-historik/`. SHA-256 och deras relativa rumslänk kontrollerades på den nya platsen. [Öppna historiska visare](../test/README.md)
+
+V1:s gamla v4-mellanexport gav andra GLB-bytes vid ombygge. V3:s blinkbygge läser sin mellanexport direkt. Två v5-mellanexporter är dokumenterade rörelsekällor till äldre v6-varianter. De bevaras med sina exakta versions-ID. De historiska arbetskantsbilder som gav olika bytes vid omrendering finns också kvar. [Underlagen per version](PAULINAS_PROV.md)

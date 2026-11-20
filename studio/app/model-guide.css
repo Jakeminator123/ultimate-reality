@@ -1,5 +1,4 @@
-.studio-modes { max-width: 100%; flex-wrap: wrap; }
-.studio-modes a:focus-visible, .model-guide a:focus-visible, .draft-estimate a:focus-visible {
+.model-guide a:focus-visible, .draft-estimate a:focus-visible {
   outline: 3px solid var(--accent); outline-offset: 2px;
 }
 .draft-estimate {
@@ -80,6 +79,5 @@
   .model-picker h2, .picker-note { padding-left: 0; }
   .model-picker button { display: none; }
   .compact-picker { display: block; width: 100%; }
-  .studio-modes a { padding: 6px 8px; }
   .model-guide { min-width: 0; grid-template-columns: minmax(0, 1fr); }
 }

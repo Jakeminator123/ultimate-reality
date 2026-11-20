@@ -26,6 +26,6 @@
 @media (max-width: 850px) { .dealers { grid-template-columns: minmax(0, 1fr); } .create { padding: 20px; } .create p { max-width: 58ch; } }
 @media (max-width: 520px) {
   .current { grid-template-columns: minmax(0, 1fr); }
-  .portrait { height: clamp(205px, 62vw, 300px); }
+  .portrait { height: clamp(205px, 62vw, 300px); grid-template-rows: minmax(0, 1fr); }
   .portrait img { object-position: center 32%; }
 }

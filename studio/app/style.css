@@ -90,55 +90,11 @@ pre,
 .monitor-bottom {
   font-family: var(--mono);
 }
-.top {
-  background: #142e25;
-  color: #f7f6ea;
-  border-bottom: 3px solid #a48756;
-}
-.top-inner,
 main {
   max-width: 1360px;
   margin: auto;
   padding: 0 clamp(20px, 4.3vw, 72px);
 }
-.top-inner {
-  height: 65px;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-}
-.brand-icon {
-  height: 35px;
-  width: 35px;
-  display: grid;
-  place-items: center;
-  color: #e7c991;
-  border: 1px solid #567063;
-  border-radius: 8px;
-}
-.top b {
-  font-size: 19px;
-  letter-spacing: -0.7px;
-}
-.divider {
-  width: 1px;
-  height: 21px;
-  background: #496055;
-  margin: 0 3px;
-}
-.module {
-  font-size: 14px;
-  color: #d4dfd4;
-}
-.local {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: #d6e3d0;
-  font-size: 12px;
-}
-.local i,
 .monitor-top i {
   width: 7px;
   height: 7px;
@@ -681,7 +637,6 @@ dialog::backdrop {
   .settings {
     padding: 16px;
   }
-  .top-inner,
   main {
     padding: 0 20px;
   }
@@ -710,24 +665,9 @@ dialog::backdrop {
   .hero h1 {
     letter-spacing: -1.8px;
   }
-  .top-inner,
   main {
     padding-left: 15px;
     padding-right: 15px;
-  }
-  .top-inner {
-    gap: 8px;
-    height: 56px;
-  }
-  .top b {
-    font-size: 16px;
-  }
-  .module {
-    font-size: 12px;
-  }
-  .local {
-    font-size: 0;
-    gap: 0;
   }
   .request {
     padding: 16px;
@@ -754,35 +694,6 @@ dialog::backdrop {
   .thumb {
     height: 80px;
   }
-}
-:root {
-  --scene-brass: #b78946;
-}
-.studio-modes {
-  display: flex;
-  gap: 5px;
-  margin: 0 0 18px;
-  width: max-content;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: #e8eae1;
-}
-.studio-modes a {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--muted);
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 650;
-  padding: 6px 13px;
-}
-.studio-modes a[aria-current] {
-  background: var(--white);
-  color: var(--pine);
-  box-shadow: 0 1px 4px #18352920;
 }
 .pose-heading {
   display: flex;

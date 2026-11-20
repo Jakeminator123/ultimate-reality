@@ -1,6 +1,8 @@
 # Metoder för dealerscenen
 
-Det aktuella utdragsprovet kombinerar Jakobs rum **RUM-03**, det större bordet **BORD-02**, skannade bordsytor **YTA-02**, den vridna skon **SKO-03**, kortbanan **KORT-02** och Paulinas rigg **DEALER-01**. [Se samma utdrag i 70/30-riktning från Stol 4 och Stol 1](../test/artefakter/skoriktning-70-30/README.md).
+Paulinas tvåkortsgiv använder sittmodell v4, samma bord och kort i två stolkameror. Se [kropps- och rörelsekedjan](PAULINAS_PROV.md) och [de scenfiler som spelaren läser](../test/README.md).
+
+Det tidigare utdragsprovet med 08-riggen kombinerar Jakobs rum **RUM-03**, bordet **BORD-02**, bordsytorna **YTA-02**, skon **SKO-03**, kortbanan **KORT-02** och **DEALER-01**. [Utdraget i 70/30-riktning från stol 4 och stol 1](../test/artefakter/skoriktning-70-30/README.md)
 
 ## Bakgrund
 

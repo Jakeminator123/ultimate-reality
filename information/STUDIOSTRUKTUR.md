@@ -20,3 +20,15 @@ För att börja med en dealer, öppna **Fas 1 → Bildpipeline**. Där går det 
 | `information/` | Beslut, metod, källregister och överlämning. Filmreferensernas register länkar till sin privata lokala mediemapp. [Filmregister](random/blackjack-rorelsereferenser/MATERIAL.md) · [Underhåll och Git](UNDERHALL.md) |
 
 Vid ett synligt fel anger bildgranskaren materialversion och källbild. För en giv tillkommer tagning, stol, kort och ruta, så att samma vy kan öppnas efter rättningen. [Bildgranskarens uppdrag](../.codex/agents/bildgranskare.toml)
+
+## Hur hittar jag rätt version?
+
+| Det du letar efter | Börja här |
+| --- | --- |
+| Paulinas bildoriginal eller den korrigerade sittprofilen | [Stillbilderna](PAULINAS_STILLBILDER.md) anger källa till geometri, hållning och fotoyta per vy. |
+| En viss rigg, ytversion, giv eller handmätning | [Paulinas provkatalog](PAULINAS_PROV.md) tar upp de 46 mapparna under `test/dealer/paulina` och de 13 namngivna GLB-exporterna i avatarmappen. |
+| Bordet, kamerorna, rummet eller ett tidigare skoprov | [Scenkatalogen](../test/README.md) täcker 23 provfamiljer och de flyttade offlinevisarna. Delar av äldre ljus- och bordsprov laddas fortfarande direkt av panoramat. |
+| Modell-, film- och bildkvitton | I Paulinas versionslager är 3 GLB-filer kroppsgeometrier, 5 fotoytor och 23 animationer. Där finns även 21 MP4 och 16 PNG. Av dessa PNG är 12 bildutgåvans vyer och 4 kontrollrutor som öppnas från de versionsbundna rörelseunderlagen i `information/`. [Materialregistret](MATERIALVERSIONER.md) · [Inläsningen i studion](../studio/lib/dealer-material.ts) |
+| Koden bakom en vy eller ett lokalt verktyg | Studions sidor och API har sina ingångar under `studio/app`. Kameraprovets CLI finns under `studio/tools`, de generiska bildrecepten under `studio/fotomall` och provdockans nio bilder under `studio/public/fotomall/docka`. För egna modellprov startar du med [lab.ps1](../lab.ps1) eller [modellverktygen](../tools/). |
+
+De lokala mätningarna i `information/lokalt/` och de tidigare rörelsefilmerna i `information/random/` kompletterar proven. Nya grundbilder väljs från avataren eller labbets inkorg. [Underhåll och gallringsprotokoll](UNDERHALL.md)

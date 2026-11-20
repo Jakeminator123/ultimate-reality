@@ -8,6 +8,8 @@ Ett fristående lokalt labb för att göra dealerfilmer där handen släpper rä
 2. Öppna sittmodell v2 för att jämföra riggen med fotona. I tvåkortsgiven visar stol 4 och stol 1 samma rörelse på sittmodell v4. [Modellvisaren](http://127.0.0.1:4317/#modellering) · [Spela tvåkortsgiven](http://127.0.0.1:4317/modellering/sekvens?dealer=paulina&id=3003aba81a5e84f1afc19143b9fab370e1a508360e5aa8849bd68d690c0d8a59)
 3. Följ överlämningen för nästa uppgift. Egna grundbilder hör hemma i `avatars/<namn>/` eller i labbets `inputs`. [Aktuell överlämning](information/HANDOFF.md) · [Studioplan](studio/PLAN.md) · [Agentinstruktioner](AGENTS.md)
 
+För att hitta ett äldre prov, slå upp mappen i [Paulinas kroppar och tagningar](information/PAULINAS_PROV.md) eller [katalogen över bord, rum och kortsko](test/README.md). Där står vilka delar som dagens giv läser direkt och vilka som användes för att bygga den.
+
 ## Redigerbar dealerstudio
 
 Öppna [Startprompter](http://127.0.0.1:4317/#promptmallar) för labbets sju recept eller dina egna sparade varianter. Välj ett klipp, redigera texten och använd den i filmutkastet. **Spara egen mall** lagrar namn, text, modell och längd på labbdisken.
