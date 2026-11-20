@@ -6,13 +6,16 @@ import json
 import msvcrt
 import os
 import re
-import shutil
 import stat
+import subprocess
 import sys
 import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+from lab_cleanup import clean_bytecode, discard, finish_trial, local, registered_runs, trial_stage
+from material_versions import sha
 
 PROJECT = Path(__file__).resolve().parents[1]
 SCHEMA = "ultimate-reality-lab/v1"
@@ -99,30 +102,44 @@ def check_tree(run, runs):
 
 
 def clean(root, dry_run=False):
+    clean_bytecode(PROJECT, dry_run)
     runs = root / "runs"
-    for run in sorted(runs.iterdir()):
-        if not RUN_ID.fullmatch(run.name):
-            continue
+    marked = [p for p in sorted(runs.iterdir()) if RUN_ID.fullmatch(p.name)]
+    if not marked:
+        return
+    try:
+        protected = registered_runs(PROJECT)
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        print(f"Behåller temporära körningar eftersom modellregistret inte gick att kontrollera: {error}",
+              file=sys.stderr)
+        return
+    for run in marked:
         try:
             data = manifest(run)
-            stamp = datetime.fromisoformat(data.get("finished") or data["started"])
+            if run.name in protected or data["state"] == "running" or not data.get("finished"):
+                continue
+            stamp = datetime.fromisoformat(data["finished"])
             if now() - stamp < RETENTION:
                 continue
+            outputs = data.get("outputs")
+            if not isinstance(outputs, dict):
+                print(f"Behåll {run.name}: filinventering saknas.")
+                continue
             check_tree(run, runs)
-            if dry_run:
-                print(f"Kan gallras: {run}")
-            else:
-                # The process holds the lab lock. Preserve run.json until payload removal succeeds.
-                for item in run.iterdir():
-                    if item.name == "run.json":
-                        continue
-                    if item.is_dir():
-                        shutil.rmtree(item)
-                    else:
-                        item.unlink()
-                (run / "run.json").unlink()
+            metadata = run / "run.json"
+            receipt = sha(metadata)
+            if json.loads(metadata.read_text(encoding="utf-8")) != data:
+                raise ValueError("Körningsmärkningen ändrades under gallringen.")
+            items = sorted(p for p in run.iterdir() if p.name != "run.json")
+            if any(not p.is_file() or p.name not in outputs or sha(p) != outputs[p.name] for p in items):
+                print(f"Behåll {run.name}: en ny eller ändrad arbetsfil finns kvar.")
+                continue
+            for item in items:
+                discard(runs, item, outputs[item.name], dry_run)
+            discard(runs, metadata, receipt, dry_run)
+            if not dry_run:
+                local(runs, run)
                 run.rmdir()
-                print(f"Gallrad: {run}")
         except (KeyError, OSError, TypeError, ValueError) as exc:
             print(f"Hoppade över {run.name}: {exc}", file=sys.stderr)
 
@@ -157,6 +174,11 @@ def run_sam(root, inputs, mesh_only):
         raise
     finally:
         data["finished"] = now().isoformat()
+        # Only these names are emitted by estimate(). Other files belong to their writers.
+        suffixes = (".npz", ".obj") if mesh_only else (".npz", ".obj", ".png")
+        outputs = [run / f"{index:02d}-{path.stem}{suffix}"
+                   for index, path in enumerate(sources, 1) for suffix in suffixes]
+        data["outputs"] = {p.name: sha(local(root, p)) for p in outputs if p.is_file()}
         write_json(run / "run.json", data)
     print(f"Färdig: {run}")
 
@@ -189,6 +211,7 @@ def export_front_model(mesh, landmarks, pose):
         temp.replace(output)
     finally:
         temp.unlink(missing_ok=True)
+    return output
 
 
 def export_views(root, name):
@@ -210,11 +233,20 @@ def export_views(root, name):
             mesh = trimesh.Trimesh(vertices=data["pred_vertices"] * [1, -1, -1],
                                    faces=data["faces"], process=False)
             if "pred_keypoints_3d" in data:
-                export_front_model(mesh, data["pred_keypoints_3d"], pose)
+                front = export_front_model(mesh, data["pred_keypoints_3d"], pose)
+            else:
+                front = None
         page = pose.with_suffix(".html")
         staged = page.with_suffix(".tmp")
         staged.write_text(scene_to_html(mesh.scene()), encoding="utf-8")
         staged.replace(page)
+        if run.parent == root / "runs":
+            record = manifest(run)
+            if "outputs" in record and pose.name in record["outputs"]:
+                for produced in (page, front):
+                    if produced:
+                        record["outputs"][produced.name] = sha(local(root, produced))
+                write_json(run / "run.json", record)
         print(page)
 
 
@@ -228,8 +260,14 @@ def main():
     keep.add_argument("id")
     view = commands.add_parser("view", help="Skapa en lokalt öppningsbar, vridbar HTML-vy av varje foto.")
     view.add_argument("id")
-    tidy = commands.add_parser("clean", help="Gallra temporära körningar som är minst sju dygn gamla.")
+    tidy = commands.add_parser("clean", help="Gallra verifierad Python-cache och avslutade SAM-prov efter sju dygn.")
     tidy.add_argument("--dry-run", action="store_true")
+    finish = commands.add_parser("finish-trial", help="Avsluta ett registrerat filmprov och gallra dess mellanexporter.")
+    finish.add_argument("dealer")
+    finish.add_argument("take")
+    finish.add_argument("stage")
+    finish.add_argument("--register", metavar="RECEPT.py", help="Kör tagningens registreringsrecept före gallringen.")
+    finish.add_argument("--dry-run", action="store_true")
     commands.add_parser("list", help="Visa körningar och lagringsplats.")
     args = parser.parse_args()
     with storage() as root:
@@ -237,6 +275,16 @@ def main():
             run_sam(root, args.photos, args.mesh_only)
         elif args.action == "clean":
             clean(root, args.dry_run)
+        elif args.action == "finish-trial":
+            if args.register and not args.dry_run:
+                if not re.fullmatch(r"[A-Za-z0-9_-]+\.py", args.register):
+                    raise ValueError("Ange registreringsreceptet med dess lokala filnamn.")
+                trial = trial_stage(PROJECT, args.dealer, args.take, args.stage).parent
+                recipe = local(PROJECT, trial / args.register)
+                result = subprocess.run([sys.executable, "-B", str(recipe)], cwd=trial)
+                if result.returncode:
+                    sys.exit(result.returncode)
+            finish_trial(PROJECT, args.dealer, args.take, args.stage, args.dry_run)
         elif args.action == "view":
             export_views(root, args.id)
         elif args.action == "keep":

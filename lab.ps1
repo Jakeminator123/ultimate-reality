@@ -1,3 +1,9 @@
+<#
+.EXAMPLE
+    .\lab.ps1 clean --dry-run
+.EXAMPLE
+    .\lab.ps1 finish-trial paulina giv-sam-v4-v5 filmprov-4ad4120c --dry-run
+#>
 [CmdletBinding()]
 param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
 $ErrorActionPreference = 'Stop'
