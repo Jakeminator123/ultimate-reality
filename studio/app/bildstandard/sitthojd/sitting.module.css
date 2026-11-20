@@ -7,6 +7,13 @@
 .page header h1 { font-size: clamp(30px,4vw,52px); margin: 4px 0; letter-spacing: -.045em; }
 .intro, .explanation, .note p { max-width: 80ch; line-height: 1.55; }
 .intro { font-size: 18px; }
+.reviewBar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; padding: 14px 17px; background: #e8eee8; border: 1px solid #cdd8ce; border-radius: 9px; }
+.reviewBar > div { display: grid; gap: 4px; }
+.reviewBar > div span, .tolerance small { color: #45594b; font-size: 13px; }
+.tolerance { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; font-size: 14px; }
+.tolerance input, .tolerance small { grid-column: 1 / -1; }
+.page input { accent-color: #315b46; }
+.tolerance input { width: 100%; margin: 4px 0; }
 .tools { margin: 22px 0 8px; gap: 22px; }
 .tools > div { gap: 4px; padding: 4px; border-radius: 9px; background: #e4e9e2; }
 .tools button { border: 0; padding: 8px 12px; border-radius: 6px; color: #3d5445; background: transparent; }
@@ -15,22 +22,42 @@
 .explanation, .legend, .measure { font-size: 14px; color: #425348; }
 .views { display: grid; gap: clamp(5px,1.4vw,16px); grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 20px; }
 .views figure { margin: 0; min-width: 0; }
-.views figcaption { font-weight: 650; margin-bottom: 6px; }
+.views figcaption { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; font-weight: 650; margin-bottom: 6px; }
 .views figcaption span { font-size: .86em; color: #526557; }
 .frame { position: relative; overflow: hidden; background: #ece9f0; border-radius: 7px; }
 .frame img { display: block; width: 100%; height: 100%; object-fit: contain; transform-origin: 50% 0; }
-.line, .seatLine, .dot { position: absolute; pointer-events: none; }
-.line, .seatLine { left: 0; width: 100%; border-top: 1px solid #176d66; }
-.seatLine { border-top: 1px dashed #ad5122; }
-.dot { width: 7px; height: 7px; border: 1px solid white; border-radius: 50%; background: #ad5122; transform: translate(-50%,-50%); }
+.guides { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.guides line, .guides circle, .guides path { vector-effect: non-scaling-stroke; }
+.bodyLine { stroke: #176d66; stroke-width: 1.2; }
+.seatLine { stroke: #94431e; stroke-dasharray: 7 4; }
+.seatDot { fill: #94431e; stroke: white; }
+.eye line { stroke: #774382; stroke-dasharray: 3 4; }
+.eye circle { stroke: #774382; fill: none; stroke-width: 1.8; }
+.cross { stroke: #3c433d; stroke-width: 1.5; filter: drop-shadow(0 1px 1px white); }
+.floor line { stroke: #2359a1; stroke-dasharray: 9 3 2 3; }
+.contact { fill: #2058a1; stroke: white; stroke-width: 1.2; }
+.edge { fill: white; fill-opacity: .4; stroke: #2058a1; stroke-width: 1.5; }
 .measure { margin: 7px 0; }
-.legend { gap: 7px; }
-.legend i, .legend b { width: 19px; border-top: 2px solid #176d66; }
-.legend b { border-top: 2px dashed #ad5122; margin-left: 9px; }
+.warning, .status { margin: 4px 0 0; font-size: 13px; }
+.warning, .flagged { color: #874016; font-weight: 700; }
+.status { color: #425348; }
+.legend { column-gap: 16px; row-gap: 6px; margin: 16px 0; }
+.legend span::before { content: ""; display: inline-block; vertical-align: middle; width: 17px; margin-right: 5px; }
+.bodyKey::before { border-top: 2px solid #176d66; }
+.seatKey::before { border-top: 2px dashed #94431e; }
+.eyeKey::before { border-top: 2px dotted #774382; }
+.floorKey::before { border-top: 2px dashed #2058a1; }
+.dataScroll { overflow-x: auto; }
+.note table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 9px 0; font-variant-numeric: tabular-nums; }
+.note th, .note td { padding: 8px 12px 8px 0; border-bottom: 1px solid #d8dfd7; text-align: left; }
+.note thead th { color: #4a5c50; }
 .note { border-top: 1px solid #cbd4ca; margin-top: 22px; }
 .note h2 { margin-bottom: 5px; font-size: 22px; }
 .note p { margin: 6px 0; }
 @media (max-width: 600px) {
+  .views { grid-template-columns: 1fr; gap: 18px; }
+  .views figure { width: 100%; max-width: 380px; justify-self: center; }
+  .reviewBar > label { width: 100%; }
   .views figcaption { font-size: 13px; }
   .measure { font-size: 12px; }
   .measure a { display: block; }

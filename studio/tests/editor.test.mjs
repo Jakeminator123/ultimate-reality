@@ -161,8 +161,15 @@ test(
           assert.equal(await figures.count(), 3);
           const profile = figures.last().locator("img");
           assert.match(await profile.getAttribute("style"), /scale\(1\)/);
+          const tolerance = page.getByRole("slider", { name: "Gräns för skalskillnad" });
+          await figures.last().getByText("Granska utsnittet", { exact: true }).waitFor();
+          const profileRow = page.getByRole("row").filter({ has: page.getByRole("rowheader", { name: "Profil" }) });
+          await profileRow.getByText("−3,88 %").or(profileRow.getByText("-3,88 %")).first().waitFor();
+          await tolerance.press("End");
+          await figures.last().getByText("Utsnitt inom gränserna", { exact: true }).waitFor();
           await page.getByRole("button", { name: "Samma bildskala" }).click();
           assert.match(await profile.getAttribute("style"), /scale\(1\.040/);
+          if (await profileRow.getByText("2 av 4").count()) await profileRow.getByText("Ej mätbart").waitFor();
           await page.getByRole("checkbox", { name: "Mätlinjer" }).uncheck();
           assert.equal(await figures.locator('[aria-hidden="true"]').count(), 0);
         } else {
@@ -209,10 +216,50 @@ test(
         await page.getByRole("slider", { name: "Vridning" }).press("Home");
         assert.match(await page.locator(".rig-camera summary").innerText(), /Bakifrån/);
         await page.getByRole("button", { name: "Trekvart", exact: true }).click();
-        assert.match(await page.locator(".rig-camera summary").innerText(), /Vänster trekvart · 45° · 3 m/);
+        const cameraSummary = page.locator(".rig-camera summary");
+        assert.match(await cameraSummary.innerText(), /Vänster trekvart · sidled 45° · höjdvinkel 0° · 3 m/);
+        const elevation = page.getByRole("slider", { name: "Höjdvinkel" });
+        await elevation.press("ArrowRight");
+        await elevation.press("ArrowRight");
+        await cameraSummary.getByText("Utanför sittreceptets vinkel").waitFor();
+        assert.match(await cameraSummary.innerText(), /höjdvinkel 2°/);
+        await page.getByRole("button", { name: "Trekvart", exact: true }).click();
+        const pivotHeight = page.getByRole("slider", { name: "Riktpunktens höjd över 3D-golvet" });
+        const cameraHeight = async () => JSON.parse(await canvas.getAttribute("data-camera"));
+        const beforeShift = await cameraHeight();
+        await pivotHeight.press("ArrowRight");
+        const afterShift = await cameraHeight();
+        const shift = afterShift.target[1] - beforeShift.target[1];
+        assert.ok(shift > .004 && shift < .016);
+        assert.ok(Math.abs(shift - (afterShift.position[1] - beforeShift.position[1])) < 1e-6);
+        assert.ok(Math.abs(afterShift.elevation - beforeShift.elevation) < 1e-6);
+        await page.getByRole("button", { name: "Trekvart", exact: true }).click();
+        await page.getByRole("checkbox", { name: "Visa riktpunkt och tillgängliga ögonlinjer" }).check();
+        await page.locator(".rig-target").waitFor();
+        if (await page.locator(".rig-eye-comparison").count()) {
+          await page.locator(".rig-eye-model").waitFor();
+          assert.ok(Number.parseFloat(await page.locator(".rig-eye-model").evaluate(e => e.style.top)) > 0);
+          await page.locator(".rig-eye-photo").waitFor();
+        }
+        await page.getByRole("checkbox", { name: "Visa riktpunkt och tillgängliga ögonlinjer" }).uncheck();
         await look.click();
         assert.equal(await page.getByRole("button", { name: "Leder", exact: true }).getAttribute("aria-pressed"), "true");
         await page.getByRole("button", { name: "Återställ leder" }).click();
+        const jawOption = page.getByLabel("Led att prova").locator('option[value="c_jaw"]');
+        if (await jawOption.count()) {
+          const skeleton = page.getByRole("button", { name: "Skelett", exact: true });
+          const joints = page.getByRole("button", { name: "Leder", exact: true });
+          await skeleton.click(); await joints.click();
+          await page.getByLabel("Led att prova").selectOption("c_jaw");
+          const closedJaw = await canvas.screenshot();
+          await page.getByRole("slider", { name: /Käköppning/ }).press("End");
+          assert.notDeepEqual(await canvas.screenshot(), closedJaw);
+          await page.getByRole("button", { name: "Återställ leder" }).click();
+          assert.deepEqual(await canvas.screenshot(), closedJaw);
+          await skeleton.click(); await joints.click();
+          await page.getByLabel("Led att prova").selectOption("l_lowarm");
+          await page.getByRole("button", { name: "Trekvart", exact: true }).click();
+        }
         if (process.env.STUDIO_RIG_QA_SCREEN) {
           await page.getByRole("checkbox", { name: "Alla 127 leder" }).uncheck();
           await page.locator("summary").filter({ hasText: "Prova armar och fingrar" }).click();

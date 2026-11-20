@@ -1,5 +1,6 @@
 import type { GranskadVy } from "../fotomall/bildserie";
 import type { ActiveDealerModel } from "./modeling";
+import type { SeatedMeasurement } from "./seated-review";
 
 export type Size = [number, number];
 export type Processing = {
@@ -25,7 +26,7 @@ export type MotionRecord = ModelRecord & { motion: {
 export type FilmReview = { schema: 1; film: string; camera: string; frames: number[]; note: string };
 export type Photo = {
   id: string; file: string; group: string; name: string; kind: string; sha256: string; url: string;
-  width: number; height: number; format: string; targetAngle?: number; observed?: GranskadVy;
+  width: number; height: number; format: string; targetAngle?: number; observed?: GranskadVy; seated?: SeatedMeasurement;
 };
 export type Edition = {
   schema: 1; id: string; name: string; edition: string; geometry: string; appearance: string | null;

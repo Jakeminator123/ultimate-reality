@@ -1,4 +1,5 @@
 import { kortinstruktion, referenskort, type Kortstandard } from "./kortstandard";
+import { bildformat, leveransformat } from "./bildformat";
 
 export const basvyer = {
   "staende/front": { roll: "Godkänd ståfront", anvandning: "helkroppens proportioner och klädsel genom serien" },
@@ -47,7 +48,7 @@ const profil = {
 const personbild = {
   ljus: "Använd en stor diffus ljuskälla snett framför personen och mjuk upplättning från motsatt sida. Behåll lampornas lägen, exponeringen och den neutrala vitbalansen genom serien.",
   bakgrund: "Använd en enfärgad, matt ljusgrå studiobakgrund.",
-  format: "stående PNG i 3:4, exempelvis 1080 × 1440 px",
+  format: leveransformat(bildformat.person),
 };
 
 const staende = {
@@ -61,7 +62,7 @@ const staende = {
 const sittande = {
   ...personbild,
   grupp: "Sittande",
-  kamera: "Håll kameran i våg i den sittande personens brösthöjd. Behåll samma brännvidd och avstånd till stolens mitt i de tre vyerna.",
+  kamera: "Placera objektivet i brösthöjd med vågrät optisk axel (0°). Flytta kameran runt stolens mitt vid samma höjd över golvet, radie och brännvidd. Behåll frontens utsnitt.",
   utsnitt: "Visa personen från hjässa till fötter, hela stolen och fötternas kontakt med golvet. Lämna en smal marginal runt motivet.",
   pose: "Sitt mitt på sitsen med bålen upprätt och axlarna avspända. Vila händerna på var sitt lår. Låt knäna peka framåt och båda fötterna vila plant på golvet. Behåll samma sittpose i alla tre vyer.",
   bakgrund: "Placera en enkel stol utan armstöd framför den matta ljusgrå bakgrunden. Använd samma stol genom serien. Håll utrymmet framför personen fritt från bord och bordsskiva.",
@@ -158,7 +159,7 @@ export const bildrecept: Bildrecept[] = [
     pose: "Lägg handflatorna mot ytan och låt fingrarna vila lätt isär. Lägg ett enda spelkort plant bredvid händerna som skalreferens, med baksidan uppåt.",
     ljus: handljus,
     bakgrund: handyta,
-    format: "liggande PNG i 3:2, exempelvis 1536 × 1024 px",
+    format: leveransformat(bildformat.hand),
     kontroll: "Handryggar, naglar och fingertoppar ska synas tydligt. Lämna en glipa mellan händerna och kortet så att kortets fyra hörn är synliga.",
   },
   {
@@ -173,7 +174,7 @@ export const bildrecept: Bildrecept[] = [
     pose: "Frys ett kortdrag längs underlaget. Låt fingerblommorna på vänsterhandens pek- och långfinger vila mot kortets baksida. Kortet ligger plant. Håll tummen, ringfingret och lillfingret avspända och fria.",
     ljus: handljus,
     bakgrund: handyta,
-    format: "liggande PNG i 16:9, exempelvis 1920 × 1080 px",
+    format: leveransformat(bildformat.kortdrag),
     kontroll: "Visa var pek- och långfingrets konturer möter kortet. Kortkanten ska gå att följa längs den vita ytan.",
   },
   {
@@ -188,7 +189,7 @@ export const bildrecept: Bildrecept[] = [
     pose: "Frys vändningen när kortets plan lutar cirka 55° mot den vita ytan. Låt höger tumme trycka mot baksidan vid ett hörn och pekfingret böjas runt kanten och trycka mot framsidan vid samma hörn. Visa baksidan snett mot kameran och låt övriga fingrar vara avspända.",
     ljus: "Använd mjukt, neutralt sidoljus och skarp teckning av fingrar och kortkant. Låt kortets svaga skugga falla en bit från kortet på den vita ytan.",
     bakgrund: handyta,
-    format: "liggande PNG i 3:2, exempelvis 1536 × 1024 px",
+    format: leveransformat(bildformat.hand),
     kontroll: "Kortkanten ska gå att följa fram till nypet. Visa tumme och pekfinger på motsatta sidor av samma hörn och luft under kortet.",
     extra: true,
   },

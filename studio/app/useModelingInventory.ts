@@ -51,7 +51,7 @@ export function useCurrentModel(edition?: string, dealer = "paulina") {
       if (document.hidden || checking) return;
       checking = true;
       try {
-        const response = await fetch(url + "&stamp=1", { cache: "no-store", signal: controller.signal });
+        const response = await fetch(url + "&stamp=1" + revision, { cache: "no-store", signal: controller.signal });
         if (response.ok && (await response.json()).stamp !== stamp && !controller.signal.aborted) refresh();
       } catch { /* The next visible check retries when the local preview reconnects. */ }
       finally { checking = false; }
@@ -63,6 +63,6 @@ export function useCurrentModel(edition?: string, dealer = "paulina") {
       controller.abort(); window.clearInterval(timer);
       document.removeEventListener("visibilitychange", check); window.removeEventListener("focus", check);
     };
-  }, [url, stamp, refresh]);
+  }, [url, revision, stamp, refresh]);
   return result;
 }

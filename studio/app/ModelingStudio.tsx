@@ -44,6 +44,7 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
   const paulinaFirst = dealer === "paulina" && inventory?.edition === "fas-1/v1";
   const [photoId, setPhotoId] = useState("sittande/front");
   const [missing, setMissing] = useState<string[]>([]);
+  const [cameraGuides, setCameraGuides] = useState(false);
   const photos = inventory?.photos ?? [];
   const groups = Array.from(new Set(photos.map(photo => photo.group)));
   const selectedIndex = Math.max(0, photos.findIndex(photo => photo.id === photoId));
@@ -72,6 +73,12 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
           {!source || missing.includes(source)
             ? <div className={styles.empty}><ImageOff size={26}/><p>{loading ? "Läser bildoriginalen…" : "Bildfilen saknas på den här datorn."}</p></div>
             : <img key={source} src={source} alt={name + " · " + selected.name} onError={() => markMissing(source)} />}
+          {cameraGuides && source && !missing.includes(source) && selected?.seated?.marks && <svg aria-hidden="true"
+            className={styles.photoGuides} viewBox={`0 0 ${selected.width} ${selected.height}`}>
+            <line x1="0" x2={selected.width} y1={selected.seated.marks.eye.y + .5} y2={selected.seated.marks.eye.y + .5}/>
+            <circle cx={selected.seated.marks.eye.x + .5} cy={selected.seated.marks.eye.y + .5} r={selected.width * .009}/>
+            <path d={`M ${selected.width/2-24} ${selected.height/2} h 48 M ${selected.width/2} ${selected.height/2-24} v 48`}/>
+          </svg>}
         </div>
         <figcaption className={styles.rail}><span>{name}{selected && " · " + selected.group}</span>
           {source && !missing.includes(source) &&
@@ -87,7 +94,8 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
         <Box size={23} strokeWidth={1.5} aria-hidden/>
       </header>
       <div className={styles.modelSurface}>
-        {model ? <PoseReview key={model.url} model={model} cameraAngle={selected?.group === "Sittande" ? selected.targetAngle : undefined}/> : <div className={styles.empty} role="status">
+        {model ? <PoseReview key={model.url} model={model} cameraAngle={selected?.group === "Sittande" ? selected.targetAngle : undefined}
+          reference={selected?.group === "Sittande" ? selected : undefined} guides={cameraGuides} onGuides={setCameraGuides}/> : <div className={styles.empty} role="status">
           <Box size={28} strokeWidth={1.4}/>
           <p>{error || (loading ? "Läser den lokala modellen…" : "Modellfilen saknas på den här datorn.")}</p>
           {!loading && <button onClick={refresh}><RefreshCw size={14}/> Läs in igen</button>}

@@ -32,6 +32,23 @@ Betan använder `gpt_image_2_6_sunburst`, PNG, ogenomskinlig bakgrund, 4K, hög 
 
 Varje referens kostar ytterligare en API-kredit per bild. Med fyra original kostar ståfronten uppskattningsvis **18 krediter**. Hela serien med elva grundbilder och en vändning kostar uppskattningsvis **225 krediter**, inklusive ståfronten. Kostnaden i studion följer antalet valda original. [Runways API-pris per format](https://docs.dev.runwayml.com/guides/pricing/#image-generation-pricing)
 
+Studions bildrecept och API-utkast läser pixelmåtten från samma formatdefinition. Paulinas sittserie v1 levererades i 1083 × 1452 px. Studion mäter dess original och visar nästa series målformat separat. [Format i studion](../studio/fotomall/bildformat.ts)
+
+## Sittserie och kamerakontroll
+
+Utgå från samma sittfront, stol och fotplacering. Linscentrum ligger på sittande brösthöjd. Behåll höjden över golvet, brännvidden och radien till stolens mitt vid 0°, 45° och 90° i sidled. Den optiska axeln hålls vågrät. Vid verklig fotografering dokumenteras höjd, brännvidd, utsnitt och en måttsatt referens i ett gemensamt golvkoordinatsystem i varje kameraläge. Det ger underlag för att bestämma kamerans läge. För en AI-bild är promptens kameravärden önskemål. [Kamerakalibrering och projektion i OpenCV](https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html)
+
+| Kontroll i studion | Projektets första granskningsgräns |
+| --- | --- |
+| Originalformat inom serien | Identisk bredd och höjd för de tre sittvyerna. |
+| Kroppens storlek i bilden | Hjässa–sula inklusive ändrader, delat med originalets höjd. Granska en relativ skillnad över 2 % (20 ‰) mot frontens andel. Reglaget provar andra gränser. |
+| Utsnittets höjdläge | Granska om mittpunkten mellan hjässa och sula förskjuts över 1 % av hela bildhöjden mot fronten. |
+| Stolens golvkontakter | Markera trampytornas mitt i originalpixlar. Ange synlig kant för delvis skymda fötter. Beräkna bildspannet när alla fyra centrum syns. Perspektivet och stolens vinkel påverkar spannet. |
+| Modellkamera | Visa sidovinkel, höjdvinkel, höjd över scengolvet, riktpunkt, avstånd och zoom. Markera en vy mer än 1° från receptets sidovinkel eller vågräta axel. |
+| Ögonens bildläge | Jämför pupillens höjd i fotooriginalet med projektionen av motsvarande ögonled i 3D-rutan. I sittreceptets kameraläge granskas över 2 procentenheters skillnad. Runt gränsen används fotopunktens skattade avläsningsosäkerhet. |
+
+I varje bildutgåva hämtas hjässa, sula och synlig sitskant ur `sittande-bildskala.json`. För de visuella kontrollerna lagras originalpixlar räknade från vänster och ovan i `sittande-kamerapunkter-v1.json`. Filnamn, utgåva, bildmått och SHA-256 måste matcha originalet. Vid byte av foto behövs ny avläsning. Geometriskt bildcentrum och en referenspunkt på en stol räcker inte för att bestämma den fotograferande kamerans lutning. [Paulinas uppmätta sittserie](http://127.0.0.1:4317/bildstandard/sitthojd) · [Gemensamma kontrollregler](../studio/lib/seated-review.ts)
+
 ## Granskning och fortsättning
 
 1. Spara ett lokalt utkast. Varje steg visar modell, prompt, målformat, ordnade referenser och pris.

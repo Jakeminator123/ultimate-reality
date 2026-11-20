@@ -168,7 +168,14 @@
 .pose-joints > div { padding: 5px 0; }
 .pose-joints input { width: clamp(70px, 16vw, 160px); accent-color: #246447; }
 .pose-joints output { min-width: 3ch; font-variant-numeric: tabular-nums; }
-.pose-canvas { flex: 1 1 0; min-width: 0; min-height: 0; }
+.pose-canvas { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; }
+.rig-camera-guides { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.rig-target { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); }
+.rig-target::before, .rig-target::after { content: ""; position: absolute; background: #364438; box-shadow: 0 1px 1px white; }
+.rig-target::before { width: 100%; height: 1px; top: 50%; }
+.rig-target::after { height: 100%; width: 1px; left: 50%; }
+.rig-eye-photo, .rig-eye-model { position: absolute; left: 0; width: 100%; border-top: 1.5px dashed #774382; }
+.rig-eye-model { border-top: 1.5px solid #166864; }
 .pose-canvas canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .rig-layer-tools, .rig-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; }
 .rig-layer-tools button { padding: 5px 9px; font-size: 13px; border-radius: 6px; background: white; }
@@ -181,6 +188,8 @@
 .rig-camera { padding: 7px 12px; border-bottom: 1px solid var(--line); color: #294738; background: #f9faf6; font-size: 14px; }
 .rig-camera summary { cursor: pointer; }
 .rig-camera summary span { margin-left: 9px; font-size: 13px; font-weight: 400; color: #516259; }
+.rig-camera .rig-warning { font-weight: 650; color: #844015; }
+.rig-guides-toggle { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
 .rig-camera-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; margin: 10px 0; }
 .rig-camera-controls label { display: grid; grid-template-columns: 1fr auto; gap: 3px 5px; align-items: center; }
 .rig-camera-controls output { font: 12px/1.4 var(--mono); }

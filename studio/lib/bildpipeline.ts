@@ -1,4 +1,5 @@
 import { bildrecept } from "../fotomall/bildrecept";
+import { bildformat } from "../fotomall/bildformat";
 import { runwayBildprompt } from "../fotomall/runway-bildprompter";
 
 export const PIPELINE_MODEL = "gpt_image_2_6_sunburst";
@@ -33,9 +34,9 @@ const basroller = {
 } as const;
 
 // Runway's 4K high-quality PNG prices before the charge of one credit per input image.
-const personformat = { ratio: "2448:3264", pris: 14 };
-const handformat = { ratio: "3504:2336", pris: 13 };
-const dragformat = { ratio: "3840:2160", pris: 11 };
+const personformat = { ...bildformat.person, pris: 14 };
+const handformat = { ...bildformat.hand, pris: 13 };
+const dragformat = { ...bildformat.kortdrag, pris: 11 };
 
 export function bildpipelinePlan(files: string[]): PipelineStep[] {
   if (!Array.isArray(files) || !files.length || files.length > MAX_ORIGINAL)

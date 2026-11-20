@@ -1,5 +1,32 @@
 import * as T from "three";
 
+export function jawHinge(body: T.Group) {
+  const bone = body.getObjectByName("c_jaw");
+  const position = (name: string) => body.getObjectByName(name)?.getWorldPosition(new T.Vector3());
+  const left = position("l_eye"), right = position("r_eye"), tip = position("c_jaw_null");
+  if (!(bone instanceof T.Bone) || !left || !right || !tip) return null;
+  let weighted = false;
+  body.traverse(mesh => {
+    if (weighted || !(mesh instanceof T.SkinnedMesh)) return;
+    const index = mesh.skeleton.bones.indexOf(bone);
+    const indices = mesh.geometry.getAttribute("skinIndex"), weights = mesh.geometry.getAttribute("skinWeight");
+    if (index < 0 || !indices || !weights) return;
+    for (let v = 0; v < indices.count && !weighted; v++) {
+      for (let k = 0; k < indices.itemSize; k++) {
+        if (indices.getComponent(v, k) === index && weights.getComponent(v, k) > 0) { weighted = true; break; }
+      }
+    }
+  });
+  if (!weighted) return null;
+  const axis = left.sub(right), fromHinge = tip.sub(bone.getWorldPosition(new T.Vector3()));
+  // Choose the rotation sign that initially lowers the jaw tip in model space.
+  const vertical = axis.clone().cross(fromHinge).y;
+  if (Math.abs(vertical) < 1e-8) return null;
+  if (vertical > 0) axis.negate();
+  axis.normalize().applyQuaternion(bone.getWorldQuaternion(new T.Quaternion()).invert());
+  return { bone, axis, rest: bone.quaternion.clone() };
+}
+
 export type RigLayers = { surface: boolean; skeleton: boolean; joints: boolean; all: boolean };
 export const initialRigLayers: RigLayers = { surface: true, skeleton: false, joints: false, all: false };
 

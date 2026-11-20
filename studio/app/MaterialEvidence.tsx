@@ -1,16 +1,32 @@
 import { useRef } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
+import { checkSeatedFrame, seatedStandard } from "../lib/seated-review";
 import styles from "./modeling.module.css";
 
 export function PhotoEvidence({ photo, project }: { photo: Photo; project: DealerMaterial }) {
   const sources = [...(project.geometry?.sources ?? []), ...(project.appearance?.sources ?? [])].filter(s => s.sha256 === photo.sha256);
+  const front = project.photos.find(p => p.id === "sittande/front");
+  const check = photo.seated && front?.seated ? checkSeatedFrame({ ...photo, seated: photo.seated }, { ...front, seated: front.seated }) : null;
+  const edition = new URLSearchParams({ dealer: project.dealer, edition: project.edition });
+  if (project.revision) edition.set("revision", project.revision);
+  const measured = "/bildstandard/sitthojd?" + edition;
   return <div className={styles.sourceNote}>
-    <p><strong>{photo.format} · {dimensions([photo.width, photo.height])}</strong>{photo.targetAngle !== undefined && " · målvinkel " + photo.targetAngle + "°"}</p>
+    <p><strong>{photo.format} · {dimensions([photo.width, photo.height])}</strong>{photo.targetAngle !== undefined &&
+      (photo.group === "Sittande" ? " · receptets sidovinkel " : " · målvinkel ") + photo.targetAngle + "°"}</p>
     <p>{sources.length ? sources.map(s => roleName[s.role]).join(" och ") : "Referens i bildserien"}</p>
+    {photo.group === "Sittande" && <p>Fotokamerans höjd över golvet och faktiska lutning är okända.</p>}
+    {check?.review && <p className={styles.photoWarning}>Granska utsnittet. {check.scaleDiffers &&
+      "Kroppens bildskala avviker " + Math.abs(check.scaleDelta).toLocaleString("sv-SE", { maximumFractionDigits: 1 }) +
+      " % från sittfronten (gräns " + seatedStandard.scalePercent + " %). "}
+      {check.centreDiffers && "Kroppens mitt ligger på en annan bildhöjd. "}{check.formatDiffers && "Originalens pixelmått skiljer sig."}</p>}
+    {sources.some(s => s.role === "surface") && photo.group === "Ansikte" && <p>Porträttet ger hud, drag och tatueringar till huvudets fotoyta. Blick, blinkning och tal behöver egna rörelser.</p>}
+    {sources.some(s => s.role === "surface") && photo.id === "hander/handryggar" && <p>Handryggarna ger hud, naglar och tatueringar. Fingerlederna styr rörelsen i ett grepp.</p>}
+    {(photo.id === "hander/kortdrag-vanster" || photo.id === "rorelsereferens/kortvandning-hoger") &&
+      <p>Greppbilden visar hur fingrarna möter kortet. En synkad front- och sidofilm ger rörelsens tempo och visar fingrar som skyms från den andra kameran.</p>}
     {photo.observed && <><p>{photo.observed.kalla}</p><details>
       <summary>Fotots riktning och ljus</summary><p>{photo.observed.observation.riktning} {photo.observed.observation.ljus}</p>
       <p>{photo.observed.osakerhet}</p></details></>}
-    {photo.group === "Sittande" && project.dealer === "paulina" && project.edition === "fas-1/v1" && <a href="/bildstandard/sitthojd">Jämför bildskala och sitsnivå</a>}
+    {photo.group === "Sittande" && front?.seated && <a href={measured}>Jämför utsnitt, ögonlinje och stolkontakter</a>}
   </div>;
 }
 

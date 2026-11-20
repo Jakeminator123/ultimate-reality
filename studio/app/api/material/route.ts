@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   try {
     requireLocal(request);
     const query = new URL(request.url).searchParams;
-    if (query.get("stamp") === "1") return Response.json({ stamp: await materialStamp(query.get("dealer") ?? "paulina") },
+    if (query.get("stamp") === "1") return Response.json({ stamp: await materialStamp(query.get("dealer") ?? "paulina", query.get("revision")) },
       { headers: { "Cache-Control": "private, no-store" } });
     if (!query.has("report")) return await materialFile(query, request.headers.get("range"));
     const project = await dealerMaterial(query.get("dealer") ?? "paulina", query.get("revision"));

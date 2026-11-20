@@ -7,6 +7,7 @@ import { bildrecept } from "../fotomall/bildrecept";
 import type { GranskadVy } from "../fotomall/bildserie";
 import { currentModel as legacyModel } from "./current-model";
 import { cropSource, dimensions, roleName } from "./material-types";
+import { bodyPixels, checkSeatedFrame, floorSpread, readSeatedMeasurement, seatedStandard } from "./seated-review";
 import type { DealerMaterial, Edition, FilmRecord, FilmReview, ModelRecord, MotionRecord, Photo } from "./material-types";
 import { LocalError } from "./storage";
 
@@ -47,11 +48,17 @@ async function records(folder: string) {
   if (!real) return [];
   return (await fs.readdir(/* turbopackIgnore: true */ real)).filter(name => name.endsWith(".json") && hex.test(name.slice(0, -5))).sort();
 }
-export async function materialStamp(dealer: string) {
-  const store = path.join(avatarDir(dealer), "3d", "versioner");
+export async function materialStamp(dealer: string, revision: string | null = null) {
+  const avatar = avatarDir(dealer), store = path.join(avatar, "3d", "versioner");
   const [active, ...registered] = await Promise.all([bytes(path.join(store, "aktiv.json")),
     ...["utgavor", "rorelser", "filmer", "granskningar"].map(group => records(path.join(store, group)))]);
-  return createHash("sha256").update(JSON.stringify([active?.toString(), ...registered])).digest("hex");
+  const release = revision ? await lockedRecord<Edition>(path.join(store, "utgavor"), revision) :
+    active ? JSON.parse(active.toString("utf8")) as Edition : null;
+  const edition = release?.edition ?? "fas-1/v1";
+  if (!editionPath.test(edition)) bad("Ogiltig bildutgåva.");
+  const observations = await Promise.all(["bildegenskaper.json", "sittande-bildskala.json", "sittande-kamerapunkter-v1.json"]
+    .map(name => bytes(path.join(avatar, edition, name))));
+  return digest(Buffer.from(JSON.stringify([active?.toString(), ...registered, revision, ...observations.map(b => b && digest(b))])));
 }
 async function lockedRecord<T>(folder: string, key: string): Promise<T | null> {
   if (!hex.test(key)) throw new LocalError("Ogiltig version.");
@@ -66,12 +73,22 @@ export async function readPhotoEdition(dealer: string, edition: string, snapshot
   if (!editionPath.test(edition)) throw new LocalError("Ogiltig bildutgåva.");
   const directory = path.join(avatarDir(dealer), edition);
   const store = path.join(avatarDir(dealer), "3d", "versioner");
+  const photos: Photo[] = [], issues: string[] = [];
+  async function optionalMeasurement(name: string) {
+    try { return await record<unknown>(path.join(directory, name)); }
+    catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      issues.push(name + " kunde inte tolkas. Några mätpunkter kan saknas.");
+      return null;
+    }
+  }
   type Book = { avatar: string; fas: number; utgava: number; bilder: ImageRow[] };
-  const [book, assessments] = await Promise.all([
+  const [book, assessments, scales, seatPoints] = await Promise.all([
     snapshot ? lockedRecord<Book>(path.join(store, "bildregister"), snapshot) : record<Book>(path.join(directory, "bildregister.json")),
     record<{ schemaVersion: number; vyer: GranskadVy[] }>(path.join(directory, "bildegenskaper.json")),
+    optionalMeasurement("sittande-bildskala.json"),
+    optionalMeasurement("sittande-kamerapunkter-v1.json"),
   ]);
-  const photos: Photo[] = [], issues: string[] = [];
   if (!book) return { photos, issues: ["Bildregistret för " + edition + " saknas lokalt."] };
   if (book.avatar.toLowerCase() !== dealer || "fas-" + book.fas + "/v" + book.utgava !== edition || !Array.isArray(book.bilder))
     bad("Bildutgåvan stämmer inte med registret.");
@@ -90,6 +107,7 @@ export async function readPhotoEdition(dealer: string, edition: string, snapshot
       v.filuppgifter.fil === row.fil && v.filuppgifter.sha256 === row.sha256 && v.filuppgifter.byte === image.length) : undefined;
     photos.push({ id, file: row.fil, name: recipe?.namn ?? row.motiv, group: row.kategori, kind: row.typ,
       sha256: row.sha256, width, height, format: format.toUpperCase(),
+      seated: id.startsWith("sittande/") ? readSeatedMeasurement({ file: row.fil, sha256: row.sha256, width, height }, edition, scales, seatPoints) : undefined,
       targetAngle: typeof row.vinkelGrader === "number" && Number.isFinite(row.vinkelGrader) ? row.vinkelGrader : recipe?.vinkelGrader, observed,
       url: url(dealer, { edition, photo: row.fil, sha: row.sha256 }) });
   }
@@ -144,7 +162,7 @@ export async function dealerMaterial(dealer = "paulina", requested: string | nul
   const store = path.join(avatarDir(dealer), "3d", "versioner");
   const editions = path.join(store, "utgavor");
   // Stamp first. If a writer publishes during the read, the next check requests fresh facts.
-  const stamp = await materialStamp(dealer);
+  const stamp = await materialStamp(dealer, requested);
   const active = await bytes(path.join(store, "aktiv.json"));
   const revision = requested ?? (active && digest(active));
   const release = revision ? await lockedRecord<Edition>(editions, revision) : null;
@@ -223,11 +241,25 @@ export async function materialFile(query: URLSearchParams, range: string | null)
 export function materialMarkdown(project: DealerMaterial) {
   const rows = ["# " + (project.activeModel?.name ?? project.dealer), "", "Bildutgåva " + project.edition,
     "Modellutgåva " + (project.revision ?? "saknas"), "", "## Bildoriginal", ""];
+  const front = project.photos.find(p => p.id === "sittande/front");
   for (const p of project.photos) {
     rows.push("- " + p.file + " · " + dimensions([p.width, p.height]) +
       " · " + p.format + (p.targetAngle !== undefined ? " · målvinkel " + p.targetAngle + "°" : "") + " · " + p.sha256);
     if (p.observed) rows.push("  - " + p.observed.observation.riktning + " " + p.observed.observation.ljus,
       "  - Osäkerhet · " + p.observed.osakerhet);
+    if (p.seated && front?.seated) {
+      const frame = { ...p, seated: p.seated };
+      const check = checkSeatedFrame(frame, { ...front, seated: front.seated });
+      rows.push("  - Hjässa–sula " + bodyPixels(frame) + " px. Skalskillnad mot sittfront " +
+        check.scaleDelta.toLocaleString("sv-SE", { maximumFractionDigits: 2 }) + " %. Utsnitt " +
+        (check.review ? "för granskning" : "inom gränserna") + " (skala " + seatedStandard.scalePercent +
+        " %, höjdläge " + seatedStandard.centrePercent + " % av bildhöjden, identiska bildmått).");
+      const spread = floorSpread(p.seated.marks);
+      if (p.seated.marks) rows.push("  - Säkra stolkontakter " +
+        p.seated.marks.feet.filter(f => f.visible === "centre").length + "/4. " +
+        (spread ? "Höjdspann " + spread.pixels + " px." : "Fullt höjdspann saknas.") +
+        " Punktosäkerhet skattad till ±" + p.seated.marks.uncertaintyPx + " px.");
+    }
   }
   for (const model of [project.geometry, project.appearance]) {
     if (!model) continue;
