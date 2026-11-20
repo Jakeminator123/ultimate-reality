@@ -83,6 +83,9 @@ test(
           remote.push(req.url());
       });
       await page.goto(origin);
+      const seatedRelease = await page.request.get(origin + "/api/material?report=json&dealer=paulina&revision=" + seatedPaulina);
+      assert.ok([200, 404].includes(seatedRelease.status()));
+      const pinnedEditionAvailable = seatedRelease.ok();
       await t.test("scenmiljön visar rätt material från alla fyra ingångar även på mobil", async () => {
         const nav = page.getByRole("navigation", { name: "Arbetsyta" });
         await nav.getByRole("link", { name: "Scenmiljö", exact: true }).click();
@@ -124,7 +127,7 @@ test(
           const card = page.locator(`main a[href="${route}"]`);
           assert.ok((await card.innerText()).includes(room.name));
           for (const seat of ["4", "1"]) {
-            const view = seat === "4" ? "paulina" : "giv";
+            const view = seat === "4" ? "paulina" : pinnedEditionAvailable ? "giv" : "golv";
             const query = new URLSearchParams({ stol: seat, vy: view, matta: "gras", tra: "furu", reling: "denim" });
             if (view === "giv") {
               query.set("tagning", "samspel-v2-v1");
@@ -161,17 +164,22 @@ test(
         await page.setViewportSize({ width: 1280, height: 900 });
         await nav.getByRole("link", { name: "Översikt", exact: true }).click();
       });
-      await t.test("panoramat delar den spelade tagningen och blinkrutan från den vanliga adressen", async (panoramaTest) => {
+      await t.test("panoramat öppnar en registrerad giv i rätt blinkruta och ger 404 för en arkiverad modellutgåva", async (panoramaTest) => {
+        const dealUrl = origin + "/bordsprov/panorama/gothic-manor?stol=4&vy=giv";
+        if (!pinnedEditionAvailable) {
+          assert.equal((await page.request.get(dealUrl)).status(), 404);
+          return;
+        }
         if (process.env.STUDIO_TEST_NO_WEBGL) return panoramaTest.skip("Panoramaspelaren kräver WebGL.");
         const view = await browser.newPage();
         try {
-          await view.goto(origin + "/bordsprov/panorama/gothic-manor?stol=4&vy=giv");
+          await view.goto(dealUrl);
           await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
           const take = await view.locator("#givkontroll").getAttribute("data-take");
           const samLinks = view.getByRole("navigation", { name: "Tagning" }).getByRole("link", { name: /^Paulinas sittmodell 4 · givprov / });
           if (await samLinks.count()) {
             assert.equal(take, new URL(await samLinks.first().getAttribute("href"), view.url()).searchParams.get("tagning"));
-            const report = await (await view.request.get(origin + "/api/material?report=json&dealer=paulina&revision=" + seatedPaulina)).json();
+            const report = await seatedRelease.json();
             const current = report.seatedTrial?.film?.take;
             if (report.seatedTrial?.id === samPanoramaTake.geometry && Number(current?.match(/^giv-sam-v4-v([1-9]\d*)$/)?.[1]) >= 3)
               assert.equal(take, current);
@@ -208,7 +216,8 @@ test(
           await view.close();
         }
       });
-      await t.test("dealervalet öppnar Paulinas rigg eller ett tomt bildutkast och faserna följer med", async () => {
+      const material = await (await page.request.get(origin + "/api/material?report=json&dealer=paulina")).json();
+      await t.test("dealervalet öppnar tillgängliga bilder och modeller eller ett tomt bildutkast", async () => {
         async function mobileWidth() {
           await page.setViewportSize({ width: 320, height: 800 });
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
@@ -224,13 +233,23 @@ test(
         await mobileWidth();
         assert.equal(await work.getByRole("link", { name: /Fas 1.*Bildpipeline/ }).getAttribute("aria-current"), "page");
         await work.getByRole("link", { name: "Översikt" }).click();
-        await page.getByRole("link", { name: "Öppna Paulinas modell" }).click();
+        const modelLink = page.getByRole("link", { name: "Öppna Paulinas modell" });
+        if (material.activeModel) {
+          await modelLink.click();
+        } else {
+          if (material.photos.length && !material.revision) {
+            await page.getByText("Nästa steg är en stilla modell av Paulina.").waitFor();
+            assert.equal(await modelLink.count(), 0);
+            await page.getByRole("link", { name: `Öppna bildserien (${material.photos.length})` }).click();
+            await page.getByRole("heading", { name: "Bildstandard för en dealer" }).waitFor();
+          }
+          await work.getByRole("link", { name: /Fas 2.*3D-modell/ }).click();
+        }
         await page.getByRole("heading", { name: "3D-modellering" }).waitFor();
         await mobileWidth();
         assert.equal(await work.getByRole("link", { name: /Fas 2.*3D-modell/ }).getAttribute("aria-current"), "page");
       });
       await page.getByRole("heading", { name: "Paulinas bildserie" }).waitFor();
-      const material = await (await page.request.get(origin + "/api/material?report=json&dealer=paulina")).json();
       await page.getByRole("heading", { name: "Modellens underlag" }).waitFor();
       assert.equal(await page.getByRole("region", { name: "Paulinas bildserie" }).getByRole("button").count(), material.photos.length);
       await t.test("materialrapport och filmrutor följer de sparade filversionerna", async () => {

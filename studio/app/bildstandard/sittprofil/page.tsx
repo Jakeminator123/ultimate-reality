@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { dealerMaterial, readSeatedProfileTrial, reviewedTakeForLink, seatedTrialModel } from "../../../lib/dealer-material";
+import type { DealerMaterial } from "../../../lib/material-types";
 import { reviewedDealChoices } from "../../../lib/reviewed-deal-versions";
+import { bodyPixels, checkSeatedFrame } from "../../../lib/seated-review";
 import { LocalError, requireLocal } from "../../../lib/storage";
 import { StudioSubpage } from "../../StudioSidebar";
 import styles from "../../modeling.module.css";
@@ -14,10 +16,21 @@ async function loadComparison(requestedTake?: string, requestedReceipt?: string)
   requireLocal(new Request("http://localhost", { headers: await headers() }));
   const trial = await readSeatedProfileTrial("paulina", "fas-1/v1");
   if (!trial) throw new LocalError("Det uppmätta profilprovet saknas på den här datorn.", 404);
-  const material = await dealerMaterial("paulina", trial.revision);
+  let material: DealerMaterial;
+  try { material = await dealerMaterial("paulina", trial.revision); }
+  catch (error) {
+    if (!(error instanceof LocalError) || error.status !== 404) throw error;
+    material = await dealerMaterial("paulina");
+    if (material.revision || material.activeModel) throw error;
+  }
   const front = material.photos.find(p => p.id === "sittande/front" && p.sha256 === trial.frontSha256);
+  if (material.edition !== "fas-1/v1" || !front?.seated)
+    throw new LocalError("Sittfronten och dess mätpunkter behöver matcha profilprovets bildutgåva.", 409);
+  if (!material.revision) return {
+    kind: "photos" as const, front: { ...front, seated: front.seated }, profile: trial.photo, issues: material.issues,
+  };
   const original = material.photos.find(p => p.id === "sittande/profil");
-  if (material.edition !== "fas-1/v1" || !front?.seated || !original?.seated)
+  if (!original?.seated)
     throw new LocalError("Modellens sittfront och tidigare profil behöver matcha bildutgåvan.", 409);
   if (!material.activeModel) throw new LocalError("Den jämförda kroppens modellfil saknas lokalt.", 404);
   let candidate = null, candidateError = "";
@@ -57,7 +70,7 @@ async function loadComparison(requestedTake?: string, requestedReceipt?: string)
     .map(({ film, receipt }) => ({ take: film.take, receipt, end: film.poses?.end }));
   if (film && selectedReceipt && !currentReceipts.has(selectedReceipt) && !previousTakes.some(row => row.receipt === selectedReceipt))
     previousTakes.push({ take: film.take, receipt: selectedReceipt, end: film.poses?.end });
-  return { photoLayers, panel: {
+  return { kind: "model" as const, photoLayers, panel: {
     trial: trial.photo, front: { ...front, seated: front.seated }, previous: { ...original, seated: original.seated }, model: material.activeModel,
     candidate: candidate && { id: candidate.id, name: candidate.name, url: candidate.url, run: candidate.run,
       appearanceUrl: candidate.appearanceUrl, appearanceError: candidate.appearanceError, defaultTake: defaultFilm?.take },
@@ -72,13 +85,30 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ m
   try { comparison = await loadComparison(tagning, kvitto); }
   catch (error) { if (!(error instanceof LocalError)) throw error; message = error.message; }
   const showCandidate = modell === "prov" || tagning !== undefined || kvitto !== undefined;
-  const photoLayers = comparison?.photoLayers ?? [];
+  const photoLayers = comparison?.kind === "model" ? comparison.photoLayers : [];
   return <StudioSubpage area="bilder"><main className={styles.archive}>
-    <nav className={styles.archiveNav}><a href="/#modellering">← 3D-modellering</a><a href="/bildstandard/sitthojd">Sittande i tre vinklar</a>
+    <nav className={styles.archiveNav}>{comparison?.kind === "photos" ? <a href="/bildstandard">← Bildstandard</a> : <a href="/#modellering">← 3D-modellering</a>}<a href="/bildstandard/sitthojd">Sittande i tre vinklar</a>
       {photoLayers.length > 0 && <a href={showCandidate ? "#fotoyta" : "?modell=prov#fotoyta"}>Fotoyta i rörelse</a>}</nav>
     <header className={styles.archiveHeader}><h1>Paulinas sittprofil</h1>
-      <p>Jämför den nya sittprofilen med SAM-kroppsprovet och kroppsmodellen från Paulinas tidigare givfilmer.</p></header>
-    {comparison ? <ProfileComparison {...comparison.panel} openCandidate={showCandidate} requestedTake={tagning ?? kvitto}/> : <p role="status">{message}</p>}
+      {comparison?.kind === "photos" && <p>Skillnaden i bildskala mellan vald profil och sittfront är {checkSeatedFrame(comparison.profile, comparison.front).scaleDelta.toLocaleString("sv-SE", { maximumFractionDigits: 2, signDisplay: "always" })} %.</p>}
+      {comparison?.kind === "model" && <p>Jämför den nya sittprofilen med SAM-kroppsprovet och kroppsmodellen från Paulinas tidigare givfilmer.</p>}</header>
+    {comparison?.kind === "photos" && <>
+      <section id="jamforelse" aria-label="Sittfront och vald sittprofil" className={styles.workspace + " " + styles.profilePair}>
+        {[{ title: "Sittfront", photo: comparison.front, panel: styles.photoPanel },
+          { title: "Vald sittprofil", photo: comparison.profile, panel: styles.modelPanel }].map(({ title, photo, panel }) =>
+          <section key={photo.id} className={panel}>
+            <header className={styles.panelHeader}><h2>{title}</h2></header>
+            <figure className={styles.photoFigure}><div className={styles.photoSurface}><img src={photo.url} alt={photo.name}/></div>
+              <figcaption className={styles.rail}><span>{bodyPixels(photo).toLocaleString("sv-SE")} px från hjässa till skosula</span>
+                <a href={photo.url} target="_blank" rel="noreferrer">Öppna original ↗</a></figcaption>
+            </figure>
+          </section>)}
+      </section>
+      {comparison.issues.map(issue => <p key={issue} role="status">{issue}</p>)}
+      {showCandidate && <p role="status">Den här bildutgåvan saknar en aktiv 3D-modell för den begärda jämförelsen.</p>}
+    </>}
+    {comparison?.kind === "model" && <ProfileComparison {...comparison.panel} openCandidate={showCandidate} requestedTake={tagning ?? kvitto}/>}
+    {!comparison && <p role="status">{message}</p>}
     {showCandidate && photoLayers.length > 0 && <section id="fotoyta" aria-labelledby="fotoyta-rubrik">
       <h2 id="fotoyta-rubrik">Fotoyta i rörelse</h2><p>Växla mellan före och efter på samma bildruta. Jämför stol 4 och stol 1 överst i filmen. Närbilderna under dem har olika utsnitt.</p>
       <div className={styles.proofGrid}>{photoLayers.map(study => <PhotoLayerComparison key={study.after.url} study={study}/>)}</div>

@@ -1,15 +1,17 @@
-# Aktuell överlämning
+# Paulina börjar om från fotona
 
-**Börja med Paulinas stillbilder.** Öppna [bildarket med de tolv grundvyerna](../avatars/paulina/fas-1/v1/index.html). [Bildguiden](PAULINAS_STILLBILDER.md) kopplar varje vy till sitt syfte, sina begränsningar och rätt modell. Alla 12 original matchade registret vid omtaget den 20 november.
+Arbetskopian är `C:\Users\jakem\dev\ultimate-reality` på lokal `main`. Öppna fotostarten för att se de tillförda originalen 01 (helfigur) och 03 (vid bordet) bredvid de genererade vyerna av kropp, ansikte, händer och kortgrepp. Studion på 4317 visar tolv registrerade bilder. Alla tolv matchar bildregistrets SHA-256 även när de läses genom studion. Paulina har nu noll aktiva 3D-modeller. [Öppna fotostarten](../avatars/paulina/fotostart/index.html) · [Studions bildserie](http://127.0.0.1:4317/bildstandard#utgavekontroll)
 
-| Fråga | Verifierat läge |
-| --- | --- |
-| Vilken är bild 3? | Sittseriens tredje vy är profilen. Den i `fas-1/v1` är 3,88 % mindre i bild än fronten. Profilen som används i v4 är 1,79 % mindre. Studions gräns är 2 %. Filen `03_sittande_bakgrund.png` är identitetsbilden vid bordet. |
-| Vilken kropp ger kort? | Modellvisaren öppnar v2. Den sparade tvåkortsgiven använder sittmodell v4, tagning 8 till REDO och tagning 9 till VILA. [Öppna den gemensamma scenen](http://127.0.0.1:4317/modellering/sekvens?dealer=paulina&id=3003aba81a5e84f1afc19143b9fab370e1a508360e5aa8849bd68d690c0d8a59) |
-| Vad saknas i bilderna? | Handryggarna visar alla tio naglar uppifrån. Högerhandens fingerblommor i sjuans landningspose saknar egen vy. Vändning A–D visar ett nyp i luften. |
+## Första modellprovet
 
-**Första återstående arbete** är att passa nagelkanterna i utgåvans handryggsbild mot högerhanden i givprov 9. Kontrollera stol 4, hjärter sju, sekvensruta 76–78 (lokal ruta 22–24). Handfotots vita bakgrund ger den ljusa fingertoppsranden. Sittfrontens mörka tyg ger tumfläcken. Där fingertoppen saknar fototäckning tar en enfärgad hud över. Jämför en egen ytversion i samma pose, både med bordsljus och som ren basfärg. [Spårade källpixlar](../test/dealer/paulina/handgranskning-v8-v9/v9-nagelrand-och-tumflack-kallpixlar.png) · [Basfärgsprov](../test/dealer/paulina/handgranskning-v8-v9/v9-hander-bordsljus-basfarg-neutral.png)
+Bygg en enda Paulina i neutral sittpose. Utgå från sittfronten och jämför samma kropp med trekvarten och den valda profilen. Granska bäckenet mot sitsen, båda sulorna mot golvet och händerna mot låren. Jämför sedan ansikte, hårfäste, kläder och tatueringar mot original 03. Visa kroppen först med en enfärgad yta och sedan med fotoytan från samma tre kameror, så att det går att avgöra om ett fel sitter i formen eller i fotot. Kortgiv, bord och rum är pausade. [Roll per bild och kvarstående luckor](PAULINAS_STILLBILDER.md)
 
-I samma landningspose ligger höger pek- och långfinger 0,24 respektive 0,25 mm från kortet. Ring- och lillfinger ligger 7,33 respektive 7,30 mm från kortet. Vid fortsatt filmgranskning återstår handbytet från stol 1, hårkonturen vid nacken och ytan under nästippen. [Kortytornas mått](../test/dealer/paulina/handgranskning-v8-v9/kortytor.json) · [Studions plan](../studio/PLAN.md)
+Sittseriens tredje bild är profilen. I upplaga 1 mäter den 1 288 px mellan hjässa och sula, **−3,88 %** mot sittfrontens 1 340 px. Det valda profilprovet v3 mäter 1 316 px, **−1,79 %**. Granskningsgränsen 2 % avser figurens höjd i bilden. En verklig profil tagen i samma sittpose med känd kamera skulle ge oberoende underlag för kroppsdjupet. [Jämför front och vald profil](http://127.0.0.1:4317/bildstandard/sittprofil)
 
-[Paulinas provkatalog](PAULINAS_PROV.md) knyter de 46 provmapparna till riggbygge, rörelse, jämförelse eller visning. [Scenkatalogen](../test/README.md) ger motsvarande ingång till bord, kortsko och rum. [Gallringsprotokollet](UNDERHALL.md#genomgång-av-hela-repot) anger vad som togs bort och var de äldre visarna finns. De tidigare försöksanteckningarna går att läsa i sin helhet med `git show 170e3d3:information/HANDOFF.md`.
+## Arkivet från 20 november 2026
+
+Arkivet ligger i `C:\Users\jakem\Documents\Ultimate Reality-arkiv\Paulina-fotoomstart-2026-11-20`. Det rymmer 2 518 filer från main och 92 från labbdisken. Sök på ursprunglig sökväg i `manifest.json`. Där finns modellversionerna, fotoytorna, nio sparade SAM-körningar, animationerna, filmproven och deras granskningar. Källbilderna finns i avatarmappen och i labbets inkorg. [Läs om återställning](<C:/Users/jakem/Documents/Ultimate Reality-arkiv/Paulina-fotoomstart-2026-11-20/LAS-MIG.md>) · [Tidigare riggar och tagningar](PAULINAS_PROV.md)
+
+Hela arkivet har provåterställts till en separat mapp. Alla 2 610 återlästa filer matchade manifestets kontrollsummor.
+
+Skrivbordsstudion på 4388 körs från `C:\Users\jakem\Desktop\Paulina-filmstudio`. I dess tvåkortsgiv, stol 1 ruta 107, syns handfotots skarpa slut över fingersidorna. I räckning V4, sidovy ruta 0, 35 och 71, anger granskningen ett glapp på 11,3–11,6 cm mellan sulorna och golvet. Det första fyndet motiverar kontroll av fotoytan. Det andra motiverar kontroll av sits och golv i det nya modellprovet. [Granskningen av de två filmerna](C:/Users/jakem/.codex/visualizations/2026/11/20/01a1f74f-9b9f-7e62-b10a-78f5ebbdd6b0/Paulina-bildgranskning-V4.md)

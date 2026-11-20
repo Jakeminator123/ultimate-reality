@@ -4,11 +4,11 @@ Ett fristående lokalt labb för att göra dealerfilmer där handen släpper rä
 
 ## Börja här
 
-1. Börja med Paulinas stillbilder. Bildöversikten visar original, valda vyer och vilka bilder som bygger modellen. [Paulinas stillbilder](information/PAULINAS_STILLBILDER.md) · [Se de tolv vyerna i studion](http://127.0.0.1:4317/bildstandard#utgavekontroll)
-2. Öppna sittmodell v2 för att jämföra riggen med fotona. I tvåkortsgiven visar stol 4 och stol 1 samma rörelse på sittmodell v4. [Modellvisaren](http://127.0.0.1:4317/#modellering) · [Spela tvåkortsgiven](http://127.0.0.1:4317/modellering/sekvens?dealer=paulina&id=3003aba81a5e84f1afc19143b9fab370e1a508360e5aa8849bd68d690c0d8a59)
+1. Öppna Paulinas fotostart. Där finns original 01 och 03, de valda sittvyerna, porträtten och handbilderna. [Fotostarten på labbdatorn](avatars/paulina/fotostart/index.html) · [De tolv vyerna i studion](http://127.0.0.1:4317/bildstandard#utgavekontroll)
+2. Jämför sittfronten med vald profil. Nästa modellprov är en stilla, sittande Paulina som kan granskas framifrån, i trekvart och i profil. [Sittprofilens bildmått](http://127.0.0.1:4317/bildstandard/sittprofil) · [Roll och begränsning per bild](information/PAULINAS_STILLBILDER.md)
 3. Följ överlämningen för nästa uppgift. Egna grundbilder hör hemma i `avatars/<namn>/` eller i labbets `inputs`. [Aktuell överlämning](information/HANDOFF.md) · [Studioplan](studio/PLAN.md) · [Agentinstruktioner](AGENTS.md)
 
-För att hitta ett äldre prov, slå upp mappen i [Paulinas kroppar och tagningar](information/PAULINAS_PROV.md) eller [katalogen över bord, rum och kortsko](test/README.md). Där står vilka delar som dagens giv läser direkt och vilka som användes för att bygga den.
+Äldre Paulina-modeller, tagningar och filmprov finns i det återställbara arkivet från den 20 november 2026. Arbetet med bord och rum är pausat. [Arkiv och återställning](information/HANDOFF.md#arkivet-från-20-november-2026) · [Tidigare kroppar och tagningar](information/PAULINAS_PROV.md) · [Bord, rum och kortsko](test/README.md)
 
 ## Redigerbar dealerstudio
 
@@ -40,21 +40,13 @@ I [Runways bildpipeline](http://127.0.0.1:4317/bildpipeline) kan du lägga in ex
 
 [Bildstandarden för en dealer](http://127.0.0.1:4317/bildstandard) visar elva grundvyer och en extra kortvändning. Varje vy har en kopierbar prompt för egna foton och ett granskat exempel från Paulina. Hämta Paulinas ifyllda mall eller en tom mall för nästa avatars bildmått, observationer och osäkerheter. Båda använder samma JSON-format.
 
-Startsidan låter dig öppna Paulina eller börja med en ny dealers egna foton. **Fas 1 · Bildpipeline** samlar bildstandarden, Paulinas tolv vyer och Runways beställningsflöde. **Fas 2 · 3D-modell** visar sittmodellen v2 och dess fotoreferenser. Välj kroppsform, fotoutseende eller enbart rigg. Skelett, ledpunkter och rutnät kan slås på var för sig. Kameravärden visar vridning, höjdvinkel, avstånd till riktpunkten och zoom. [Dealerval](http://127.0.0.1:4317/) · [Paulinas modell](http://127.0.0.1:4317/#modellering)
-
-Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen i Codex skapade sittbilderna. I bildutgåvan `fas-1/v1` mäter hjässa till skosula 1 340, 1 340 och 1 288 px. I sittmodell v4 används en senare profil som mäter 1 316 px. [Jämför bildutgåvans tre vyer](http://127.0.0.1:4317/bildstandard/sitthojd) · [Se profilen som används i v4](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#jamforelse)
-
-[Övrigt](http://127.0.0.1:4317/ovrigt) innehåller sittbasen v1, tidigare 08-riggar, labbets bildinkorg och parkerade rums- och ljusprov. Välj **Foto**, **Överlägg** eller **3D** för ett sparat prov. [Den äldre dockmallen](http://127.0.0.1:4317/ovrigt/fotomall) kan fortfarande sparas som fristående HTML.
+Startsidan öppnar Paulinas bildserie. En framtida registrerad modell kan visas som kroppsform, fotoutseende eller rigg. De genererade sittbilderna mäter 1 340 px mellan hjässa och sula i front och trekvart, 1 288 px i den ursprungliga profilen och 1 316 px i den valda profilen. [Dealerval](http://127.0.0.1:4317/) · [Tre sittvyer](http://127.0.0.1:4317/bildstandard/sitthojd) · [Vald profil](http://127.0.0.1:4317/bildstandard/sittprofil)
 
 ## Gemensam 3D-scen
 
-Paulinas SAM-sittmodell v4 ger till plats 4. Stol 4 och stol 1 visar samma kropp, fingrar och kort. Under Rörelseprov kan du jämföra givmönstret med källfilmerna, välja slutpose och spara en sekvens där varje kort ligger kvar när nästa hämtas. [Rörelsemönster och givsekvenser](http://127.0.0.1:4317/modellering/rorelseprov) · [Paulina vid bordet](http://127.0.0.1:4317/bordsprov/panorama/gothic-manor?stol=4&vy=giv)
+Scenen gör det möjligt att se samma kropp, fingrar och kort från flera spelarplatser. Den tidigare tvåkortsgiven använde en v4-kropp och två rörelseklipp efter varandra. De spelbara Paulina-proven ligger nu i arkivet. Geometrin för bord, sko och kameror finns i projektet för senare scenarbete. [Paulinas tidigare prov](information/PAULINAS_PROV.md) · [Scenkatalogen](test/README.md)
 
-I det redigerbara rumsprovet RUM-03 står BORD-02 på 192 × 129,6 cm med SKO-03. Den tidigare 08-riggen visar tagningen `skoriktning-70-30-v1` i de två stolkamerorna. [Öppna rumsprovet](http://127.0.0.1:4317/bordsprov/rum3d?rum=mesh&stol=4&glas=1)
-
-[Se Paulinas vänsterhandsutdrag på det större bordet](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html). I Kasinorum kan du jämföra 192 × 129,6 cm med 160 × 108 cm på samma bildruta. [Materialdetaljen](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html?vy=material) visar Poly Havens gröntonade mikromocka, bruna läder och valnötsfaner.
-
-I [det tomma bordsprovet](http://127.0.0.1:4317/bordsprov/rumsprov.html?dealer=0) kan du växla mellan stol 4 och stol 1 samt mellan 108 och 96 cm ytterdjup med samma sko, kortmål och rum. [Rumsprovets renderingsanvisningar](test/bakgrund/kasinorum-v1/README.md) skapar en lokal visare som fungerar även med studion stängd. [Materialmapparna](test/README.md) skiljer dealer, bord, bakgrund och artefakter. Lägg egna dokument eller referenser för chattarna i [jakob-random](jakob-random/).
+I [det tomma bordsprovet](http://127.0.0.1:4317/bordsprov/rumsprov.html?dealer=0) kan du växla mellan stol 4 och stol 1 samt mellan 108 och 96 cm ytterdjup. [Den äldre dockmallen](http://127.0.0.1:4317/ovrigt/fotomall) kan sparas som fristående HTML. Lägg egna dokument eller referenser för chattarna i [jakob-random](jakob-random/).
 
 ### Provdockan i Övrigt
 

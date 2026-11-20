@@ -1,5 +1,7 @@
 # Materialversioner för en dealer
 
+Paulinas aktiva material på 4317 är nu bildutgåvan `fas-1/v1`. Hennes tidigare kropps-, yt- och filmversioner finns i [återställningsarkivet](HANDOFF.md#arkivet-från-20-november-2026). Exemplen med tagningar nedan beskriver den tidigare modellomgången.
+
 Studion visar den valda bildutgåvan, kroppsmodellen, fotoytan och filmerna som faktiskt hör till dem. Öppna **Modellens underlag** för pixelmått, bildkällor och granskningsrutor. Markdownrapporten och JSON-vyn läser samma lokala material som sidan. [Modellering](http://127.0.0.1:4317/#modellering) · [Paulinas aktuella materialrapport](http://127.0.0.1:4317/api/material?dealer=paulina&report=md)
 
 | Material | Det som följer med versionen | Hur vi använder uppgiften |
@@ -10,7 +12,7 @@ Studion visar den valda bildutgåvan, kroppsmodellen, fotoytan och filmerna som 
 | Animerad modell | GLB med tidslägen från animationsspåren, exakt grundrigg och fotoyta, tagning, kort-ID och kortbanans SHA-256. | Samma arm, fingrar och kortbana kan spelas från båda stolarna. Filmexporten anger den animerade GLB-filens SHA-256. |
 | Renderad film | Filmens SHA-256, tagning, rigg, vald fotoyta, eventuellt kort, kamera och uppmätta fil- och bildrutetider. | Återanvänd samma rörelse och samma kort från olika stolar. Koppla varje iakttagelse till filmversion, kamera och nollbaserade rutor. |
 | Fotoyta i rörelse | `photoLayer` anger källfilmens kvitto, källrörelsens SHA-256 och de justerade delarna. | Växla mellan källfilmen och den korrigerade ytan på samma ruta. Registreringen kontrollerar källkropp, kort, antal rutor och bildfrekvens. [Granska fotoytan](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#fotoyta) |
-| Givsekvens | Varje steg har eget filmkvitto, animationsfil, målplats, kortinstans, landningsruta och släppruta. | En giv som slutar i REDO kan följas av nästa giv från REDO. Spelaren verifierar källorna när en sparad sekvens öppnas. Varje landat kort behåller sitt läge när kameran byts. [Spela två kort](http://127.0.0.1:4317/modellering/sekvens?dealer=paulina&id=3003aba81a5e84f1afc19143b9fab370e1a508360e5aa8849bd68d690c0d8a59) |
+| Givsekvens | Varje steg har eget filmkvitto, animationsfil, målplats, kortinstans, landningsruta och släppruta. | En giv som slutar i REDO kan följas av nästa giv från REDO. Spelaren verifierar källorna när en sparad sekvens öppnas. Varje landat kort behåller sitt läge när kameran byts. [Arkiverad tvåkortsgiv](PAULINAS_PROV.md) |
 
 ## Automatisk registrering
 

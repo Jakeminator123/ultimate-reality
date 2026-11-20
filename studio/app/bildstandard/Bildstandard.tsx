@@ -36,6 +36,7 @@ export default function Bildstandard({ exempel, project }: { exempel: PaulinaExe
   const recept = bildrecept.find((bild) => bild.id === vy) ?? bildrecept[0];
   const paulina = exempel.find((bild) => bild.id === recept.id);
   const body = project?.geometry?.sources.find(s => s.role === "geometry")?.processing;
+  const seatedFront = project?.photos.find(photo => photo.id === "sittande/front");
   const prompt = skapaBildprompt(recept, referenser);
   const kortvandning = recept.id === "rorelsereferens/kortvandning-hoger";
 
@@ -94,8 +95,9 @@ export default function Bildstandard({ exempel, project }: { exempel: PaulinaExe
           <summary>Behöver Paulinas bilder högre upplösning?</summary>
           {body ? <p>Den modellbyggande sittbilden var {dimensions(body.original)}. SAM läste in {dimensions(body.prepared)}.
             {body.crop && <> Kroppsutsnittet var {dimensions(body.crop.body)} och varje handutsnitt {dimensions(body.crop.hand)} enligt {cropSource[body.crop.evidence]}.</>}</p>
-            : <p>Bildmåtten för en registrerad kroppsmodell visas när dess sparade körning finns lokalt.</p>}
-          <p>För Paulinas nästa kortdrag rekommenderar vi en samtidig sidofilm där fingrarnas kontakt med kortkanten syns. För hud, hår och tyg används detaljer från originalbilderna. Komplettera med bakifrån snett taget hårporträtt där täckning saknas. <a href="/#modellering">Modellens källbilder och filmprov</a></p>
+            : seatedFront && <p>Sittfrontens original är {dimensions([seatedFront.width, seatedFront.height])}. <a href={seatedFront.url}>Öppna sittfronten i full storlek</a>.</p>}
+          {project?.activeModel ? <p>För Paulinas nästa kortdrag rekommenderar vi en samtidig sidofilm där fingrarnas kontakt med kortkanten syns. För hud, hår och tyg används detaljer från originalbilderna. Komplettera med bakifrån snett taget hårporträtt där täckning saknas. <a href="/#modellering">Modellens källbilder och filmprov</a></p>
+            : <p>Kontrollera om naglarnas kanter, hårstrån och tygets struktur går att urskilja när bilden öppnas i full storlek. {project && <a href="#utgavekontroll">Se bildmått och granskning för varje vy</a>}</p>}
         </details>
       </header>
       <section aria-label="Välj en bildvy" className={styles.valrad}>

@@ -5,7 +5,7 @@
 | `studio/` i Git | Appens källkod, plan och generella recept. | Versionshistorik i Git. |
 | `information/` i Git | Beslut, verifierade slutsatser, handoff och tidigare skriftliga projektöversikter. | En aktuell handoff. Äldre versioner finns i Git. |
 | `tools/`, `tests/` i Git | Lokala modellverktyg och isolerade tester. | Versionshistorik i Git. |
-| `avatars/<dealer>/` lokalt | Bildoriginal, rigg, fotoyta och tagningar. `3d/versioner/aktiv.json` väljer en sparad utgåva. `studio.json` finns kvar för den tidigare Paulina-visaren. | Bevarade avatarversioner på labbdatorn. |
+| `avatars/<dealer>/` lokalt | Original, grundvyer och bildgranskningar. En registrerad 3D-utgåva kan dessutom ha ett versionslager under `3d/versioner/`. För Paulina ligger det tidigare lagret i arkivet från 20 november. | Grundbilder bevaras på labbdatorn. [Paulinas arkiv](HANDOFF.md#arkivet-från-20-november-2026) |
 | `inputs/` på labbdisken | Egna källfoton, filmer och ljud som Jakob lägger in. | Original bevaras. |
 | `orders/` på labbdisken | Versionssparade lokala utkast med exakt JSON, beskurna referensbilder och filmgranskning, under `giv-plats-4`. | Sparade revisioner bevaras. Verkliga leverantörsjobb är en senare etapp. |
 | `orders/bildpipeline/<revision>/` på labbdisken | Runways stillbildsserie, källkopior, låsta prompter, skickade referenser, jobb-ID och mottagna resultat. | Bevarade beställningsrevisioner. Filnamn och referensbytes omfattas av den lokala backupen. |
@@ -15,13 +15,13 @@
 
 På Jakobs dator är labbdisken `D:\ultimate-reality-lab`. Kör `.\lab.ps1 list` från projektroten för att skapa och se grundstrukturen. Tömning av arbetsytan ska aldrig påverka källmaterial, beställningar eller sparade referenser. För ett låst försök, identifiera processen som använder just den filen, avsluta den när arbetet är klart och kör gallringen igen.
 
-För Fas 1 jämför `tools/seated_photo_scale.py` de tre PNG-filerna med bildregistret och skriver `sittande-bildskala.json` i samma utgåva. `tools/mhr_seated_rig.py` skapar sittmodellen från den sparade SAM-körningen och `tools/paulina_utseende.py` lägger de granskade fotografiska källorna på riggen. [Köranvisning och material-ID](../test/dealer/paulina/fas1-sittande-v2/README.md)
+För Fas 1 jämför `tools/seated_photo_scale.py` sittvyerna med bildregistret och skriver `sittande-bildskala.json` i bildutgåvan. De tidigare byggena använde `tools/mhr_seated_rig.py` för sittmodellen och `tools/paulina_utseende.py` för fotoytan. [Tidigare kroppar och prov](PAULINAS_PROV.md)
 
 ## Vad ska till GitHub?
 
 Registrerade foton, GLB-filer och filmer ligger under avatarens lokala `3d/versioner`. Källrelationer och tidigare val följer med en lokal säkerhetskopia av avatarens mapp. Projektkoden kan återskapa visningen från den kopian. [Versionshantering och köranvisning](MATERIALVERSIONER.md)
 
-Bildserie, kropp och tagning har egna versionsnummer. Paulinas `fas-1/v1` är fortfarande den valda bildserien. Dess `bildregister.json` anger `fotounderlag-v2.json` som källa, och det underlaget länkar vidare till `fotounderlag-v1.json`. I `test/artefakter` namnges varje försök efter frågan det undersöker. `skolage-v1` mäter platsen för skon medan `skolage-vilohand-v1` jämför handen med skon i två givfilmer. Vid städning kan en förkastad arbetsfil tas bort när registren, proven och deras källhänvisningar har kontrollerats mot filens exakta version. [Paulinas lokala mappguide](../avatars/paulina/README.md)
+Bildserie, kropp och tagning har egna versionsnummer. Paulinas `fas-1/v1` är fortfarande den valda bildserien. Dess `bildregister.json` anger `fotounderlag-v2.json` som källa, och det underlaget länkar vidare till `fotounderlag-v1.json`. I `test/artefakter` namnges varje försök efter frågan det undersöker. `skolage-v1` mäter platsen för skon medan `skolage-vilohand-v1` jämför handen med skon i två givfilmer. Vid städning kan en förkastad arbetsfil tas bort när registren, proven och deras källhänvisningar har kontrollerats mot filens exakta version. [Fotostarten](../avatars/paulina/fotostart/index.html) · [Lokal mappguide från den tidigare modellomgången](../avatars/paulina/README.md)
 
 - Versionshantera källkod, delade agentinstruktioner, tester, generella recept, beroendelåsfil, exempelfält utan hemligheter och korta textbeslut. Dela reproducerbara anvisningar och anonyma testdata.
 - Håll källfoton, filmer, mesh, modellvikter, råa Runway-beställningar och svar, leverantörslänkar, tokens, arbetskopior, byggresultat, cache och lokala IDE-inställningar på datorn. Git-reglerna finns i rotens `.gitignore`.
