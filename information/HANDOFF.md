@@ -2,6 +2,10 @@
 
 Arbetskopian är `C:\Users\jakem\dev\ultimate-reality` på lokal `main`. Rörelseprovet ligger i `avatars/paulina/prov-70/v1/`. Original 01 (helfigur) och 03 (vid bordet) finns tillsammans med tolv registrerade vyer av kropp, ansikte, händer och kortgrepp. Alla tolv matchar bildregistrets SHA-256 när de läses genom studion. [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Öppna fotostarten](../avatars/paulina/fotostart/index.html) · [Studions bildserie](http://127.0.0.1:4317/bildstandard#utgavekontroll)
 
+## Ankare vid kortskon
+
+**Börja med rutan vid 2,625 s i de två Grok-givarna.** Utifrån samma pose och instruktion landade kortet på två punkter 19,4 cm isär. Byt därefter mellan A1 och A2.3 i kameravisaren. Samma Paulina-rigg `ae129ea1…` bär 127 leder och de två handposerna i 120 kameravinklar. I fotoprovet når Kling 4 med uttrycklig slutbild rätt handfördelning i ruta 72. Kostnaden i beställningsvyn var sammanlagt 69 krediter för version 3–6. Nästa prov kan låsa kortbanan till en vald spelplats och använda samma rutor för att jämföra hud, naglar och hår med fotona. [Välj ankarpose och kameravinkel](http://127.0.0.1:4317/prov-ankare/v1) · [Fyra filmer sida vid sida](http://127.0.0.1:4317/prov-ankare/v1/film.mp4) · [Provrapport och mätningar](ANKARPROV_V1.md) · [RFGCA och beställbar 4D](RFGCA_OCH_ANKARBILDER.md)
+
 ## Rörelseprov v1
 
 **Börja i ruta 42 (1,750 s).** Byt mellan front och +70° och följ kortets och fingrarnas överlappning. Jämför sedan ruta 70 med ruta 73. För nästa utseendeprov, använd samma rörelse och utsnitt och jämför ögon, hårfäste och naglar mot originalet. Ansiktet och håret är mörkare och har mindre synlig detalj i 3D. [Öppna exakt ruta 42 vid 70°](http://127.0.0.1:4317/prov-70/v1?ruta=42&kamera=70) · [Källfilmen och båda kamerorna tillsammans](http://127.0.0.1:4317/prov-70/v1/jamforelse.mp4)

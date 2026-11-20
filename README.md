@@ -6,7 +6,8 @@ Ett fristående lokalt labb för att göra dealerfilmer där handen släpper rä
 
 1. Öppna Paulinas fotostart. Där finns original 01 och 03, de valda sittvyerna, porträtten och handbilderna. [Fotostarten på labbdatorn](avatars/paulina/fotostart/index.html) · [De tolv vyerna i studion](http://127.0.0.1:4317/bildstandard#utgavekontroll)
 2. Öppna Paulinas rörelseprov. Samma sittande kropp och blackjackbord kan ses framifrån eller från 70°. Filmoriginal, friläggning och kamerajämförelse hör till samma lokala provversion. [Rörelseprovet](http://127.0.0.1:4317/prov-70/v1) · [Från film till 3D](information/FRAN_FILM_TILL_3D.txt) · [Sittprofilens bildmått](http://127.0.0.1:4317/bildstandard/sittprofil)
-3. Följ överlämningen för nästa uppgift. Egna grundbilder hör hemma i `avatars/<namn>/` eller i labbets `inputs`. [Aktuell överlämning](information/HANDOFF.md) · [Studioplan](studio/PLAN.md) · [Agentinstruktioner](AGENTS.md)
+3. Välj vila eller händer vid kortskon och rotera samma Paulina genom 120 kameravinklar. Fyra filmprov visar hur Grok och Kling använder ankarbilderna. [Kameravisaren](http://127.0.0.1:4317/prov-ankare/v1) · [Filmer och mätningar](information/ANKARPROV_V1.md)
+4. Följ överlämningen för nästa uppgift. Egna grundbilder hör hemma i `avatars/<namn>/` eller i labbets `inputs`. [Aktuell överlämning](information/HANDOFF.md) · [Studioplan](studio/PLAN.md) · [Agentinstruktioner](AGENTS.md)
 
 Äldre Paulina-modeller, tagningar och filmprov finns i det återställbara arkivet från den 20 november 2026. Det nya provet har en egen kropp, stol, bord och kort i `avatars/paulina/prov-70/v1/`. [Versioner och arbetsytor](information/STUDIOSTRUKTUR.md) · [Arkiv och återställning](information/HANDOFF.md#arkivet-från-20-november-2026)
 

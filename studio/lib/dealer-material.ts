@@ -63,8 +63,13 @@ export async function materialStamp(dealer: string, revision: string | null = nu
   const observations = await Promise.all(["bildegenskaper.json", "sittande-bildskala.json", "sittande-kamerapunkter-v1.json", "utgavegranskning-v1.json",
     "granskning/sittprofilprov.json", "granskning/sittmodellprov.json"]
     .map(name => bytes(path.join(avatar, edition, name))));
-  if (dealer === "paulina" && !revision)
-    observations.push(await bytes(path.join(avatar, "prov-70", "v1", "visning", "matning.json")));
+  if (dealer === "paulina" && !revision) {
+    const trialReceipts = await Promise.all([
+      bytes(path.join(avatar, "prov-70", "v1", "visning", "matning.json")),
+      bytes(path.join(avatar, "prov-ankare", "v1", "visning", "jämförelse.json")),
+    ]);
+    observations.push(...trialReceipts);
+  }
   return digest(Buffer.from(JSON.stringify([active?.toString(), ...registered, revision, ...observations.map(b => b && digest(b))])));
 }
 async function lockedRecord<T>(folder: string, key: string): Promise<T | null> {
@@ -320,8 +325,15 @@ export async function dealerMaterial(dealer = "paulina", requested: string | nul
   const { photos, issues } = await readPhotoEdition(dealer, edition, release?.photoRegister);
   const result: DealerMaterial = { dealer, edition, revision, stamp, photos, issues, activeModel: null,
     geometry: null, appearance: null, versions: [], motions: [], films: [] };
-  if (dealer === "paulina" && !requested && await checkedPath(path.join(avatarDir(dealer), "prov-70", "v1", "visning", "matning.json")))
-    result.motionTrialUrl = "/prov-70/v1";
+  if (dealer === "paulina" && !requested) {
+    const avatar = avatarDir(dealer);
+    const [motion, anchors] = await Promise.all([
+      checkedPath(path.join(avatar, "prov-70", "v1", "visning", "matning.json")),
+      checkedPath(path.join(avatar, "prov-ankare", "v1", "visning", "jämförelse.json")),
+    ]);
+    if (motion) result.motionTrialUrl = "/prov-70/v1";
+    if (anchors) result.anchorTrialUrl = "/prov-ankare/v1";
+  }
   if (!release) {
     if (dealer === "paulina") result.activeModel = await legacyModel();
     return result;

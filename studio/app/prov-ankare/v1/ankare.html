@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paulinas ankare · Dealerstudion</title>
+  <style>
+    :root { color-scheme: dark; font-family: "DM Sans", "Segoe UI", sans-serif; background: #101e1c; color: #f2eee4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100%, 1330px); margin: 0 auto; padding: clamp(16px, 3vw, 38px); }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.3rem; }
+    h1 { font-weight: 560; letter-spacing: -.044em; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.12; margin: 0; }
+    a { color: #e4d3a5; text-underline-offset: .23em; text-decoration-thickness: 1px; }
+    a:hover { color: #fff2d2; }
+    a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #f1ca7e; outline-offset: 4px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 2rem; padding: 1rem 0 1.15rem; border-top: 1px solid #435650; }
+    fieldset { display: flex; padding: 0; margin: 0; border: 0; }
+    legend, .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .pose { position: relative; }
+    .pose span { display: block; cursor: pointer; padding: .52rem .82rem; border: 1px solid #60766c; background: #22342f; }
+    .pose:first-of-type span { border-radius: 5px 0 0 5px; }
+    .pose:last-of-type span { border-radius: 0 5px 5px 0; border-left: 0; }
+    .pose input:checked + span { color: #10211c; background: #d8e6d5; }
+    .pose input:focus-visible + span { position: relative; outline: 2px solid #f1ca7e; outline-offset: 3px; }
+    .angle { display: flex; align-items: center; gap: .65rem; flex: 1 1 300px; max-width: 470px; }
+    .angle label { font-size: .94rem; color: #d3dfd7; }
+    input[type="range"] { min-width: 76px; flex: 1; accent-color: #dfc48b; cursor: pointer; }
+    select { font: inherit; font-variant-numeric: tabular-nums; color: inherit; background: #22342f; border: 1px solid #60766c; border-radius: 5px; padding: .42rem .38rem; }
+    figure { margin: 0; }
+    #bild { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; border-radius: 7px; background: #243a32; }
+    #fel { color: #f2cd99; }
+    nav { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem 1.55rem; margin: 1.15rem 0 0; }
+    .primary { font-weight: 600; }
+    @media (max-width: 640px) {
+      main { padding: 16px 12px; }
+      header { align-items: baseline; }
+      .controls { gap: .85rem; }
+      .angle { max-width: none; flex-basis: 100%; }
+      nav { align-items: flex-start; }
+    }
+  </style>
+  <script type="module" src="/prov-ankare/v1/visare.mjs"></script>
+</head>
+<body>
+<main>
+  <header><h1>Paulinas ankare</h1><a href="/">Till studion</a></header>
+  <div class="controls">
+    <fieldset>
+      <legend>Pose</legend>
+      <label class="pose"><input class="sr" type="radio" name="pose" value="a1"><span>A1 · Vila</span></label>
+      <label class="pose"><input class="sr" type="radio" name="pose" value="a23" checked><span>A2.3 · Vid kortskon</span></label>
+    </fieldset>
+    <div class="angle">
+      <label for="vinkel">Kameravinkel</label>
+      <input id="vinkel" type="range" min="0" max="357" step="3" value="0" aria-valuetext="0 grader">
+      <select id="grader" aria-label="Exakt kameravinkel"><option value="0">0°</option></select>
+    </div>
+  </div>
+  <figure>
+    <img id="bild" width="1280" height="720" src="/prov-ankare/v1/bild/a23-000.png" alt="Paulina vid kortskon i A2.3, kamera 0 grader">
+    <figcaption id="fel" role="status" hidden>Bilden gick inte att läsa.</figcaption>
+  </figure>
+  <nav aria-label="Filmprov">
+    <a class="primary" href="/prov-ankare/v1/film.mp4">Jämför de fyra filmproven</a>
+    <a href="/prov-ankare/v1/rigg.mp4">A1 till A2.3 från två kameror</a>
+  </nav>
+</main>
+</body>
+</html>
