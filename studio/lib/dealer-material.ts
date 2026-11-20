@@ -259,10 +259,11 @@ export function materialMarkdown(project: DealerMaterial) {
         check.scaleDelta.toLocaleString("sv-SE", { maximumFractionDigits: 2 }) + " %. Utsnitt " +
         (check.review ? "för granskning" : "inom gränserna") + " (skala " + seatedStandard.scalePercent +
         " %, höjdläge " + seatedStandard.centrePercent + " % av bildhöjden, identiska bildmått).");
-      const spread = floorSpread(p.seated.marks);
+      const spread = floorSpread(p.seated.marks, 2);
       if (p.seated.marks) rows.push("  - Säkra stolkontakter " +
         p.seated.marks.feet.filter(f => f.visible === "centre").length + "/4. " +
-        (spread ? "Höjdspann " + spread.pixels + " px." : "Fullt höjdspann saknas.") +
+        (spread ? "De synliga punkterna spänner över " + spread.widthPixels + " px i sidled och " + spread.pixels + " px i höjdled." : "Par av synliga kontaktcentrum saknas.") +
+        (spread && spread.centres < 4 ? " Hela stolens spann är okänt." : "") +
         " Punktosäkerhet skattad till ±" + p.seated.marks.uncertaintyPx + " px.");
     }
   }

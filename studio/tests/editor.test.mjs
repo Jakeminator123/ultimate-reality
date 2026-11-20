@@ -245,7 +245,14 @@ test(
           await figures.last().getByText("Utsnitt inom gränserna", { exact: true }).waitFor();
           await page.getByRole("button", { name: "Samma bildskala" }).click();
           assert.match(await profile.getAttribute("style"), /scale\(1\.040/);
-          if (await profileRow.getByText("2 av 4").count()) await profileRow.getByText("Ej mätbart").waitFor();
+          if (await profileRow.getByText("2 av 4").count()) {
+            await profileRow.getByText("Bara synliga fötter").waitFor();
+            const centres = material.photos.find(photo => photo.id === "sittande/profil").seated.marks.feet.filter(point => point.visible === "centre");
+            for (const axis of ["x", "y"]) {
+              const values = centres.map(point => point[axis]);
+              await profileRow.getByText(`${axis} ${Math.min(...values)}–${Math.max(...values)}`, { exact: false }).waitFor();
+            }
+          }
           await page.getByRole("checkbox", { name: "Mätlinjer" }).uncheck();
           assert.equal(await figures.locator('[aria-hidden="true"]').count(), 0);
         } else {

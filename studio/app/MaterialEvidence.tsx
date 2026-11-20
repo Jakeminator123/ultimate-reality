@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
-import { checkSeatedFrame, seatedStandard } from "../lib/seated-review";
+import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-review";
 import { modelPhotoRoles } from "../lib/photo-review";
 import styles from "./modeling.module.css";
 
@@ -8,6 +8,7 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   const roles = modelPhotoRoles(photo, project);
   const front = project.photos.find(p => p.id === "sittande/front");
   const check = photo.seated && front?.seated ? checkSeatedFrame({ ...photo, seated: photo.seated }, { ...front, seated: front.seated }) : null;
+  const contacts = floorSpread(photo.seated?.marks, 2);
   const edition = new URLSearchParams({ dealer: project.dealer, edition: project.edition });
   if (project.revision) edition.set("revision", project.revision);
   const measured = "/bildstandard/sitthojd?" + edition;
@@ -16,6 +17,8 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
     <p><strong>{photo.format} · {dimensions([photo.width, photo.height])}</strong>{photo.targetAngle !== undefined &&
       (photo.group === "Sittande" ? " · receptets sidovinkel " : " · målvinkel ") + photo.targetAngle + "°"}</p>
     <p>{roles.length ? roles.map(s => roleName[s]).join(" och ") : "Referens i bildserien"}</p>
+    {contacts && <p>De {contacts.centres} synliga mittpunkterna under stolfötterna spänner över {contacts.widthPixels} px i sidled och {contacts.pixels} px i höjdled.
+      {contacts.centres < 4 && " Hela stolens spann är okänt."}</p>}
     {photo.group === "Sittande" && <p>Fotokamerans höjd över golvet och faktiska lutning är okända.</p>}
     {check?.review && <p className={styles.photoWarning}>Granska utsnittet. {check.scaleDiffers &&
       "Kroppens bildskala avviker " + Math.abs(check.scaleDelta).toLocaleString("sv-SE", { maximumFractionDigits: 1 }) +

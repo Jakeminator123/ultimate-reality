@@ -60,10 +60,14 @@ export function checkSeatedFrame(photo: PhotoFrame, front: PhotoFrame, tolerance
   return { scaleDelta, centreDelta, formatDiffers, scaleDiffers, centreDiffers, review: formatDiffers || scaleDiffers || centreDiffers };
 }
 
-export function floorSpread(marks?: CameraMarks) {
-  if (marks?.feet.length !== 4 || marks.feet.some(p => p.visible !== "centre")) return null;
-  const rows = marks.feet.map(p => p.y);
-  return { top: Math.min(...rows), bottom: Math.max(...rows), pixels: Math.max(...rows) - Math.min(...rows) };
+export function floorSpread(marks?: CameraMarks, minimumCentres: 2 | 4 = 4) {
+  if (!marks || marks.feet.length > 4) return null;
+  const centres = marks.feet.filter(point => point.visible === "centre");
+  if (centres.length < minimumCentres) return null;
+  const columns = centres.map(point => point.x), rows = centres.map(point => point.y);
+  const left = Math.min(...columns), right = Math.max(...columns);
+  const top = Math.min(...rows), bottom = Math.max(...rows);
+  return { left, right, top, bottom, widthPixels: right - left, pixels: bottom - top, centres: centres.length };
 }
 
 export function angleDifference(degrees: number, target: number) {

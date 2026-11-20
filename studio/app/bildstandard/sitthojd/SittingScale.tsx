@@ -16,8 +16,9 @@ function PhotoGuides({ photo, scale, shift, floor, centre }: {
   photo: MeasuredPhoto; scale: number; shift: number; floor: boolean; centre: boolean;
 }) {
   const { width: w, height: h, seated: s } = photo;
-  const spread = floorSpread(s.marks);
+  const spread = floorSpread(s.marks, 2);
   const radius = w * 0.009;
+  const railY = spread ? Math.min(h - radius, spread.bottom + .5 + radius * 2.4) : 0;
   return <svg aria-hidden="true" className={styles.guides} viewBox={`0 0 ${w} ${h}`}>
     <g transform={`translate(${(1 - scale) * w / 2} ${shift}) scale(${scale})`}>
       {[s.crownY, s.soleY].map(y => <line className={styles.bodyLine} key={y} x1="0" x2={w} y1={y + .5} y2={y + .5}/>)}
@@ -28,8 +29,10 @@ function PhotoGuides({ photo, scale, shift, floor, centre }: {
         <circle cx={s.marks.eye.x + .5} cy={s.marks.eye.y + .5} r={radius}/>
       </g>}
       {floor && s.marks && <g className={styles.floor}>
-        {spread && [...new Set([spread.top, spread.bottom])].map(y =>
+        {spread?.centres === 4 && [...new Set([spread.top, spread.bottom])].map(y =>
           <line key={y} x1="0" x2={w} y1={y + .5} y2={y + .5}/>)}
+        {spread && <path className={spread.centres === 4 ? styles.span : styles.partialSpan}
+          d={`M ${spread.left + .5} ${railY - radius} v ${radius} h ${spread.widthPixels} v ${-radius}`}/>}
         {s.marks.feet.map(p => <circle key={p.x + "," + p.y} cx={p.x + .5} cy={p.y + .5}
           r={radius} className={p.visible === "centre" ? styles.contact : styles.edge}/>)}
       </g>}
@@ -94,23 +97,26 @@ export default function SittingScale({ dealer, edition, views }: { dealer: strin
       })}</div>
       {lines && <div className={styles.legend}><span className={styles.bodyKey}>Hjässa och sula</span><span className={styles.seatKey}>Dynans underkant</span>
         {centre && <span className={styles.eyeKey}>Pupill · kryss i bildrutans mitt</span>}
-        {floor && <span className={styles.floorKey}>Fylld punkt vid golvkontakt · ring vid skymd mitt</span>}</div>}
+        {floor && <span className={styles.floorKey}>Stolfötter · fylld punkt vid synlig mitt, ring vid skymd mitt. Klammern visar spannet i sidled.</span>}</div>}
       <section className={styles.note}><h2>Mått i originalen</h2>
-        <div className={styles.dataScroll}><table><thead><tr><th>Vy</th><th>Skala mot front</th><th>Höjdläge mot front</th><th>Sitsrad</th><th>Stolkontakter</th><th>Stolfötternas bildspann</th></tr></thead>
+        <div className={styles.dataScroll}><table><thead><tr><th scope="col">Vy</th><th scope="col">Skala mot front</th><th scope="col">Höjdläge mot front</th><th scope="col">Sitsrad</th><th scope="col">Stolkontakter</th><th scope="col">Spann i sidled (x)</th><th scope="col">Spann i höjdled (y)</th></tr></thead>
           <tbody>{rows.map(({ id, label, photo }) => {
-            if (!photo) return <tr key={id}><th>{label}</th><td colSpan={5}>Mätunderlag saknas</td></tr>;
-            const check = checkSeatedFrame(photo, front, tolerance), marks = photo.seated.marks, spread = floorSpread(marks);
-            return <tr key={id}><th>{label}</th>
+            if (!photo) return <tr key={id}><th scope="row">{label}</th><td colSpan={6}>Mätunderlag saknas</td></tr>;
+            const check = checkSeatedFrame(photo, front, tolerance), marks = photo.seated.marks, spread = floorSpread(marks, 2);
+            return <tr key={id}><th scope="row">{label}</th>
               <td className={check.scaleDiffers ? styles.flagged : undefined}>{signed(check.scaleDelta)} %</td>
               <td className={check.centreDiffers ? styles.flagged : undefined}>{signed(check.centreDelta)} %</td>
-              <td>{photo.seated.seatY} px</td><td>{marks ? marks.feet.filter(p => p.visible === "centre").length + " av 4" : "Ej granskade"}</td>
-              <td>{spread ? format(spread.pixels) + " px · " + format(spread.pixels / photo.height * 100, 1) + " %" : "Ej mätbart"}</td></tr>;
+              <td>{photo.seated.seatY} px</td><td>{marks ? marks.feet.filter(p => p.visible === "centre").length + " av 4" : "Ej granskade"}
+                {spread && spread.centres < 4 && <small>Bara synliga fötter</small>}</td>
+              <td>{spread ? <>{format(spread.widthPixels)} px<small>x {spread.left}–{spread.right} · {format(spread.widthPixels / photo.width * 100, 1)} %</small></> : "Ej mätbart"}</td>
+              <td>{spread ? <>{format(spread.pixels)} px<small>y {spread.top}–{spread.bottom} · {format(spread.pixels / photo.height * 100, 1)} %</small></> : "Ej mätbart"}</td></tr>;
           })}</tbody></table></div>
         <p>Skalan jämför hur stor del av bilden kroppen upptar. Höjdläget jämför mittpunkten mellan hjässa och sula i procent av bildhöjden. Positiva värden ligger längre ned. Grundgränserna är {seatedStandard.scalePercent} % för skala och {seatedStandard.centrePercent} % för höjdläge. Även olika bildmått inom serien ger en varning.</p>
       </section>
       <section className={styles.note}><h2>Visar stolbenen en högre kamera?</h2>
-        <p>En vågrät kamera kan se sitsen snett uppifrån när objektivet sitter över den. När kameran går från trekvart till profil ändras avståndet till varje ben. Därför kan samma stolfot hamna på en annan bildrad även vid oförändrad kamerahöjd.</p>
-        <p>Spannet mäts mellan högsta och lägsta säkra golvkontakt. En skymd mittpunkt gör hela spannet obestämt. {uncertainties.length > 0 && "Den visuella punktavläsningens skattade osäkerhet är " + uncertainties.map(u => "±" + u + " px").join(", ") + "."} Kryssmarkeringen visar bildrutans mitt. Fotots optiska centrum kräver kalibrering.</p>
+        <p>När kameran går runt samma stol ändras benens avstånd till kameran. I trekvart syns stolens bredd och djup samtidigt. Fötter på golvet kan därför hamna på olika bildrader även om kameran hålls vågrät på samma höjd.</p>
+        <p>Spannen mäts mellan de yttersta synliga kontaktcentrumen i x och y. Vid två eller tre synliga mittpunkter visar den streckade klammern bara deras spann. Hela stolens spann är då okänt. {uncertainties.length > 0 && "Punktavläsningens skattade osäkerhet är " + uncertainties.map(u => "±" + u + " px").join(", ") + "."}</p>
+        <p>Krysset visar bildrutans geometriska mitt. Fotots optiska centrum kräver kalibrering. Kroppsriggen följer dealern. Med kända fotpositioner på samma stol och kalibrerade kameror går det att jämföra var varje stolfot ska hamna med var den syns i varje original.</p>
       </section>
       <section className={styles.note}><h2>Standard för nästa sittserie</h2>
         <p><strong>{leveransformat(bildformat.person)}</strong> i alla tre vyer. Använd samma stol, brännvidd och kameraradie. Mät objektivets höjd från golvet, håll den optiska axeln vågrät och rotera runt stolens mitt. Vid fotografering, ta en kalibreringsruta i varje kameraläge med en måttsatt referens i samma koordinatsystem som golvet.</p>

@@ -13,6 +13,7 @@ test("mätpunkter följer bildfilens hash, utgåva och originalstorlek", () => {
   const data = readSeatedMeasurement(identity, edition, scale, marks);
   assert.equal(data.marks.eye.y, 185);
   assert.equal(floorSpread(data.marks).pixels, 62);
+  assert.equal(floorSpread(data.marks).widthPixels, 300);
   assert.equal(readSeatedMeasurement({ ...identity, width: 1080 }, edition, scale, marks), undefined);
   assert.equal(readSeatedMeasurement({ ...identity, sha256: "b".repeat(64) }, edition, scale, marks), undefined);
   assert.equal(readSeatedMeasurement(identity, "fas-1/v2", scale, marks), undefined);
@@ -22,6 +23,18 @@ test("mätpunkter följer bildfilens hash, utgåva och originalstorlek", () => {
   assert.equal(readSeatedMeasurement(identity, edition, scale, outside).marks, undefined);
   assert.equal(floorSpread({ ...data.marks, feet: data.marks.feet.map((p, i) => i === 1 ? { ...p, visible: "edge" } : p) }), null);
   assert.equal(floorSpread(), null);
+});
+
+test("stolens spann i x och y använder bara synliga mittpunkter", () => {
+  const profileMarks = { ...marks.views[0], feet: [
+    { x: 384, y: 1306, visible: "edge" }, { x: 390, y: 1358, visible: "centre" },
+    { x: 798, y: 1305, visible: "edge" }, { x: 819, y: 1356, visible: "centre" },
+  ] };
+  assert.equal(floorSpread(profileMarks), null);
+  assert.deepEqual(floorSpread(profileMarks, 2), {
+    left: 390, right: 819, top: 1356, bottom: 1358, widthPixels: 429, pixels: 2, centres: 2,
+  });
+  assert.equal(floorSpread({ ...profileMarks, feet: profileMarks.feet.slice(0, 3) }, 2), null);
 });
 
 test("sittkontrollen använder original, skiljer skala från höjdläge och varnar på olika raster", () => {

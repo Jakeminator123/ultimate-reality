@@ -43,7 +43,7 @@ Utgå från samma sittfront, stol och fotplacering. Linscentrum ligger på sitta
 | Originalformat inom serien | Identisk bredd och höjd för de tre sittvyerna. |
 | Kroppens storlek i bilden | Hjässa–sula inklusive ändrader, delat med originalets höjd. Granska en relativ skillnad över 2 % (20 ‰) mot frontens andel. Reglaget provar andra gränser. |
 | Utsnittets höjdläge | Granska om mittpunkten mellan hjässa och sula förskjuts över 1 % av hela bildhöjden mot fronten. |
-| Stolens golvkontakter | Markera trampytornas mitt i originalpixlar. Ange synlig kant för delvis skymda fötter. Beräkna bildspannet när alla fyra centrum syns. Perspektivet och stolens vinkel påverkar spannet. |
+| Stolens golvkontakter | Markera trampytornas mitt i originalpixlar. Ange synlig kant för delvis skymda fötter. Redovisa x- och y-spannet för synliga mittpunkter och deras antal. Fyra synliga centrum ger hela stolens bildspann. Perspektivet ändras med sidovinkeln. |
 | Modellkamera | Visa sidovinkel, höjdvinkel, höjd över scengolvet, riktpunkt, avstånd och zoom. Markera en vy mer än 1° från receptets sidovinkel eller vågräta axel. |
 | Ögonens bildläge | Jämför pupillens höjd i fotooriginalet med projektionen av motsvarande ögonled i 3D-rutan. I sittreceptets kameraläge granskas över 2 procentenheters skillnad. Runt gränsen används fotopunktens skattade avläsningsosäkerhet. |
 

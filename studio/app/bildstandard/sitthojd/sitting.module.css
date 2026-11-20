@@ -35,6 +35,8 @@
 .eye circle { stroke: #774382; fill: none; stroke-width: 1.8; }
 .cross { stroke: #3c433d; stroke-width: 1.5; filter: drop-shadow(0 1px 1px white); }
 .floor line { stroke: #2359a1; stroke-dasharray: 9 3 2 3; }
+.span, .partialSpan { fill: none; stroke: #2058a1; stroke-width: 1.6; }
+.partialSpan { stroke-dasharray: 5 3; }
 .contact { fill: #2058a1; stroke: white; stroke-width: 1.2; }
 .edge { fill: white; fill-opacity: .4; stroke: #2058a1; stroke-width: 1.5; }
 .measure { margin: 7px 0; }
@@ -51,6 +53,7 @@
 .note table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 9px 0; font-variant-numeric: tabular-nums; }
 .note th, .note td { padding: 8px 12px 8px 0; border-bottom: 1px solid #d8dfd7; text-align: left; }
 .note thead th { color: #4a5c50; }
+.note td small { display: block; margin-top: 3px; color: #526557; white-space: nowrap; }
 .note { border-top: 1px solid #cbd4ca; margin-top: 22px; }
 .note h2 { margin-bottom: 5px; font-size: 22px; }
 .note p { margin: 6px 0; }
