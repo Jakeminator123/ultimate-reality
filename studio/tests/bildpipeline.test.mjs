@@ -30,8 +30,67 @@ const { pipelineAction, pipelineImage, pipelineRevision } = await import("../lib
 const { bildpipelinePlan } = await import("../lib/bildpipeline.ts");
 const { verifiedPhotoReview, reviewPhotoSeries } = await import("../lib/photo-review.ts");
 const { actOnFilmOrder, filmOrder, filmOrderOriginal, requestHash } = await import("../lib/film-order-server.ts");
+const { danceAsset, danceDraft, saveDanceDraft } = await import("../lib/dance-order-server.ts");
 const { API_VERSION, ENDPOINT } = await import("../lib/model.ts");
 hooks.deregister();
+
+test("dansprovet binder fotot och rörelsefilmens exakta bytes till samma filmorder", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "ultimate-dansorder-"));
+  const studio = path.join(root, "studio"), lab = path.join(root, "ultimate-reality-lab");
+  const trial = path.join(root, "avatars", "paulina", "rorelseprov-dans", "v1");
+  const cwd = process.cwd(), priorRoot = process.env.ULTIMATE_REALITY_STORAGE, priorKey = process.env.RUNWAYML_API_SECRET;
+  t.after(async () => {
+    process.chdir(cwd);
+    if (priorRoot === undefined) delete process.env.ULTIMATE_REALITY_STORAGE;
+    else process.env.ULTIMATE_REALITY_STORAGE = priorRoot;
+    if (priorKey === undefined) delete process.env.RUNWAYML_API_SECRET;
+    else process.env.RUNWAYML_API_SECRET = priorKey;
+    assert.equal(path.dirname(root), path.resolve(os.tmpdir()));
+    await fs.rm(root, { recursive: true, force: true });
+  });
+  await Promise.all([studio, path.join(lab, "inputs"), path.join(lab, "orders"), path.join(trial, "referenser"), path.join(trial, "visning")]
+    .map(dir => fs.mkdir(dir, { recursive: true })));
+  await fs.writeFile(path.join(lab, ".owner"), "ultimate-reality-lab/v1");
+  process.chdir(studio);
+  process.env.ULTIMATE_REALITY_STORAGE = root;
+  process.env.RUNWAYML_API_SECRET = "offline-film-fixture";
+  const picture = await sharp({ create: { width: 720, height: 1280, channels: 3, background: "green" } }).png().toBuffer();
+  await fs.writeFile(path.join(trial, "referenser/paulina.png"), picture);
+  const movie = path.join(trial, "visning/rorelsereferens.mp4");
+  execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "color=green:s=720x1280:r=24",
+    "-frames:v", "96", "-c:v", "mpeg4", "-threads", "2", movie], { windowsHide: true });
+  const movieBytes = await fs.readFile(movie);
+  const prompt = "Match the dancer's jump and blink";
+  assert.deepEqual(await danceDraft(null), { versions: [], selected: null });
+  const saved = await saveDanceDraft({ prompt, base: 0, parent: 0 });
+  assert.deepEqual(await danceDraft(1), saved);
+  await fs.unlink(movie);
+  const revision = await saveDanceDraft({ prompt: prompt + " exactly", base: 1, parent: 1 });
+  assert.equal(revision.selected.motionSha256, saved.selected.motionSha256);
+  const preview = await danceAsset(new Request("http://localhost/", { headers: { range: "bytes=0-15" } }), "motion", 1);
+  assert.equal(preview.status, 206);
+  assert.deepEqual(Buffer.from(await preview.arrayBuffer()), movieBytes.subarray(0, 16));
+  let submits = 0;
+  const id = randomUUID();
+  const remote = async (url, init) => {
+    assert.equal(url, ENDPOINT);
+    const body = JSON.parse(init.body);
+    assert.equal(body.model, "kling_4");
+    assert.equal(body.ratio, "auto_1080p");
+    assert.equal(body.duration, 4);
+    assert.equal(body.promptText, prompt);
+    assert.deepEqual(body.promptImage, [{ uri: "data:image/png;base64," + picture.toString("base64"), position: "first" }]);
+    assert.deepEqual(body.referenceVideos, [{ uri: "data:video/mp4;base64," + movieBytes.toString("base64") }]);
+    submits++;
+    return Response.json({ id });
+  };
+  const command = { action: "start", version: 1, requestSha256: saved.selected.requestSha256 };
+  await assert.rejects(actOnFilmOrder({ ...command, requestSha256: revision.selected.requestSha256 }, remote, "rorelseprov-dans"), /avviker/);
+  await Promise.all([actOnFilmOrder(command, remote, "rorelseprov-dans"), actOnFilmOrder(command, remote, "rorelseprov-dans")]);
+  assert.equal(submits, 1);
+  assert.equal((await filmOrder(1, "rorelseprov-dans")).job.taskId, id);
+  await assert.rejects(filmOrder(1), /saknas/);
+});
 
 test("en vald filmversion skickas en gång och samma jobb ger ett verifierat filmoriginal", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "ultimate-filmorder-"));

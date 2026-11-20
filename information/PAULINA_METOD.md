@@ -125,6 +125,8 @@ Välj din egen versionsmapp till `$spar`. Spara filmoriginalet tillsammans med m
 
 ### Jakobs ZIP från den längre kasinofilmen
 
+Jakob beskriver filmposen som halvstående. Bordet skymmer höfter, knän och fötter i kasinobilden. Underkroppen i dashboardens GLB är därför SAM:s uppskattning. Dansprovets ståfoto visar hela Paulina och är en separat källa.
+
 Skrivbordsfilen `2026-11-20_135617_video.zip` har SHA-256 `a20d587f247a9ef5e75c52790605ed1d090979207b262d5e06044de21737ee63`. Alla elva poster matchar dashboardens sparade körning. Filmoriginalet `mera.mp4` har **2 983 rutor**, 1 464 × 790 bildpunkter, 30 b/s och en längd på 99,43 s. Originalets sökväg återfanns i JSON-exporten och filmbytesen kontrollerades separat. Råfilens SHA-256 börjar `ecb548dc`.
 
 | Fil i exporten | Vad den berättar |
@@ -182,6 +184,27 @@ Det första kommandot återskapar v1 från det låsta Kling-klippet. Det andra b
 Under hela greppfasen, ruta 0–55, var det största tumgapet 0,563 mm och pekfingrets största gap 0,069 mm. Två byggen gav samma GLB, SHA-256 `ac3cf5cb6db3026903e3d0de241985e564a1281ef8f6066e548fffa1092710d2`, och samma mätkvitto. [V2-riggens fullständiga mätkvitto](http://127.0.0.1:4317/giv-plats-4/filmrorelse/v2/rorelsematning.json) · [Spara tidsmatchade bildpar från spelaren](../studio/tools/granska-filmrorelse.mjs)
 
 **Från kropp till film.** Ställ in pose, ruta, kamera och utsnitt i studion. Rendera en stillbild som startankare och vid behov ett slutankare. Lägg in bilderna i studions versionssparade beställning och skicka den valda revisionen. Fyra registrerade Grok- och Kling-prov visar den riktningen. Två prov använde samma A2.3-pose och text från front respektive +70°. Grepp och släpp skilde sig i de genererade filmerna. För exakt samma kortbana från alla håll kan kamerorna rendera den lokala 3D-animationen direkt. [De fyra leverantörsproven](ANKARPROV_V1.md) · [Modell- och promptguide](RUNWAY_DEALER.md)
+
+### Dansprovet med ett foto och en rörelsefilm
+
+Original 01 visar Paulina i helfigur. Beskär originalets 1 083 × 1 452 px till 810 × 1 440 px från x = 136, y = 6. Båda skorna ligger innanför utsnittet. Den lokala PNG-filen har SHA-256 `426096cc010cb0d54b23976a788481f0c7ec58a5d9cdba35a1edbf87573eab37`. På kasinofilmens första ruta skymmer bordet benen. [Ståfotot i labbstudion](http://127.0.0.1:4317/rorelseprov-dans/v1/paulina.png)
+
+SAM skattar utgångsposen från original 01. Kroppsverktyget ställer Paulinas V4-rigg i den posen och animerar sidosteg, armsvängar, knäböj och ett tvåfotahopp. Ögonlocksverktyget använder två av MHR-modellens ansiktsformer. En fast frontkamera filmar 96 rutor vid 24 b/s i 720 × 1 280 px. [Kroppens koreografi](../tools/paulina_dance_motion.py) · [Ögonlockens rörelse](../tools/paulina_dance_blink.py) · [Kameran och MP4-exporten](../studio/tools/filma-rorelseprov-dans.mjs)
+
+Följande kommandon utgår från projektroten med labbstudion igång. Ståspåret har SHA-256 `370e908d…`. Första kommandot med Python verifierar en befintlig fil eller beräknar den från fotot med de lokala SAM-vikterna. [Exportera ståposen](../tools/paulina_standing_track.py)
+
+```powershell
+$dansPython = (Resolve-Path '..\sam-3d-body\.venv\Scripts\python.exe').Path
+& $dansPython -B tools/paulina_standing_track.py --device cpu
+& $dansPython -B tools/paulina_dance_motion.py
+& $dansPython -B tools/paulina_dance_blink.py
+Push-Location studio
+try { node tools/filma-rorelseprov-dans.mjs } finally { Pop-Location }
+```
+
+I beställningsvyn sparas fotot, den renderade rörelsefilmen och instruktionen i en egen revision. Kling 4 får foto i `promptImage` och MP4 i `referenceVideos`. Resultatet är en ny 2D-film. Studions jämförelse visar båda filmerna på samma tidslinje, och ett bildblad tar åtta prover utifrån respektive fils faktiska bildtider. [Beställningsvyn](http://127.0.0.1:4317/rorelseprov-dans/bestallning) · [Dansprovet](http://127.0.0.1:4317/rorelseprov-dans) · [Tidsmatchade bildpar](../tools/compare_paulina_dance.py)
+
+Kling levererade 97 rutor vid 24 b/s i 1 080 × 1 920 px från beställningsversion 1. Både rigg och Kling flyttar sig åt höger i bilden och når hopptoppen i ruta 64. I ruta 68 har båda landat. Riggens ögonlock möts i ruta 12–13. I fotofilmen är ögonen delvis öppna och Paulinas vänstra hand samt hjässan hamnar delvis utanför bilden under hoppet. [Jämför rörelsen vid åtta tider](http://127.0.0.1:4317/rorelseprov-dans/v1/samma-tid.jpg) · [Studera ögonlocken i samma rutor](http://127.0.0.1:4317/rorelseprov-dans/v1/blinkning.jpg)
 
 ## 5. Vad de 120 kameravinklarna gör
 

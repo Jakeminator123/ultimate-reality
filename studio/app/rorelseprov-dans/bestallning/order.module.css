@@ -1,0 +1,19 @@
+.order {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.1fr) minmax(280px, 1fr);
+  gap: clamp(1rem, 3vw, 3rem);
+  align-items: start;
+}
+.material { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
+.material figure { margin: 0; min-width: 0; }
+.material figcaption { margin-bottom: 0.5rem; font-weight: 650; }
+.material img, .material video { width: 100%; aspect-ratio: 9 / 16; object-fit: contain; border-radius: 7px; background: #e7eae5; }
+.settings { display: grid; gap: 0.9rem; }
+.settings p { margin: 0; }
+.settings label { display: grid; gap: 0.35rem; font-weight: 600; }
+.settings select, .settings textarea { width: 100%; font: inherit; font-weight: 400; }
+.settings textarea { resize: vertical; }
+.settings > button { justify-self: start; }
+@media (max-width: 760px) {
+  .order { grid-template-columns: 1fr; }
+}

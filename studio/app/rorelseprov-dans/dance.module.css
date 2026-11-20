@@ -1,0 +1,24 @@
+.page { max-width: 1120px; }
+.films {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: .8rem 1.5rem;
+  margin: 1.2rem 0;
+}
+.films h2 { margin: 0 0 .45em; font-size: 1.08rem; }
+.films video {
+  display: block;
+  width: 100%;
+  height: min(60vh, 630px);
+  object-fit: contain;
+  background: #e3e3df;
+  border-radius: 8px;
+}
+@media (max-width: 600px) {
+  .films { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+  .films section:only-child { grid-column: 1 / -1; }
+  .films video { height: auto; aspect-ratio: 9 / 16; max-height: 60vh; }
+  .films h2 { font-size: .94rem; }
+}
+.links { margin-top: 1.25rem; }
+.moments { margin-top: .65rem; }

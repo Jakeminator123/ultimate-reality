@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import type { FilmOrder } from "../lib/film-order";
 
-const endpoint = "/api/runway/film";
 const statusText = {
   waiting: "Redo att skickas",
   submitting: "Beställningen skickas",
@@ -20,8 +19,8 @@ async function responseState(response: Response): Promise<FilmOrder> {
   return data;
 }
 
-export default function FilmOrderPanel({ version, requestSha256, dirty, credits }: {
-  version: number; requestSha256?: string; dirty: boolean; credits: number;
+export default function FilmOrderPanel({ version, requestSha256, dirty, credits, endpoint = "/api/runway/film" }: {
+  version: number; requestSha256?: string; dirty: boolean; credits: number; endpoint?: string;
 }) {
   const [order, setOrder] = useState<FilmOrder>();
   const [error, setError] = useState("");
@@ -34,7 +33,7 @@ export default function FilmOrderPanel({ version, requestSha256, dirty, credits 
       .then(responseState).then((state) => { if (!controller.signal.aborted) setOrder(state); })
       .catch((err: Error) => { if (!controller.signal.aborted) setError(err.message); });
     return () => controller.abort();
-  }, [version]);
+  }, [version, endpoint]);
 
   async function act(action: "start" | "sync" | "reconcile") {
     setBusy(true);

@@ -2,6 +2,12 @@
 
 Arbetskopian är `C:\Users\jakem\dev\ultimate-reality` på lokal `main`. Rörelseprovet ligger i `avatars/paulina/prov-70/v1/`. Original 01 (helfigur) och 03 (vid bordet) finns tillsammans med tolv registrerade vyer av kropp, ansikte, händer och kortgrepp. Alla tolv matchar bildregistrets SHA-256 när de läses genom studion. [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Öppna fotostarten](../avatars/paulina/fotostart/index.html) · [Studions bildserie](http://127.0.0.1:4317/bildstandard#utgavekontroll)
 
+## Dans från Paulinas rigg till Kling 4
+
+I `avatars/paulina/rorelseprov-dans/v1/` finns ståfotot `426096cc`, riggen med blinkning `1d46eca0`, rörelsefilmen `7581953f` och Kling-originalet `becadf76`. Studion skickade en sparad version med ett foto och en fyra sekunder lång rörelsefilm. Beställning och kvitto ligger på labbdisken i `orders/rorelseprov-dans/v1-runway/`. [Jämför båda filmerna](http://127.0.0.1:4317/rorelseprov-dans) · [Metoden och körkommandona](PAULINA_METOD.md#dansprovet-med-ett-foto-och-en-rörelsefilm)
+
+Vid granskning, välj först **Hoppets topp** och därefter **Blinkningen**. Båda filmerna toppar i ruta 64 och landar i ruta 68. I Kling träffar hjässan överkanten i ruta 62–66 och Paulinas vänstra hand passerar höger bildkant i ruta 61–68. Ett litet avstånd återstår mellan ögonlocken i ruta 12–13. [Helfigurer vid samma bildtid](http://127.0.0.1:4317/rorelseprov-dans/v1/samma-tid.jpg) · [Blinkning i närbild](http://127.0.0.1:4317/rorelseprov-dans/v1/blinkning.jpg)
+
 ## Filmöverföring, blick och bildmetod
 
 [Metoden](PAULINA_METOD.md) beskriver bildurvalet, sittprofil v3, V2–V4, 120 virtuella kameravinklar och båda vägarna mellan film och 3D. I labbstudion finns [bildutgåvan med Paulina](http://127.0.0.1:4317/giv-plats-4/metod/bildutgava.pdf). Den [öppna, illustrerade utgåvan](../output/pdf/paulina-foto-till-rorelse.pdf) använder studions trädockor och kameraritningar.
