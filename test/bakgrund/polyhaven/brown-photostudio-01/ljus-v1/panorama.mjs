@@ -21,11 +21,26 @@ async function start() {
     const { placeTable } = await import("./bord.mjs");
     // Align the centre seat with the studio view Jakob chose.
     globe.rotation.y = -Math.atan2(home.x, home.z);
-    const seat = await placeTable(scene, renderer, canvas.dataset.seat);
+    const { seat, table } = await placeTable(scene, renderer, canvas.dataset.seat);
     camera.position.fromArray(seat.eye);
     globe.position.copy(camera.position);
     home.copy(camera.position).sub(new T.Vector3().fromArray(seat.aim));
     camera.fov = seat.fovVertical;
+    const shadowControl = document.querySelector("#kontaktskugga");
+    if (shadowControl) {
+      const { createContactShadows } = await import("./golv-v2.mjs");
+      const shadows = createContactShadows(table);
+      table.add(shadows);
+      shadows.visible = shadowControl.checked;
+      shadowControl.addEventListener("change", () => {
+        shadows.visible = shadowControl.checked;
+        renderer.render(scene, camera);
+      });
+      // Match the four downward arrow presses used for the panorama-v1 reference.
+      const direction = new T.Spherical().setFromVector3(home);
+      direction.phi -= 4 * .14;
+      home.setFromSpherical(direction.makeSafe());
+    }
   }
   const orbitEye = new T.PerspectiveCamera();
   const controls = new OrbitControls(orbitEye, canvas);

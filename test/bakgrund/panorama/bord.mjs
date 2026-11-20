@@ -28,5 +28,5 @@ export async function placeTable(scene, renderer, seatId) {
   const { shoe, draw } = buildDrawShoe(take.shoe);
   draw(take.frames[0].card_curve_zy_m);
   scene.add(table, shoe);
-  return calibration.cameras[seatId];
+  return { table, seat: calibration.cameras[seatId] };
 }

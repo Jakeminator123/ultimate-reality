@@ -19,3 +19,14 @@ Jakob valde den tomma fotostudion som startvy. I de tomma rummen roterar kameran
 Bordets antagna yttermått är 192 × 129,6 cm. Filthöjden är antagen till 75 cm. [Bordsmodell](../../../studio/lib/table-layout.json) · [Fast kamerakalibrering](../../bord/filtdjup-v1/matt.json) · [Kortskons version och mått](../../artefakter/skoriktning-70-30/README.md)
 
 De båda stolsbilderna är 1400 × 820 px. Från Stol 4 ligger soffan bakom bordet. Från Stol 1 syns fönstret över relingen. Vridning 45° åt höger och återställning provades i båda stolarna och de två tomma rummen. De återställda vyerna blev pixelidentiska med sina startbilder. Helskärm och sidbredd 390 px är kontrollerade.
+
+## Golvkontakt från Stol 1 och Stol 4
+
+Provet `golv-v2` utgår från `panorama-v1`, Brown Photostudio 01 och BORD-02. Öppna en stol och välj **Visa bordsfötterna**. Kryssrutan **Kontaktskugga** växlar mellan referensen och en mjuk skugga kring varje mässingsfot. Kamerans position och vertikala synfält på 48° är desamma som i stolsbilden. Blicken riktas 32,09° längre ned. [Prova Stol 1](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=1&vy=golv) · [Prova Stol 4](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4&vy=golv)
+
+| Kamera | Bildgranskning | Referens | Med kontaktskugga |
+| --- | --- | --- | --- |
+| Stol 1, 43,66° nedåt | En fot syns mot ljusa golvplankor. Skuggan möter mässingsringen och plankskarven kan följas genom skuggan. | [Utan skugga](golv-v2/stol-1-utan.jpg) | [Med skugga](golv-v2/stol-1-med.jpg) |
+| Stol 4, 46,27° nedåt | Båda fötterna syns. Varje ring får en mjuk skugga utan synlig ytterkant. | [Utan skugga](golv-v2/stol-4-utan.jpg) | [Med skugga](golv-v2/stol-4-med.jpg) |
+
+Skuggornas lägen och storlek följer 3D-modellens lägsta cylindrar. Skuggstyrkan är vald för bildprovet. Fotot är taget från en punkt och golvets verkliga avstånd till de modellerade fötterna är okänt. Vid jämförelse före JPEG-export var referensbilden pixelidentisk med v1 efter fyra piltryck nedåt. Påslagen skugga mörkade 12 275 av 771 456 pixlar från Stol 1 och 13 356 från Stol 4. [Skuggans utformning](golv-v2/kontaktskugga.mjs)

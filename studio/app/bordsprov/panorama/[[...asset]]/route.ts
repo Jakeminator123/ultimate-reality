@@ -16,16 +16,25 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
     const root = path.resolve(process.cwd(), "..");
     if (!asset) {
       const html = await readFile(/* turbopackIgnore: true */ path.join(root, "test/bakgrund/panorama/visare.mall.html"), "utf8");
-      const selectedSeat = new URL(request.url).searchParams.get("stol");
+      const query = new URL(request.url).searchParams;
+      const selectedSeat = query.get("stol");
       const seat = key === "fotostudio" && (selectedSeat === "4" || selectedSeat === "1") ? selectedSeat : "";
-      const seatMenu = key === "fotostudio" ? '<nav aria-label="Utsnitt i fotostudion"><a data-seat="" href="/bordsprov/panorama/fotostudio">Tomt rum</a><a data-seat="4" href="/bordsprov/panorama/fotostudio?stol=4">Stol 4</a><a data-seat="1" href="/bordsprov/panorama/fotostudio?stol=1">Stol 1</a></nav>' : "";
-      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye).replaceAll("{{plats}}", seat).replace("{{platser}}", seatMenu), {
+      const floorView = Boolean(seat && query.get("vy") === "golv");
+      const seatMenu = key === "fotostudio" ? `<nav aria-label="Utsnitt i fotostudion"><a data-seat="" href="/bordsprov/panorama/fotostudio">Tomt rum</a>${["4", "1"].map(id => `<a data-seat="${id}" href="?stol=${id}${floorView ? "&amp;vy=golv" : ""}">Stol ${id}</a>`).join("")}</nav>` : "";
+      let floorControls = "";
+      if (seat) {
+        floorControls = floorView
+          ? `<a href="?stol=${seat}">Visa bordsskivan</a><label><input id="kontaktskugga" type="checkbox" checked> Kontaktskugga</label>`
+          : `<a href="?stol=${seat}&amp;vy=golv">Visa bordsfötterna</a>`;
+      }
+      return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye).replaceAll("{{plats}}", seat).replace("{{platser}}", seatMenu).replace("{{golvkontroll}}", floorControls), {
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-cache" },
       });
     }
     const resources = new Map([
       ["visare.mjs", ["test/bakgrund/polyhaven/brown-photostudio-01/ljus-v1/panorama.mjs", "text/javascript"]],
       ["bord.mjs", ["test/bakgrund/panorama/bord.mjs", "text/javascript"]],
+      ["golv-v2.mjs", ["test/bakgrund/panorama/golv-v2/kontaktskugga.mjs", "text/javascript"]],
       ["studio.hdr", [room.photo, "application/octet-stream"]],
       ["HDRLoader.js", ["studio/node_modules/three/examples/jsm/loaders/HDRLoader.js", "text/javascript"]],
     ]);
