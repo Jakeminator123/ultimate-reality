@@ -222,6 +222,27 @@ Blickprovet startar i V4:s sittande vila. Valen avser **Paulinas egna sidor**. M
 
 **72 ansiktsreglage i grundmodellen.** Vi höll Paulinas form och pose fasta i lokala `mhr_model.pt` och ökade varje uttryckskoefficient en i taget från 0 till 1. Alla 72 formade huden. Skelettet stod still i alla 72 prov. För den första koefficienten flyttades 1 373 av 18 439 grundhörn mer än 0,01 mm, som mest 11,47 mm. I varje prov gick 100 % av de berörda hörnen att hitta via V4-ytans källindex `_SAM_INDEX`. Den lokala bildestimatorn nollställer ansiktsuttryck och käkrotation vid bildskattning. Giv V4 innehåller ännu inget av de 72 morfmålen. För fler synliga miner behöver förflyttningarna omvandlas till V4:s bindkoordinater och exporteras som namngivna mål. Käköppning, tänder, tunga och fonemer behöver därefter inspekteras på de faktiska ytorna. [Lokalt kvitto för alla uttryck](../avatars/paulina/giv-plats-4/v3/granskning/minspel/mhr72-kontroll-v4.json) · [Metas MHR](https://github.com/facebookresearch/MHR)
 
+## Återanvändning för nästa dealer
+
+En ny dealer i samma studio behöver följande åtta arbetsmoment. Fem har personoberoende verktyg eller recept. Med lika vikt per moment ger det **5/8, cirka 63 % uppskattad teknisk täckning**. Paulina är den enda identitet som följts genom hela kedjan i det här projektet. Arbetstiden per ny dealer är ännu omätt.
+
+| Moment | Underlag i projektet |
+| --- | --- |
+| Importera och versionsspara original | Studion kan ta en ny persons foton som indata. [Filhantering](../studio/lib/bildpipeline-files.ts) |
+| Beställa de strukturerade bildvyerna | Vid en lokal kontroll planerade 1, 2, 4 respektive 14 ursprungsfiler tolv olika bildroller per utkast. Bilderna behöver sedan väljas och bedömas. [Bildrecept](../studio/lib/bildpipeline.ts) |
+| Skatta kropp från foton | SAM-verktyget läser valda bilder och sparar varje skattning med mått, ledpositioner och kroppsyta. [Fotokörning](../tools/sam_photo.py) |
+| Bygga den skinnade sittande grundmodellen | Verktyget tar en angiven SAM-körning och tre sittvyer. Det går att ange en ny modellfil och ett nytt rapportmål. [MHR-export](../tools/mhr_seated_rig.py) |
+| Visa 120 vinklar | Studions kameror kan återanvändas för en giv i samma bordsläge med en kompatibel animationsscen, ögon- och fingerleder och namngivet kort. [Kameralägen](../studio/app/giv-plats-4/orbit-cameras.mjs) · [Visarens scenkrav](../studio/app/giv-plats-4/orbit-runtime.mjs) |
+| Passa likhet och material | Ansikte, hår, händer och hud kräver passning mot den nya personens bilder. [Paulinas ansiktspassning](../tools/paulina_face_fit.py) |
+| Passa given mot bord och kort | Handens läge, nyp, släpp och kortbana behöver provas på den nya kroppens proportioner. [Paulinas giv till plats 4](../tools/paulina_deal_p4.py) |
+| Granska en leverans | Likhet, deformation, skymda ytor och kontakt bedöms visuellt i flera vinklar. [Paulinas kontroller](HANDOFF.md) |
+
+I dansprovets ståfoto finns 70 skattade tvådimensionella bildpunkter. Positionerna kommer från analysbilden på 955 × 1 280 px och räknas tillbaka till originalets 1 083 × 1 452 px. Riggens skelett har 127 leder med läge och orientering i tre dimensioner. En animerad leds hudvikter avgör hur den påverkar ytan. [Ståfotots mätfil och format](../tools/paulina_standing_track.py) · [Skinnad kropp](../tools/mhr_seated_rig.py)
+
+### Import till Meshy
+
+Meshys webbverktyg kan ta emot en egen GLB på upp till 100 MB. Paulinas separata danskaraktär är 13,59 MB och innehåller två meshobjekt, en skinnbindning med 127 leder, ett blinkmål och ett animationsklipp. För ett försök med Meshys egen riggning rekommenderar leverantören en upprätt A- eller T-pose med mellanrum mellan kropp och armar. Filformat och storlek är kontrollerade lokalt. Ett prov i Meshy behövs för att avgöra hur dess arbetsgång behandlar Paulinas rigg, fingerkontakter och blinkmål. [Meshys uppladdningsformat](https://help.meshy.ai/en/articles/9991884-what-3d-file-formats-does-meshy-support-full-export-list) · [Meshys riggningsguide](https://docs.meshy.ai/en/webapp/guides/3d-model/rigging)
+
 ## Metodens plats bland tidigare arbeten
 
 **Vad modellen tillför en blackjackfilm.** En spelare kan byta stol mitt i given och fortfarande se samma kort, hand och klockslag. Vi kan också höja eller sänka spelarkameran, upprepa en handrörelse och granska om huden träffar filten. I en fast 2D-tagning kommer kameravinkeln och de synliga detaljerna från den inspelningen. För att visa att V4 når samma visuella kvalitet som en filmad dealer behövs en verklig referenstagning vid samma ljus, bildvinkel, avstånd och händelserutor. Nuvarande prov visar fungerande rörelse och geometrisk kontroll. Hårdjup, en skymd handflata och filmens rörelser i djupled är delvis skattade. [Fotot och V3 i porträtt](http://127.0.0.1:4317/giv-plats-4/v3/ansikte-original.jpg) · [Filmjämförelsen i studion](http://127.0.0.1:4317/giv-plats-4/filmrorelse?ruta=0)

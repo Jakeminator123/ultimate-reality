@@ -1,6 +1,10 @@
 # Paulina från foton till rörelse i 3D
 
-Arbetskopian är `C:\Users\jakem\dev\ultimate-reality` på lokal `main`. Rörelseprovet ligger i `avatars/paulina/prov-70/v1/`. Original 01 (helfigur) och 03 (vid bordet) finns tillsammans med tolv registrerade vyer av kropp, ansikte, händer och kortgrepp. Alla tolv matchar bildregistrets SHA-256 när de läses genom studion. [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Öppna fotostarten](../avatars/paulina/fotostart/index.html) · [Studions bildserie](http://127.0.0.1:4317/bildstandard#utgavekontroll)
+Arbetskopian är `C:\Users\jakem\dev\ultimate-reality` på lokal `main`. Rörelseprovet ligger i `avatars/paulina/prov-70/v1/`. Original 01 visar Paulina i helfigur och original 03 visar henne vid bordet. Av den valda seriens tolv bildroller återanvänder ståfronten original 01. Elva roller bygger på genererade eller bearbetade bilder. Alla tolv matchar bildregistrets SHA-256 när de läses genom studion. [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Öppna fotostarten](../avatars/paulina/fotostart/index.html) · [Studions bildserie](http://127.0.0.1:4317/bildstandard#utgavekontroll)
+
+## Presentationen från foto till rörelse
+
+Skrivbordsmappen `Paulina - från foto till rörelse` samlar den fristående presentationen. I den 50 sekunder långa filmen (`653fe770`) följs originalfoton och bildroller av sittmodell, leder, kameravarv och riggstyrd film i halvbild. Samtliga 120 vinklar i den kodade MP4-filen identifierades mot verkliga renderingar av V4, ruta 92. Sida 4 i PDF:n (`6913635a`) visar den projekterade högerhandens 23 punkter och Paulinas genomskinliga fotoyta över samma skelett. Skrivbordets ZIP innehåller bara denna PDF och MP4. För en ny dealer återstår att mäta personpassning och arbetstid genom en andra fullständig produktion. [Åtta bedömda arbetsmoment](PAULINA_METOD.md#återanvändning-för-nästa-dealer)
 
 ## Dans från Paulinas rigg till Kling 4
 
