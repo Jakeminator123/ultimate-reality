@@ -58,3 +58,16 @@ Första torrprovet hittade noll gamla SAM-körningar. Efter gallringen fanns all
 | Python 3.11 | 16 reproducerade `.pyc`-filer, tillsammans 410 536 byte. I `tools` gallrades `paulina_utseende`. I Paulinas prov gallrades `fas1-sittande-v2/granska`, `giv-sam-v4-v2/bygg`, `giv-sam-v4-v4/{jamfor_vila,retur}`, `giv-sam-v4-v5/bygg_redo`, `kortdrag-v2-v1/bygg`, `samspel-v2-v4/bygg`, `tvahandsgiv-v2-v1/{bygg,fingeryta}`, `tvahandsgiv-v2-v2/lagt_byte`, `tvahandsgiv-v2-v3/{bygg_hand,handform}` och `tvahandsgiv-v2-v4/{bygg_tryck,grepp,kort}`. Varje fil låg under respektive provs `__pycache__` med ändelsen `.cpython-311.pyc`. |
 
 Den registrerade v6-rörelsen börjar med `62ebe398` och filmen med `2b2e4dcc`. V7 anger den registrerade rörelsen som källa. Före kasseringen jämfördes de två utprovningarnas ursprung, SHA-256 och användning i källkedjorna. Nya materialtyper behöver en ägare och en gallringsregel. Bevarade media behöver separat backup för att tåla diskfel.
+
+## Omtag från stillbilderna
+
+Vid genomgången den 20 november gallrades **35 kopior, 67 391 763 byte**. De bevarade filernas SHA-256 kontrollerades efter gallringen.
+
+| Gallrad kopia | Bevarad plats | Byte |
+| --- | --- | ---: |
+| GLB och MP4 i `giv-sam-v4-v4/utprovning/` | Två registrerade exporter i tagningens rot och i avatarens versionslager. Filmkvittot börjar med `62c48d49`. | 31 636 828 |
+| 18 PNG, 1 JPG och 10 JSON i samma mellanmapp | Samma 29 filnamn och innehåll i [tagningens rot](../test/dealer/paulina/giv-sam-v4-v4/). Bygg- och granskningsskripten använder roten som standard. | 18 423 979 |
+| Den fristående kopian `kasinorum-utdrag-100/ledvolym.html` | [Offlinevisaren för ledvolym](../test/artefakter/kasinorum-utdrag-100/handkandidat/ledvolym/granska.html) | 17 288 974 |
+| Tre äldre `kontur.json` i `skolage-v1/arbetskant`, `arbetskant-v2` och `arbetskant-v3` | [Den identiska v4-konturen](../test/artefakter/skolage-v1/arbetskant-v4/kontur.json). Varje historisk variant har sin egen bana. [Köranvisning](../test/artefakter/skolage-v1/README.md#återskapa) | 41 982 |
+
+`lab.ps1 clean --dry-run` hittade inga gallringsbara SAM-körningar eller Python-cacher. I givprov 1, 3 och 5 skiljer sig vissa mellanexporter från de registrerade filerna. I prov 3 läser blinkbygget sin mellanexport. Användningen av de avvikande versionerna i prov 1 och 5 är oklar. Likadana filmrutor kan också ha egna roller i två registrerade tagningar.

@@ -4,9 +4,9 @@ Ett fristående lokalt labb för att göra dealerfilmer där handen släpper rä
 
 ## Börja här
 
-1. Öppna [den lokala dealerstudion](http://127.0.0.1:4317). [Studioplanen](studio/PLAN.md) beskriver nästa etapp med figur, kort och kameror.
-2. Läs [aktuell överlämning](information/HANDOFF.md) för senaste verifierade läge och nästa uppgift. I varje IDE gäller samma [agentinstruktioner](AGENTS.md).
-3. Lägg egna grundbilder i `avatars/<namn>/` eller välj material i labbets `inputs`. Mediefiler och personliga prov lagras lokalt.
+1. Börja med Paulinas stillbilder. Bildöversikten visar original, valda vyer och vilka bilder som bygger modellen. [Paulinas stillbilder](information/PAULINAS_STILLBILDER.md) · [Se de tolv vyerna i studion](http://127.0.0.1:4317/bildstandard#utgavekontroll)
+2. Öppna sittmodell v2 för att jämföra riggen med fotona. I tvåkortsgiven visar stol 4 och stol 1 samma rörelse på sittmodell v4. [Modellvisaren](http://127.0.0.1:4317/#modellering) · [Spela tvåkortsgiven](http://127.0.0.1:4317/modellering/sekvens?dealer=paulina&id=3003aba81a5e84f1afc19143b9fab370e1a508360e5aa8849bd68d690c0d8a59)
+3. Följ överlämningen för nästa uppgift. Egna grundbilder hör hemma i `avatars/<namn>/` eller i labbets `inputs`. [Aktuell överlämning](information/HANDOFF.md) · [Studioplan](studio/PLAN.md) · [Agentinstruktioner](AGENTS.md)
 
 ## Redigerbar dealerstudio
 
@@ -40,7 +40,7 @@ I [Runways bildpipeline](http://127.0.0.1:4317/bildpipeline) kan du lägga in ex
 
 Startsidan låter dig öppna Paulina eller börja med en ny dealers egna foton. **Fas 1 · Bildpipeline** samlar bildstandarden, Paulinas tolv vyer och Runways beställningsflöde. **Fas 2 · 3D-modell** visar sittmodellen v2 och dess fotoreferenser. Välj kroppsform, fotoutseende eller enbart rigg. Skelett, ledpunkter och rutnät kan slås på var för sig. Kameravärden visar vridning, höjdvinkel, avstånd till riktpunkten och zoom. [Dealerval](http://127.0.0.1:4317/) · [Paulinas modell](http://127.0.0.1:4317/#modellering)
 
-Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen i Codex skapade de tre sittbilderna. Hjässa till skosula upptar cirka 1 340, 1 340 och 1 288 px. [Jämför originalen och bildskalan](http://127.0.0.1:4317/bildstandard/sitthojd) · [Från kroppsskattning till fler kameror](studio/PLAN.md#från-paulinas-rigg-till-dealerfilm)
+Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen i Codex skapade sittbilderna. I bildutgåvan `fas-1/v1` mäter hjässa till skosula 1 340, 1 340 och 1 288 px. I sittmodell v4 används en senare profil som mäter 1 316 px. [Jämför bildutgåvans tre vyer](http://127.0.0.1:4317/bildstandard/sitthojd) · [Se profilen som används i v4](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#jamforelse)
 
 [Övrigt](http://127.0.0.1:4317/ovrigt) innehåller sittbasen v1, tidigare 08-riggar, labbets bildinkorg och parkerade rums- och ljusprov. Välj **Foto**, **Överlägg** eller **3D** för ett sparat prov. [Den äldre dockmallen](http://127.0.0.1:4317/ovrigt/fotomall) kan fortfarande sparas som fristående HTML.
 

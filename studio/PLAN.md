@@ -12,6 +12,8 @@ Under **Bakgrund och ljus** visar [Fotopanorama (360°)](http://127.0.0.1:4317/s
 
 ### Vilka bilder bygger Paulina och vilken rörelse ska vi skapa?
 
+[Paulinas stillbilder](../information/PAULINAS_STILLBILDER.md) visar vilka original och bildversioner som används i arbetet.
+
 | Underlag | Uppgift i projektet |
 | --- | --- |
 | Stående 0°, 45°, 90° | Håller ihop identitet, kläder och proportioner mellan vyer. |
@@ -20,7 +22,11 @@ Under **Bakgrund och ljus** visar [Fotopanorama (360°)](http://127.0.0.1:4317/s
 | Båda handryggarna ovanifrån | Ger naglar, hud och tatueringar till riggens händer. Handleden och fingerlederna styr senare greppet. |
 | Vänster kortgrepp och extra höger kortvändning | Visar två enskilda kontaktlägen. Filmerna behövs för att välja rörelseordning, kortets rotation och tidpunkten för släppet. |
 
-**Paulina · sittmodell v4** byggdes lokalt med SAM 3D Body DINOv3 från sittfronten, trekvarten och den granskade sittprofilen. Modellen har en egen kropp och en fotoyta från sju bilder. Vi passar näsvingen mot profilporträttet och kontrollerar samma ändring framifrån och i trekvart. Kroppsprov v3 använde samma sittbilder och gav nästan identisk viloform. De tidigare givproven 1–5 är inspelade med sittmodell v2. På sittmodell v4 har given en egen export med modellens kropp, fotoyta, kortbana och två stolkameror. Filmspelaren har hastighetsval från 0,25× till 1× och knappar för de granskade bildrutorna. [Jämför kropp, foto och fotoyta](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#jamforelse) · [Spela v4:s giv och se granskade rutor](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#givfilm)
+**Sittmodell v2** öppnas i modellvisaren. De fem tidigare rörelseproven `samspel-v2-v1` till `samspel-v2-v5` använder den kroppen. [Modellvisaren](http://127.0.0.1:4317/#modellering) · [Rörelseproven](http://127.0.0.1:4317/modellering/rorelseprov)
+
+**Sittmodell v4** byggdes lokalt med SAM 3D Body DINOv3 från sittfronten, trekvarten och den nyare sittprofilen. Modellen har en kropp och en fotoyta från sju bilder. Kroppsprov v3 använde samma sittbilder och gav nästan identisk viloform. Givserien `giv-sam-v4-v1` till `giv-sam-v4-v9` använder v4. I tvåkortsgiven spelas först tagning 8 och sedan tagning 9 på samma kropp och fotoyta. Stol 1 och stol 4 följer samma kortbana. [Jämför kropp, foto och fotoyta](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#jamforelse) · [Spela v4:s giv och se granskade rutor](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#givfilm)
+
+I profiljämförelsen går det att kontrollera hur näsvingen passar mot porträttet och granska samma ändring i front och trekvart. Filmspelaren har hastighetsval från 0,25× till 1× och knappar för de granskade bildrutorna.
 
 Slutmålet är en igenkännbar dealer som känns filmad när spelaren byter stol. Jakobs tidigare videoklipp visar handlägen. För den nya given har han pekat ut REDO A2.3 som relevant förebild. På Paulinas sittmodell v4 har vi passat den posen vid projektets bord och kortsko. Båda stolarna visar samma animerade kropp och samma kort. [Tidigare videoreferenser](../information/random/desk-v2-rorelsereferenser/GRANSKNING.md) · [Jämför den tidigare starten, REDO och de två slutposerna](../test/dealer/paulina/a23-giv-v5-v6/start-landning-och-bada-slutposerna.jpg)
 
