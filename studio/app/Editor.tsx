@@ -129,7 +129,7 @@ export default function Editor() {
       ? { frame: saved.draft.first, uri: saved.request.body.promptImage[0].uri }
       : undefined,
   );
-  const settings = draftSettings(draft.model);
+  const settings = draftSettings(draft.model, draft.quality);
   const b = usePicture(
     settings.last ? draft.last : null,
     saved?.draft.last && saved.request.body.promptImage[1]
@@ -142,7 +142,7 @@ export default function Editor() {
   const uri = slot === "last" && draft.last ? b.uri : a.uri;
   const payload =
     a.uri && (!settings.last || !draft.last || b.uri) && draft.prompt.trim()
-      ? makePayload(draft.prompt, draft.duration, a.uri, b.uri || undefined, draft.model)
+      ? makePayload(draft.prompt, draft.duration, a.uri, b.uri || undefined, draft.model, draft.quality)
       : null;
   const dirty =
     JSON.stringify(draft) !== JSON.stringify(saved?.draft || initialDraft);
@@ -327,7 +327,7 @@ export default function Editor() {
           </div>
         )}
         {mode === "oversikt" ? <DealerOverview dirty={dirty}/> : mode === "modellering" ? <ModelingStudio/> : mode === "promptmallar" ? <PromptLibrary draft={draft} ready={ready} apply={(p) => {
-          edit({ prompt: p.prompt, model: p.model, duration: p.duration,
+          edit({ prompt: p.prompt, model: p.model, duration: p.duration, quality: p.model === draft.model ? draft.quality : undefined,
             clipName: p.id === "@draft" ? draft.clipName : p.name });
           setSlot("first");
           setTab("reference");
@@ -534,11 +534,21 @@ export default function Editor() {
                       const model = e.target.value;
                       if (!isDraftModel(model)) return;
                       const durations = draftSettings(model).model.durations;
-                      edit({ model, duration: durations.includes(draft.duration) ? draft.duration : durations[0] });
+                      edit({ model, quality: undefined, duration: durations.includes(draft.duration) ? draft.duration : durations[0] });
                       setSlot("first");
                     }}>{draftModels.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
-                    <small>{settings.quality}</small>
+                    {draft.model !== "kling_4" && <small>{settings.quality}</small>}
                   </label>
+                  {draft.model === "kling_4" && <label>
+                    <small>Upplösning</small>
+                    <select aria-label="Filmupplösning" value={settings.quality} onChange={(e) => {
+                      const quality = e.target.value;
+                      if (quality === "720p" || quality === "1080p") edit({ quality });
+                    }}>
+                      <option value="720p">720p</option>
+                      <option value="1080p">1080p</option>
+                    </select>
+                  </label>}
                   <label>
                     <small>Längd</small>
                     <select

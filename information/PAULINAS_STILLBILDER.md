@@ -29,4 +29,4 @@ De tolv bilderna i Fas 1, upplaga 1, matchade registrets SHA-256 och pixelmått 
 
 ## Vad ska modellen ge?
 
-En igenkännbar, sittande Paulina som går att se från flera spelarplatser. Först granskas samma stilla kropp i front, trekvart och profil. När den fungerar kan en animation styra händer och kort medan flera kameror filmar samma giv. Tidigare modell-, hand- och filmprov finns i det lokala arkivet. [Tidigare riggar och tagningar](PAULINAS_PROV.md) · [Arkiv och återställning](HANDOFF.md)
+En igenkännbar, sittande Paulina som går att se från flera spelarplatser. I rörelseprov v1 driver en Kling-film samma kropp och kort i frontkameran och vid +70°. För provet skapades en uppskattad baksida, sidovy och handflatsbild. Tillförda fotografier från dessa håll skulle ge oberoende underlag för likheten. [Källorna till de kompletterande bilderna](../avatars/paulina/prov-70/v1/referenser/bildregister.json) · [Jämför film och 3D](http://127.0.0.1:4317/prov-70/v1/jamforelse.mp4) · [Arkiv och återställning](HANDOFF.md)

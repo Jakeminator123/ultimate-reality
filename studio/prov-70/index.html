@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paulina vid blackjackbordet · 70°</title>
+  <style>
+    :root{color-scheme:dark;font-family:"DM Sans","Segoe UI",sans-serif;background:#101e1c;color:#f2eee4}
+    *{box-sizing:border-box}body{margin:0}main{max-width:1200px;margin:auto;padding:clamp(14px,3.5vw,44px)}
+    header{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    a{color:#dcd5ac}h1{font-size:clamp(24px,4vw,44px);font-weight:550;letter-spacing:-.04em;margin:0 0 18px}
+    #scene{width:100%;aspect-ratio:16/10;display:block;background:#22302b;border-radius:8px}
+    .controls{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;margin:16px 0}
+    button{font:inherit;color:inherit;border:1px solid #86968d;border-radius:6px;padding:.48rem .86rem;background:#243632;cursor:pointer}
+    button[aria-pressed=true],button:hover{background:#426055}label{display:flex;align-items:center;gap:7px}
+    input{accent-color:#e5c993;max-width:33vw}output{font-variant-numeric:tabular-nums;min-width:3em}
+    footer{border-top:1px solid #51605a;margin-top:1em;padding:1em 0;display:flex;gap:.7em 1.5em;flex-wrap:wrap}
+    #status{color:#c6d2cb;margin:.6em 0}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #f2cc83}
+    @media(max-width:570px){.controls{gap:9px}#scene{aspect-ratio:4/4}footer{font-size:.9em}}
+  </style>
+  <script type="importmap">{"imports":{"three":"/bordsprov/rum3d/three.module.js","three/addons/":"/bordsprov/rum3d/addons/"}}</script>
+</head>
+<body><main>
+  <header><h1>Paulina vid blackjackbordet</h1><a href="/bildstandard">Paulinas bildserie</a></header>
+  <canvas id="scene" aria-label="Samma 3D-kropp och kort sett med den valda kameran"></canvas>
+  <div class="controls" aria-label="Kamera och uppspelning">
+    <button id="front" type="button" aria-pressed="true">Front</button><button id="side" type="button" aria-pressed="false">70°</button>
+    <label>Kamera <input id="angle" type="range" min="-90" max="90" value="0" step="1"><output id="degrees">0°</output></label>
+    <button id="play" type="button" disabled>Spela</button><label>Tid <input id="time" type="range" min="0" max="5" step=".001" value="0" disabled><output id="seconds">0,00 s</output></label>
+  </div>
+  <p id="status" role="status">Läser lokal 3D-modell …</p>
+  <footer><a id="model" href="/prov-70/v1/modell.glb" download="paulina-blackjack.glb">Hämta 3D-scenen</a>
+    <a data-local href="/prov-70/v1/kallfilm.mp4" hidden>Runways källfilm</a>
+    <a data-local href="/prov-70/v1/frilagd.webm" hidden>Film med genomskinlig bakgrund</a>
+    <a data-local href="/prov-70/v1/jamforelse.mp4" hidden>Runway och båda 3D-vinklarna</a>
+    <a data-local href="/prov-70/v1/matning.json" hidden>Rörelsemätning</a>
+    <a href="/prov-70/v1/sida.png">Genererad sidoreferens</a>
+  </footer>
+</main><script type="module" src="/prov-70/v1/visare.mjs"></script></body></html>

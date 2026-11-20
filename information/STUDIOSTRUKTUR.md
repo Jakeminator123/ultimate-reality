@@ -1,12 +1,12 @@
 # Arbetsytor i Ultimate Reality
 
-Paulinas fotoomstart använder en stilla sittpose. Öppna originalen och jämför samma kropp framifrån, i trekvart och från den valda profilen. [Fotostarten](../avatars/paulina/fotostart/index.html) · [Stillbilder och mätningar](PAULINAS_STILLBILDER.md) · [Aktuell överlämning](HANDOFF.md)
+Paulinas fotoomstart börjar med en sittande kropp. I rörelseprov v1 får den samma rörelse i två kameror. Originalfoton, genererade kompletteringar, filmorder och rörelse har egna källkvitton. [Fotostarten](../avatars/paulina/fotostart/index.html) · [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Aktuell överlämning](HANDOFF.md)
 
 | Plats | Innehåll |
 | --- | --- |
 | `avatars/paulina/` | Tillförda original 01 och 03 samt numrerade källbilder och `fotounderlag-v*.json`. Fotostarten visar valda referenser. |
 | `avatars/paulina/fas-1/v1/` | De tolv registrerade bildfilerna för upplaga 1, bildregistret och granskning. Vald profil v3 ligger i upplagans granskning och har ett eget mätkvitto. |
-| `avatars/paulina/prov-70/v1/` | Versionsmapp för aktuellt prov. Samla provets tillförda och skapade filer, källhänvisningar, SAM-ID och mätningar här. Fotounderlaget återanvänds via exakt sökväg och SHA-256. |
+| `avatars/paulina/prov-70/v1/` | Versionsmapp för det lokala rörelseprovet. `referenser` innehåller kompletterande bilder, `runway` innehåller källfilm, orderkvitto och friläggning, `modell` innehåller kropp och scen, `rorelse` innehåller skattade ledposer, `visning` innehåller kamerafilmer och mätning, `granskning` innehåller visuella kontroller. [Provets underlag och filer](../avatars/paulina/prov-70/v1/README.md) |
 | `avatars/<dealer>/3d/versioner/` | Registrerade GLB-filer, fotoytor, rörelser, filmexporter och granskningskvitton. Den valda kombinationen av kropp, eventuell fotoyta och bildutgåva anges i `aktiv.json`. [Versioner och registrering](MATERIALVERSIONER.md) |
 | Labbdisken | `inputs` för inkorgens original, `orders` för lokala beställningsversioner och originalresultat, `runs` för tillfälliga SAM-prov och `saved` för bevarade körningar. [Underhåll och Git](UNDERHALL.md) |
 | `studio/`, `tools/`, `test/` | Studio, verktyg och provrecept. Automatiska tester finns i `tests/` och `studio/tests/`. [Studioplan](../studio/PLAN.md) · [Provkatalog](../test/README.md) |

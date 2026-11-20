@@ -81,6 +81,8 @@ export async function POST(req: Request) {
       !draft.prompt.trim() ||
       draft.prompt.length > 1000 ||
       (draft.model !== undefined && !isDraftModel(draft.model)) ||
+      (draft.quality !== undefined && (draft.model !== "kling_4" ||
+        (draft.quality !== "720p" && draft.quality !== "1080p"))) ||
       !draftSettings(draft.model).model.durations.includes(draft.duration)
     )
       throw new LocalError("Kontrollera bilder, prompt och längd.");
@@ -126,7 +128,7 @@ export async function POST(req: Request) {
       )
     )
       throw new LocalError("Beskärningen kunde inte paketeras.");
-    const exact = makePayload(draft.prompt, draft.duration, uris[0], uris[1], draft.model ?? MODEL);
+    const exact = makePayload(draft.prompt, draft.duration, uris[0], uris[1], draft.model ?? MODEL, draft.quality);
     if (JSON.stringify(exact) !== JSON.stringify(payload))
       throw new LocalError("Förhandsvisningen hör till ett äldre utkast.");
     const { revisions } = await folders();

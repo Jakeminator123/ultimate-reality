@@ -1,6 +1,6 @@
 # Första studion
 
-**Målet är en igenkännbar dealerfilm där spelaren kan byta stol och följa samma händer och kort.** Vi börjar om med Paulinas foton. Första provet är en enda stilla, sittande modell mot neutral bakgrund. Jämför samma kroppsform och fotoyta i front, trekvart och profil. Rum, bord och kortgiv väntar tills Paulina är igenkännbar i alla tre vyerna. [Fotostarten](../avatars/paulina/fotostart/index.html) · [Överlämningen](../information/HANDOFF.md)
+**Målet är en igenkännbar dealerfilm där spelaren kan byta stol och följa samma händer och kort.** Från Paulinas foton bygger vi en kropp med en rigg. Det lokala rörelseprovet använder en fast frontkamera i Runway och två 3D-kameror kring samma blackjackbord. Jämför Paulinas ansikte, handens bana och kortet vid samma tidpunkt i originalfilmen och båda renderingarna. [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Fotostarten](../avatars/paulina/fotostart/index.html) · [Överlämningen](../information/HANDOFF.md)
 
 Redigeringsvyn och den gemensamma 3D-scenen finns i Next.js, React och TypeScript. Studion har verktyg för att granska bildoriginal, se kortet från två kameror och förhandsvisa en beställning. [Bildstandard](http://127.0.0.1:4317/bildstandard) · [Scenmiljö](http://127.0.0.1:4317/scenmiljo)
 

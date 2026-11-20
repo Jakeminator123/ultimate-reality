@@ -5,10 +5,10 @@ Ett fristående lokalt labb för att göra dealerfilmer där handen släpper rä
 ## Börja här
 
 1. Öppna Paulinas fotostart. Där finns original 01 och 03, de valda sittvyerna, porträtten och handbilderna. [Fotostarten på labbdatorn](avatars/paulina/fotostart/index.html) · [De tolv vyerna i studion](http://127.0.0.1:4317/bildstandard#utgavekontroll)
-2. Jämför sittfronten med vald profil. Nästa modellprov är en stilla, sittande Paulina som kan granskas framifrån, i trekvart och i profil. [Sittprofilens bildmått](http://127.0.0.1:4317/bildstandard/sittprofil) · [Roll och begränsning per bild](information/PAULINAS_STILLBILDER.md)
+2. Öppna Paulinas rörelseprov. Samma sittande kropp och blackjackbord kan ses framifrån eller från 70°. Filmoriginal, friläggning och kamerajämförelse hör till samma lokala provversion. [Rörelseprovet](http://127.0.0.1:4317/prov-70/v1) · [Från film till 3D](information/FRAN_FILM_TILL_3D.txt) · [Sittprofilens bildmått](http://127.0.0.1:4317/bildstandard/sittprofil)
 3. Följ överlämningen för nästa uppgift. Egna grundbilder hör hemma i `avatars/<namn>/` eller i labbets `inputs`. [Aktuell överlämning](information/HANDOFF.md) · [Studioplan](studio/PLAN.md) · [Agentinstruktioner](AGENTS.md)
 
-Äldre Paulina-modeller, tagningar och filmprov finns i det återställbara arkivet från den 20 november 2026. Arbetet med bord och rum är pausat. [Arkiv och återställning](information/HANDOFF.md#arkivet-från-20-november-2026) · [Tidigare kroppar och tagningar](information/PAULINAS_PROV.md) · [Bord, rum och kortsko](test/README.md)
+Äldre Paulina-modeller, tagningar och filmprov finns i det återställbara arkivet från den 20 november 2026. Det nya provet har en egen kropp, stol, bord och kort i `avatars/paulina/prov-70/v1/`. [Versioner och arbetsytor](information/STUDIOSTRUKTUR.md) · [Arkiv och återställning](information/HANDOFF.md#arkivet-från-20-november-2026)
 
 ## Redigerbar dealerstudio
 
@@ -44,7 +44,7 @@ Startsidan öppnar Paulinas bildserie. En framtida registrerad modell kan visas 
 
 ## Gemensam 3D-scen
 
-Scenen gör det möjligt att se samma kropp, fingrar och kort från flera spelarplatser. Den tidigare tvåkortsgiven använde en v4-kropp och två rörelseklipp efter varandra. De spelbara Paulina-proven ligger nu i arkivet. Geometrin för bord, sko och kameror finns i projektet för senare scenarbete. [Paulinas tidigare prov](information/PAULINAS_PROV.md) · [Scenkatalogen](test/README.md)
+Scenen gör det möjligt att se samma kropp, fingrar och kort från flera spelarplatser. I rörelseprov v1 följer två kameror en ny kropp riggad med MHR. Den tidigare tvåkortsgiven använde en v4-kropp och två rörelseklipp efter varandra och går att återställa från arkivet. [Rörelseprov v1](http://127.0.0.1:4317/prov-70/v1) · [Paulinas tidigare prov](information/PAULINAS_PROV.md)
 
 I [det tomma bordsprovet](http://127.0.0.1:4317/bordsprov/rumsprov.html?dealer=0) kan du växla mellan stol 4 och stol 1 samt mellan 108 och 96 cm ytterdjup. [Den äldre dockmallen](http://127.0.0.1:4317/ovrigt/fotomall) kan sparas som fristående HTML. Lägg egna dokument eller referenser för chattarna i [jakob-random](jakob-random/).
 

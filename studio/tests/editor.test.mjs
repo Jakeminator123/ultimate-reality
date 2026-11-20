@@ -238,7 +238,12 @@ test(
           await modelLink.click();
         } else {
           if (material.photos.length && !material.revision) {
-            await page.getByText("Nästa steg är en stilla modell av Paulina.").waitFor();
+            if (material.motionTrialUrl) {
+              const trial = page.getByRole("link", { name: "Se rörelsen vid 0° och 70°" });
+              assert.equal(await trial.getAttribute("href"), material.motionTrialUrl);
+            } else {
+              await page.getByText("Nästa steg är en stilla modell av Paulina.").waitFor();
+            }
             assert.equal(await modelLink.count(), 0);
             await page.getByRole("link", { name: `Öppna bildserien (${material.photos.length})` }).click();
             await page.getByRole("heading", { name: "Bildstandard för en dealer" }).waitFor();
@@ -792,6 +797,18 @@ test(
       assert.equal(await page.getByLabel("Längd på resultatet").inputValue(), "1");
       await page.getByLabel("Jämför klipplängd").selectOption("30");
       await page.getByRole("heading", { name: "WAN 3.0" }).waitFor();
+      await page.goto(origin + "/#film");
+      await page.getByLabel("Utkastets modell").selectOption("kling_4");
+      assert.equal(await page.getByLabel("Filmupplösning").inputValue(), "1080p");
+      await page.getByLabel("Filmupplösning").selectOption("720p");
+      await page.getByLabel("Filmlängd").selectOption("5");
+      await page.getByRole("button", { name: "Spara version" }).click();
+      await page.getByText("Sparad som version 5").waitFor();
+      const kling = (await (await page.request.get(origin + "/api/draft?v=5")).json()).record;
+      assert.equal(kling.request.body.model, "kling_4");
+      assert.equal(kling.request.body.ratio, "auto_720p");
+      await page.reload();
+      assert.equal(await page.getByLabel("Filmupplösning").inputValue(), "720p");
       await page.setViewportSize({ width: 375, height: 840 });
       assert.ok(
         await page.evaluate(

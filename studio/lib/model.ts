@@ -13,12 +13,15 @@ const imageDraftSettings = {
   grok_imagine_1_5_lite: { quality: "720p", ratio: "auto_720p", last: false },
 } as const;
 export type DraftModel = keyof typeof imageDraftSettings;
+export type FilmQuality = "720p" | "1080p";
 export function isDraftModel(value: unknown): value is DraftModel {
   return typeof value === "string" && Object.hasOwn(imageDraftSettings, value);
 }
 export const draftModels = videoModels.filter((m) => isDraftModel(m.id));
-export function draftSettings(id: DraftModel = MODEL) {
-  const settings = imageDraftSettings[id];
+export function draftSettings(id: DraftModel = MODEL, quality?: FilmQuality) {
+  const settings = id === "kling_4" && quality === "720p"
+    ? { ...imageDraftSettings[id], quality: "720p", ratio: "auto_720p" } as const
+    : imageDraftSettings[id];
   const model = draftModels.find((m) => m.id === id)!;
   return { ...settings, model, rate: model.rates.find((r) => r.quality === settings.quality)! };
 }
@@ -53,6 +56,7 @@ export type Draft = {
   version: number;
   prompt: string;
   model?: DraftModel;
+  quality?: FilmQuality;
   duration: number;
   first: Frame;
   last: Frame | null;
@@ -91,8 +95,9 @@ export function makePayload(
   first: string,
   last?: string,
   model: DraftModel = MODEL,
+  quality?: FilmQuality,
 ) {
-  const settings = imageDraftSettings[model];
+  const settings = draftSettings(model, quality);
   const promptImage = [{ uri: first, position: "first" }];
   if (last && settings.last) promptImage.push({ uri: last, position: "last" });
   return { model, promptImage, promptText: prompt, duration, ...(settings.ratio && { ratio: settings.ratio }) };
