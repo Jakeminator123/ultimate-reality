@@ -31,7 +31,9 @@ För en annan registrerad dealer öppnas `/?dealer=<namn>#modellering`. Kamerapr
 
 ## Nästa prov för att få Paulina naturlig
 
-1. Sätt viloposen på studions stol och kontrollera kontakten mellan säte, sits och golv från sidan. I det registrerade kameraprovet syns bakgrunden under sätet.
-2. Filma **ett kortdrag samtidigt framifrån och från sidan**. Låt tummen, pekfingret, skons öppning och kortkanten synas. Spara synkpunkten och markera grepp, kort på kant och släpp.
-3. Passa v2:s arm och fingrar till de tre momenten. Rendera samma tagning och samma 3D-kort från stol 4 och stol 1. Granska kontakt, glidning, skuggor och timing i det utsnitt spelaren får se.
+V2 har ett inspelat kameravridningsprov i vila och ett animerat utdrag av KORT-02 med Brown Photostudio på 50 %. I modellen följer två fingertoppar kortet genom 33 lägen. I tvåkamerafilmen syns kontakten tydligast från stol 1. Studions filmrutor 12, 28 och 44 motsvarar rörelsens lägen 1, 17 och 33. [Se den versionsbundna filmen](http://127.0.0.1:4317/api/material?dealer=paulina&film=b96eec10025c9434908172dfb319051ae1a580815e96302af5a71ab89cce99a0)
+
+1. Filma **ett verkligt kortdrag samtidigt framifrån och från sidan**. Låt tummen, pekfingret, skons öppning och kortkanten synas. Spara synkpunkten och markera grepp, kort på kant och släpp.
+2. Jämför den animerade v2-handleden och de fria fingrarna med verkliga greppet. Lägg till släpp och kortets landning. Rendera samma tagning och samma 3D-kort från stol 4 och stol 1.
+3. Granska glidning, skuggor och timing i spelarens utsnitt. Där stolen syns behövs också kontakt mellan säte, sits och golv. I viloposens profilprov syns bakgrunden under sätet.
 4. Bedöm hud, hår och kavaj i de två färdiga vyerna. Ta en skarp närbild där ytdetalj saknas, till exempel bakre trekvart för håret. Om rörelsen stämmer men fotoytan brister, prova filmprojektion från en känd kamera på samma rigg.

@@ -126,6 +126,8 @@ test(
           assert.equal(partial.status(), 206);
           assert.equal((await partial.body()).length, 16);
           await page.getByText(film.title, { exact: true }).click();
+          for (const review of film.reviews)
+            await page.getByText(review.camera + " · ruta " + review.frames.join(", "), { exact: true }).first().waitFor();
           const mark = film.marks.find(m => m.seconds > 0);
           if (mark) {
             await page.getByRole("button", { name: mark.label + " · ruta " + mark.frame }).click();

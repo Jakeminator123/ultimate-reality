@@ -50,6 +50,7 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
   const selected = photos[selectedIndex];
   const source = selected?.url;
   const model = inventory?.activeModel;
+  const cardFilm = inventory?.films.find(f => f.motion && f.card);
   const markMissing = (id: string) => setMissing(ids => ids.includes(id) ? ids : [...ids, id]);
 
   function stepPhoto(direction: number) {
@@ -124,7 +125,9 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
       <summary>Från rigg till dealerfilm</summary>
       <ol>
         <li><strong>Filma ett kortdrag framifrån och från sidan samtidigt.</strong> Identifiera grepp, kort på kant och släpp i samma rutor. Sidovyn visar fingrarna när framsidan skyms.</li>
-        <li><strong>Passa handen mot kortet i 3D.</strong> Styr handled, fingrar och ett gemensamt kort efter referensfilmen. Rendera samma tagning från stol 4 och stol 1. <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1">Öppna bordsprovet med 08-riggen</a></li>
+        <li><strong>{cardFilm ? "Jämför och förfina det animerade greppet." : "Passa handen mot kortet i 3D."}</strong> Styr handled, fingrar och ett gemensamt kort efter referensfilmen. Lägg till släpp och landning. Rendera samma tagning från stol 4 och stol 1. {cardFilm
+          ? <a href={cardFilm.url}>Se utdraget med den valda modellversionen</a>
+          : <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1">Öppna bordsprovet med 08-riggen</a>}</li>
         <li><strong>Välj filmens utseende.</strong> Rendera båda kamerorna från samma rörelse. Om hud eller tyg ser konstgjorda ut, jämför fototexturen med film projicerad på den rörliga kroppen från en känd kamera.</li>
       </ol>
     </details>

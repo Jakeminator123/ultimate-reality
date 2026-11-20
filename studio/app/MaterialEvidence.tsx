@@ -27,7 +27,7 @@ function FilmEvidence({ film }: { film: DealerMaterial["films"][number] }) {
         if (player.current && m.seconds !== undefined) { player.current.pause(); player.current.currentTime = m.seconds + .000001; }
       }}>{m.label} · ruta {m.frame}</button>)}</div>
     <p>Rutorna räknas från 0.</p>
-    {film.reviews.map(review => <p key={review.note}><b>Ruta {review.frames.join(", ")}</b> · {review.note}</p>)}
+    {film.reviews.map(review => <p key={review.camera + review.note}><b>{review.camera} · ruta {review.frames.join(", ")}</b> · {review.note}</p>)}
   </details>;
 }
 
