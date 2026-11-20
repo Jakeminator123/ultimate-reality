@@ -18,6 +18,9 @@
     footer {margin:.65rem 0;color:#d5dbd4}
     .return {display:inline-block; color:#e1cda9; margin-bottom:.7rem}
     select {font:inherit; color:inherit; background:#202e29; border:1px solid #6d7b74; border-radius:.35rem; padding:.3rem}
+    #bordsmaterial {display:flex; align-items:center; flex-wrap:wrap; gap:.55rem 1.2rem; margin:0 0 .8rem; border:1px solid #53675d; border-radius:.5rem; min-width:0}
+    #bordsmaterial legend {padding:0 .3rem; color:#e1cda9}
+    #bordsmaterial output:empty {display:none}
     #status {margin:0} #status:empty {display:none}
     main:fullscreen {background:#17201d; display:flex; flex-direction:column; height:100%; max-width:none}
     main:fullscreen canvas {height:0;min-height:0;flex:1}
@@ -33,6 +36,7 @@
         {{rumslankar}}
       </nav>
     </header>
+    {{materialval}}
     <canvas id="panorama" data-eye="{{blick}}" data-seat="{{plats}}" data-view="{{vy}}" data-mat="{{matta}}" tabindex="0" aria-label="Se dig omkring i {{rum}}"></canvas>
     <footer aria-label="Blickriktning">
       <button id="left">Vrid åt vänster</button><button id="right">Vrid åt höger</button>

@@ -22,11 +22,16 @@ async function start() {
     const { placeTable } = await import("./bord.mjs");
     // Align the centre seat with the studio view Jakob chose.
     globe.rotation.y = -Math.atan2(home.x, home.z);
-    const { seat, table } = await placeTable(scene, renderer, canvas.dataset.seat, placement, canvas.dataset.mat);
+    const { seat, table, layout } = await placeTable(scene, renderer, canvas.dataset.seat, placement);
     camera.position.fromArray(seat.eye);
     globe.position.copy(camera.position);
     home.copy(camera.position).sub(new T.Vector3().fromArray(seat.aim));
     camera.fov = seat.fovVertical;
+    const panel = document.querySelector("#bordsmaterial");
+    if (panel) {
+      const { bindTableFinishes } = await import("./materialval.mjs");
+      await bindTableFinishes(panel, table, layout, renderer, () => renderer.render(scene, camera));
+    }
     const shadowControl = document.querySelector("#kontaktskugga");
     if (shadowControl) {
       const { createContactShadows } = await import("./golv-v2.mjs");

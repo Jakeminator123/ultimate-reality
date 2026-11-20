@@ -50,6 +50,9 @@ export const sceneMaterial: Record<SceneView, SceneMaterial> = {
     },
     preview: { src: "/scenmiljo/bilder/bord-stol-4-v1.jpg", alt: "Blackjackbordet och kortskon från Stol 4 i Brown Photostudio", caption: "BORD-02 i Brown Photostudio · Stol 4" },
     related: [
+      { title: "Byt bordsmaterial", version: "materialval-v1 · BORD-02",
+        description: "Prova lackerad furu längs sargen. Välj filt eller gräs på spelytan och jämför brunt läder, rödbrunt läder och blå denim på relingen.",
+        links: seatLinks(panorama, "&vy=paulina&tra=furu&reling=rodbrun") },
       { title: "Skons riktning", version: "SKO-03 · skoriktning-70-30-v1",
         description: "Mynningen pekar 70 delar in mot bordets mitt och 30 delar fram mot Stol 4. De båda stolarna visar samma sko.",
         links: [{ label: "Se kortutdraget i skon", href: grip + "?stol=1&ruta=17" }] },

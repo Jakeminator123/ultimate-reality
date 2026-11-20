@@ -1,6 +1,6 @@
 # Grass Ground på bordets spelyta
 
-I RUM-02 kan **Prova gräsmattan** byta spelyta på BORD-02. **Visa grön filt** återställer YTA-02. Materialvalet följer med vid stolsbyte och när Paulina visas. Vid pose 17 från `skoriktning-70-30-v1` ligger samma rödryggade KORT-02 under vänsterhanden i båda materialproven. [Prova Stol 4](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4&vy=paulina&matta=gras) · [Prova Stol 1](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=1&vy=paulina&matta=gras)
+Välj **Gräsmatta · Grass Ground** under **Spelyta** i panoramat. **Grön filt** återställer YTA-02. Materialvalet följer med vid stolsbyte och när Paulina visas. Vid pose 17 från `skoriktning-70-30-v1` ligger samma rödryggade KORT-02 under vänsterhanden i båda materialproven. [Prova Stol 4](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=4&vy=paulina&matta=gras) · [Prova Stol 1](http://127.0.0.1:4317/bordsprov/panorama/fotostudio?stol=1&vy=paulina&matta=gras)
 
 Charlotte Baglionis skannade gräs och jord ger bordsmattan en brungrön, fläckig yta. En upprepning har källans mått på cirka 2,51 × 2,51 m. Färg, OpenGL-normaler och ytans råhet används i originalskala. Bordsformen och kortets kontaktyta är plana som i filtprovet. Spelrutornas konturer och text ritas i sina ursprungliga positioner ovanpå materialet. [Grass Ground av Poly Haven](https://polyhaven.com/a/grass_ground) · [Materialuppgifter](https://api.polyhaven.com/info/grass_ground) · [CC0](https://polyhaven.com/license)
 

@@ -68,6 +68,14 @@ function veneerUV(T, geometry) {
   geometry.setAttribute("uv",new T.Float32BufferAttribute(uv,2));
 }
 
+export function tableSurfaces(table) {
+  const felt = table.children.find(m => m.geometry?.type === "ShapeGeometry");
+  const rail = table.children.find(m => m.isMesh && m.geometry.type === "BufferGeometry" && m.children.some(c => c.isLineSegments));
+  const skirt = table.children.find(m => m.geometry?.type === "ExtrudeGeometry");
+  if (!felt?.material.map || !rail || !skirt) throw Error("Filt, reling eller träskiva saknas i bordsmodellen.");
+  return { felt, rail, skirt };
+}
+
 export async function applyTableMaterials(table, layout, baseUrl) {
   const T = await import("three");
   const directory = new URL(baseUrl || "./", document.baseURI);
@@ -104,10 +112,7 @@ export async function applyTableMaterials(table, layout, baseUrl) {
       materials.push(mat);
       return mat;
     }
-    const felt=table.children.find(m=>m.geometry?.type==="ShapeGeometry");
-    const rail=table.children.find(m=>m.isMesh && m.geometry.type==="BufferGeometry" && m.children.some(c=>c.isLineSegments));
-    const skirt=table.children.find(m=>m.geometry?.type==="ExtrudeGeometry");
-    if (!felt?.material.map || !rail || !skirt) throw Error("Filt, reling eller träskiva saknas i bordsmodellen.");
+    const { felt, rail, skirt } = tableSurfaces(table);
     const cloth=material("felt",0xffffff,1,.48), leather=material("rail",0xffffff,.85,.70);
     const veneer=material("wood",0xf5e7d8,.82,.46);
     // The old map contains the live card target, spots and lettering. Keep

@@ -103,7 +103,7 @@ test(
         await page.setViewportSize({ width: 1280, height: 900 });
         await nav.getByRole("link", { name: "Översikt", exact: true }).click();
       });
-      await t.test("fotopanoramats rum nås från bakgrundsmenyn och behåller stol, pose och matta vid rumsbyte", async () => {
+      await t.test("fotopanoramats rum nås från bakgrundsmenyn och behåller stol, pose och tre bordsmaterial vid rumsbyte", async () => {
         const { panoramaRooms } = await import("../lib/panorama-rooms.ts");
         const catalogue = "/scenmiljo/bakgrund/fotopanorama";
         const title = "Fotopanorama (360°)";
@@ -122,7 +122,7 @@ test(
           const card = page.locator(`main a[href="${route}"]`);
           assert.ok((await card.innerText()).includes(room.name));
           for (const seat of ["4", "1"]) {
-            const query = new URLSearchParams({ stol: seat, vy: "paulina", matta: "gras" });
+            const query = new URLSearchParams({ stol: seat, vy: "paulina", matta: "gras", tra: "furu", reling: "denim" });
             const response = await page.request.get(origin + route + "?" + query);
             assert.equal(response.status(), 200);
             const state = await page.evaluate(html => {
@@ -130,11 +130,13 @@ test(
               const canvas = doc.querySelector("canvas[data-seat]");
               return {
                 seat: canvas?.dataset.seat, view: canvas?.dataset.view, mat: canvas?.dataset.mat,
+                finishes: [...doc.querySelectorAll("#bordsmaterial select")].map(select => select.value),
                 rooms: [...doc.querySelectorAll("a[data-room]")].map(link => link.getAttribute("href")),
                 back: !!doc.querySelector('a[href="/scenmiljo/bakgrund/fotopanorama"]'),
               };
             }, await response.text());
             assert.deepEqual([state.seat, state.view, state.mat, state.back], [seat, "paulina", "gras", true], room.name);
+            assert.deepEqual(state.finishes, ["gras", "furu", "denim"]);
             const destinations = state.rooms.map(href => new URL(href, origin + route));
             assert.deepEqual(destinations.map(link => link.pathname).sort(), roomHrefs);
             for (const destination of destinations) {
