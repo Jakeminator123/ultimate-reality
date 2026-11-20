@@ -33,11 +33,13 @@ export async function placeTable(scene, renderer, seatId, view) {
     card.visible = false; // KORT-02 and its bending track are embedded in this take.
     const { loadDeal } = await import("./giv.mjs");
     playback = await loadDeal(scene, document.querySelector("#givkontroll"));
+  } else if (view === "sequence") {
+    card.visible = false; // Each deal supplies its own registered, animated playing card.
   } else if (study) {
     await study.placePaulina(scene, take, draw);
   } else {
     draw(take.frames[0].card_curve_zy_m);
   }
   scene.add(table, shoe);
-  return { table, layout, playback, seat: calibration.cameras[seatId] };
+  return { table, layout, playback, seat: calibration.cameras[seatId], cameras: calibration.cameras };
 }

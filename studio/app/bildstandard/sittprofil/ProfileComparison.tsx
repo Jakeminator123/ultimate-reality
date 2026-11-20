@@ -69,6 +69,7 @@ export default function ProfileComparison({ trial, front, previous, model, candi
             {" "}Bildutgåvans grundmodell i 3D-modellering är {model.name}.</p>
           {candidate.appearanceError && <p role="status">{candidate.appearanceError}</p>}
           {(film || continuations.length > 0) && <p><a href="#givfilm">Se given på den här SAM-kroppen från stol 4 och stol 1</a></p>}
+          {film?.appearanceStudy && <p>Vilomodellen visar grundfotoytan. Given använder den korrigerade fotoytan. <a href="#fotoyta">Jämför på samma bildruta</a></p>}
           {candidate.run && <small>SAM-körning <code>{candidate.run}</code></small>}
         </> : <p>Den här kroppen använder bildutgåvans sittprofil. Samma kropp visas i bildutgåvans rörelseprov.</p>}
         {candidateError && <p role="status">{candidateError}</p>}
@@ -95,6 +96,7 @@ export default function ProfileComparison({ trial, front, previous, model, candi
         <p><strong>{continuations.some(row => row.receipt === selectedReceipt) ? "Aktuell tagning" : "Tidigare tagning"}</strong>
           {" · "}{dealLabel(candidate.name, film.take, film.poses?.end)} · {film.appearance ? "Fotoyta" : "Neutral yta"} · stol 4 och stol 1.</p>
         <FilmEvidence film={film} displayName={dealLabel(candidate.name, film.take, film.poses?.end)} expanded/>
+        {film.motion && <a href={"/api/material?" + new URLSearchParams({ dealer: "paulina", model: film.motion })}>Hämta den animerade 3D-modellen för den här given</a>}
       </> : requestedTake !== undefined ? <p role="status">Tagningen <code>{requestedTake}</code> finns inte bland den här kroppens granskade filmer.
         {candidate.defaultTake && <> <Link href={filmLink(candidate.defaultTake)} prefetch={false}>Öppna studions valda tagning</Link></>}</p>
         : <p>Välj en granskad tagning ovan.</p>}
