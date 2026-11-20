@@ -43,8 +43,8 @@ Använd samma vilobild som utgångspunkt för varje tagning. Ange kortmål, givh
 
 | Prov | Exempel på prompt efter kontroll av utsnittet |
 | --- | --- |
-| Start, kontakt, slut från stol 4 | *One continuous five-second shot from a fixed camera. The dealer draws one card with her right hand. Her thumb rests on the top face and her index finger supports the short edge from below. The far edge touches the felt inside the center mark. Her fingers open and withdraw. The card settles flat and stays in the mark.* |
-| Foto och filmad givning | *Use the portrait for the dealer, clothing and table. Use the motion clip for the thumb–index grip, wrist path and release timing. Keep the camera fixed. Deal one card and hold on its final position as the hand returns.* |
+| Start, kontakt, slut från stol 4 | *One continuous five-second shot from a fixed camera. The pads of the dealer's left fingers press the back of one card and slide it out of the shoe toward the felt. Her right hand receives the exposed edge close to the table, turns the two of spades face up and places it flat inside the center mark in one sweep. Her right fingers release. The card stays in place as her left hand returns to the next card.* |
+| Foto och filmad givning | *Use the portrait for the dealer and clothing. Follow the motion clip for the left fingertips pushing out the card, the low handover and the right hand turning and placing it. Keep the camera fixed on the studio table and hold on the card as the hands return to the chosen end pose.* |
 
 Byt referensnamn mot syntaxen i den valda modellen. Om Seedance-mallen används, ange en tagning på fem sekunder och granska dess omskrivning före sparning. [Runways promptmall](https://d3phaj0sisr2ct.cloudfront.net/site/assets/runway-sd-enhancer-skill.md) · [Runways exempel](https://runway.com/prompts/a-game-of-horse)
 

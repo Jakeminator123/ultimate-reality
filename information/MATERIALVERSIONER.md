@@ -9,10 +9,14 @@ Studion visar den valda bildutgåvan, kroppsmodellen, fotoytan och filmerna som 
 | Fotoyta | Egen GLB-version, den rigg den byggdes på, källbilder och kroppstexturens inbäddade pixelmått. | Ett nytt porträtt, en ombakad textur eller en ny basrigg kan ge en ny version. De tidigare filerna går att granska vidare. |
 | Animerad modell | GLB med tidslägen från animationsspåren, exakt grundrigg och fotoyta, tagning, kort-ID och kortbanans SHA-256. | Samma arm, fingrar och kortbana kan spelas från båda stolarna. Filmexporten anger den animerade GLB-filens SHA-256. |
 | Renderad film | Filmens SHA-256, tagning, rigg, vald fotoyta, eventuellt kort, kamera och uppmätta fil- och bildrutetider. | Återanvänd samma rörelse och samma kort från olika stolar. Koppla varje iakttagelse till filmversion, kamera och nollbaserade rutor. |
+| Fotoyta i rörelse | `photoLayer` anger källfilmens kvitto, källrörelsens SHA-256 och de justerade delarna. | Växla mellan källfilmen och den korrigerade ytan på samma ruta. Registreringen kontrollerar källkropp, kort, antal rutor och bildfrekvens. [Granska fotoytan](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#fotoyta) |
+| Givsekvens | Varje steg har eget filmkvitto, animationsfil, målplats, kortinstans, landningsruta och släppruta. | En giv som slutar i REDO kan följas av nästa giv från REDO. Spelaren verifierar källorna när en sparad sekvens öppnas. Varje landat kort behåller sitt läge när kameran byts. [Spela två kort](http://127.0.0.1:4317/modellering/sekvens?dealer=paulina&id=3003aba81a5e84f1afc19143b9fab370e1a508360e5aa8849bd68d690c0d8a59) |
 
 ## Automatisk registrering
 
 Den första versionssiffran i `ansiktsrigg-v2-v2` anger kroppens version och den andra anger blinkprovets version. Studion visar **Blinkning · prov 2** och anger kroppen separat. En sammansatt giv använder ett skelett och en tidslinje. GLB-filen anger SHA-256 för de hand- och ögonlocksrörelser som ingår. Registret matchar deras geometri och fotoyta. Under filmen går det att öppna källrörelser och granskade bildrutor. [Rörelseprov](http://127.0.0.1:4317/modellering/rorelseprov)
+
+När en spelbar giv tar över en granskad korrigering av kropp eller hår anger `appearanceStudy` det exakta fotoyteprovets filmkvitto. Registreringen läser de inbäddade färgtexturerna i båda GLB-filerna och jämför dem del för del. En sparad sekvens med fler kort använder samma fotoyteprov genom hela given.
 
 När en tagning får korrigerad fotoyta anger den grundtexturens SHA-256, den inbäddade nya texturens SHA-256 och vilka porträtt som använts. Vid registrering verifieras båda texturerna och porträttens koppling till grundmodellens bildserie. Den spelbara given behåller kroppens ursprungliga leder och bindning. [Prov 2 med korrigerad yta](paulina-rorelseunderlag-v2.json)
 

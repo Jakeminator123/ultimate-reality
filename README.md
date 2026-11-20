@@ -46,13 +46,17 @@ Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen
 
 ## Gemensam 3D-scen
 
-Den aktuella scenen använder Jakobs redigerbara RUM-03, BORD-02 på 192 × 129,6 cm och SKO-03. Den tidigare 08-riggen visar samma kort från stol 4 och stol 1 i tagningen `skoriktning-70-30-v1`. [Öppna den aktuella scenen](http://127.0.0.1:4317/bordsprov/rum3d?rum=mesh&stol=4&glas=1)
+Paulinas SAM-sittmodell v4 ger till plats 4. Stol 4 och stol 1 visar samma kropp, fingrar och kort. Under Rörelseprov kan du jämföra givmönstret med källfilmerna, välja slutpose och spara en sekvens där varje kort ligger kvar när nästa hämtas. [Rörelsemönster och givsekvenser](http://127.0.0.1:4317/modellering/rorelseprov) · [Paulina vid bordet](http://127.0.0.1:4317/bordsprov/panorama/gothic-manor?stol=4&vy=giv)
+
+I det redigerbara rumsprovet RUM-03 står BORD-02 på 192 × 129,6 cm med SKO-03. Den tidigare 08-riggen visar tagningen `skoriktning-70-30-v1` i de två stolkamerorna. [Öppna rumsprovet](http://127.0.0.1:4317/bordsprov/rum3d?rum=mesh&stol=4&glas=1)
 
 [Se Paulinas vänsterhandsutdrag på det större bordet](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html). I Kasinorum kan du jämföra 192 × 129,6 cm med 160 × 108 cm på samma bildruta. [Materialdetaljen](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html?vy=material) visar Poly Havens gröntonade mikromocka, bruna läder och valnötsfaner.
 
 I [det tomma bordsprovet](http://127.0.0.1:4317/bordsprov/rumsprov.html?dealer=0) kan du växla mellan stol 4 och stol 1 samt mellan 108 och 96 cm ytterdjup med samma sko, kortmål och rum. [Rumsprovets renderingsanvisningar](test/bakgrund/kasinorum-v1/README.md) skapar en lokal visare som fungerar även med studion stängd. [Materialmapparna](test/README.md) skiljer dealer, bord, bakgrund och artefakter. Lägg egna dokument eller referenser för chattarna i [jakob-random](jakob-random/).
 
-Öppna [Grepp och landning](http://127.0.0.1:4317/?vy=webview#scen). **Stol 4** och **Stol 1** visar samma pose och kort vid samma bildruta. Justera högerhandens grepp längs kortkanten, extra glapp och lutning. Flytta målet med **Sidled** och **Djup**, eller välj **Placera direkt i bild** och dra på filten. **Handdetalj** förstorar kontakten från båda stolarnas kamerapositioner. Tumme visas i orange och pekfinger i blått.
+### Provdockan i Övrigt
+
+Övrigt innehåller mätverktyget **Provdocka · grepp och landning**. Figuren byggs av enkla former. **Stol 4** och **Stol 1** visar samma pose och kort vid samma bildruta. Justera högerhandens grepp längs kortkanten, extra glapp och lutning. Flytta målet med **Sidled** och **Djup**, eller välj **Placera direkt i bild** och dra på filten. **Handdetalj** förstorar kontakten från båda stolarna. Tumme visas i orange och pekfinger i blått. [Övrigt](http://127.0.0.1:4317/ovrigt) · [Öppna provdockan](http://127.0.0.1:4317/?vy=webview#scen)
 
 **Kontakt** visar kortkanten på filten, **Släpp** inleder fingrarnas frigöring och **Slut** visar kortet kvar när handen har återgått. Givningen är fem sekunder med 24 bilder/s. **Spara version** lagrar sceninställningarna med utkastet. **Spara bildpar** lägger två PNG-filer i inkorgen för vidare granskning eller manuellt val i filmutkastet. [Modeller, referensmaterial och promptförslag](information/RUNWAY_DEALER.md)
 
