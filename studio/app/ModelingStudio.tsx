@@ -114,6 +114,7 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
       {inventory?.seatedTrial?.film && <div className={styles.modelFilm}>
         <a className={styles.inlineLink} href={inventory.seatedTrial.film.url}>Spela given på {inventory.seatedTrial.name} <ArrowRight size={15}/></a>
         <span>Stol 4 och stol 1 · <code>{inventory.seatedTrial.film.take}</code></span>
+        <a className={styles.inlineLink} href="/bildstandard/sittprofil?modell=prov#givfilm">Granska i filmspelaren</a>
       </div>}
       {reviewedDeal && reviewedLink && model && <div className={styles.modelFilm}>
         <a className={styles.inlineLink} href={reviewedLink}>Öppna senaste granskade given <ArrowRight size={15}/></a>

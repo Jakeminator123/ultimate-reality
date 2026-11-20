@@ -61,6 +61,10 @@ export function FilmEvidence({ film, expanded, context, children, comparison, an
   const [speed, setSpeed] = useState(1);
   const frameHeading = useId();
   const name = takeLabel(film.take, film.title);
+  const start = film.poses?.start;
+  const marks = start && !film.marks.some(mark => mark.frame === 0)
+    ? [{ frame: 0, seconds: 0, label: start === "A2.3" ? "Start i REDO A2.3" : "Start i VILA A1" }, ...film.marks]
+    : film.marks;
   return <details open={expanded} id={anchorId}>
     <summary>{name}</summary>
     {name !== film.title && <p>{film.title}</p>}
@@ -80,7 +84,7 @@ export function FilmEvidence({ film, expanded, context, children, comparison, an
     {comparison && <><h3 id={frameHeading}>Bildrutor i Paulinas film</h3>
       <p>Knapparna nedan pausar Paulinas film på den valda rutan. Första bildrutan är 0.</p></>}
     <div className={styles.frameMarks} role={comparison ? "group" : undefined} aria-labelledby={comparison ? frameHeading : undefined}>
-      {film.marks.map(m => m.seconds === undefined ?
+      {marks.map(m => m.seconds === undefined ?
       <span key={m.frame}>{m.label} · ruta {m.frame}</span> :
       <button key={m.frame} onClick={() => {
         if (player.current && m.seconds !== undefined) pauseAtMark(player.current, m.seconds);
