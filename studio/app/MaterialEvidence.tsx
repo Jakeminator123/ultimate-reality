@@ -3,6 +3,7 @@ import { useRef, type ReactNode } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
 import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-review";
 import { modelPhotoRoles } from "../lib/photo-review";
+import DealComparison from "./modellering/rorelseprov/DealComparison";
 import styles from "./modeling.module.css";
 
 export function PhotoCameraGuides({ photo }: { photo: Photo }) {
@@ -48,15 +49,17 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   </div>;
 }
 
-export function FilmEvidence({ film, expanded, context, children }: {
+export function FilmEvidence({ film, expanded, context, children, comparison }: {
   film: DealerMaterial["films"][number]; expanded?: boolean; context?: ReactNode; children?: ReactNode;
+  comparison?: { handover: number; release: number };
 }) {
   const player = useRef<HTMLVideoElement>(null);
   return <details open={expanded}>
     <summary>{film.title}</summary>
     <p>Tagning <code>{film.take}</code> · {dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
     {context}
-    <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/>
+    {comparison ? <DealComparison film={film} modelPlayer={player} {...comparison}/> :
+      <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/>}
     <div className={styles.frameMarks}>{film.marks.map(m => m.seconds === undefined ?
       <span key={m.frame}>{m.label} · ruta {m.frame}</span> :
       <button key={m.frame} onClick={() => {

@@ -1,0 +1,74 @@
+"use client";
+
+import { useRef, useState, type RefObject } from "react";
+import { dealReferences } from "../../../lib/deal-references";
+import type { DealerMaterial } from "../../../lib/material-types";
+import styles from "./comparison.module.css";
+
+type Film = DealerMaterial["films"][number];
+type Phase = "draw" | "handover" | "release";
+
+export default function DealComparison({ film, modelPlayer, handover, release }: {
+  film: Film; modelPlayer: RefObject<HTMLVideoElement | null>; handover: number; release: number;
+}) {
+  const references = useRef<(HTMLVideoElement | null)[]>([]);
+  const [message, setMessage] = useState("");
+  const [unavailable, setUnavailable] = useState<string[]>([]);
+  const [filmControls, setFilmControls] = useState(false);
+
+  function position(phase: Phase) {
+    if (phase !== "draw") setFilmControls(false);
+    const modelTime = { draw: 0, handover, release }[phase];
+    const positions = [
+      { player: modelPlayer.current, time: modelTime },
+      ...dealReferences.map((clip, i) => ({ player: references.current[i], time: clip[phase] })),
+    ];
+    setMessage("");
+    for (const { player, time } of positions) {
+      if (!player || player.error) continue;
+      player.pause();
+      player.currentTime = time + 0.000001;
+    }
+    return positions;
+  }
+
+  async function playDeal() {
+    const starts = position("draw");
+    try {
+      await Promise.all(starts.map(({ player }) => player && !player.error ? player.play() : undefined));
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      for (const { player } of starts) player?.pause();
+      setMessage("Gemensam uppspelning kunde inte starta. Välj Visa filmreglage för att spela ett klipp i taget.");
+    }
+  }
+
+  return <section id="jamfor-giv" className={styles.comparison} aria-labelledby="jamfor-giv-rubrik">
+    <h3 id="jamfor-giv-rubrik">Jämför handbytet och släppet</h3>
+    <p>Välj en händelse för att pausa alla filmer vid motsvarande rörelse. Vid uppspelning behåller varje tagning sitt eget tempo.</p>
+    <div className={styles.actions} role="group" aria-label="Styr de tre filmerna">
+      <button type="button" onClick={() => position("handover")}>Handbyte</button>
+      <button type="button" onClick={() => position("release")}>Släpp</button>
+      <button type="button" onClick={playDeal}>Spela från uttaget</button>
+      <button type="button" onClick={() => {
+        modelPlayer.current?.pause();
+        references.current.forEach(player => player?.pause());
+      }}>Pausa alla</button>
+      <label><input type="checkbox" checked={filmControls} onChange={event => setFilmControls(event.target.checked)}/> Visa filmreglage</label>
+    </div>
+    {message && <p role="status">{message}</p>}
+    <div className={styles.players}>
+      <figure className={styles.model}>
+        <figcaption><strong>Paulina · konstruerad rörelsestudie</strong><span>{film.cameras.map(c => c.id).join(" och ")} · {film.take}</span></figcaption>
+        <video controls={filmControls} playsInline preload="auto" ref={modelPlayer} aria-label={film.title} src={film.url}/>
+      </figure>
+      {dealReferences.map((clip, i) => <figure key={clip.sha256}>
+        <figcaption><strong>{clip.title}</strong><span>{clip.view}</span></figcaption>
+        <video controls={filmControls} playsInline preload="auto" aria-label={clip.title} src={"/api/givreferens?film=" + clip.sha256}
+          ref={element => { references.current[i] = element; }}
+          onError={() => setUnavailable(previous => previous.includes(clip.sha256) ? previous : [...previous, clip.sha256])}/>
+        {unavailable.includes(clip.sha256) && <p role="status">Det lokala klippet kunde inte öppnas. <a href={clip.source}>Öppna källfilmen</a></p>}
+      </figure>)}
+    </div>
+  </section>;
+}

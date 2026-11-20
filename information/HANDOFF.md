@@ -16,6 +16,8 @@ Vid en gemensam tagning anger Paulina-chatten rigg, animation och kortbana. BB a
 
 **Spela upp `samspel-v2-v1` från stol 4 och stol 1.** Paulina drar KORT-02 ur skon, byter hand, vänder kortet och ger till plats 4 på samma 127-leders v2-rigg. Den nya ögonlocksrörelsen ligger på samma tidslinje. Blinkningen placerades under återgången som ett animationsval. [Spela given och välj bildruta](http://127.0.0.1:4317/modellering/rorelseprov#samspel) · [Lokal modell, källfiler och mätning](../test/dealer/paulina/samspel-v2-v1/README.md) · [Arbetsytor och ansvar](STUDIOSTRUKTUR.md)
 
+**Jämför handbyte och släpp.** I rörelseprovet stannar *Handbyte* på Paulinas ruta 15, Howcasts källruta 4274 och VIP-spelarens tid 1:18,900. *Släpp* visar den fria kortkanten i Paulinas ruta 41, Howcasts källruta 4300 och VIP-spelarens tid 1:19,600. Vid uppspelning behåller varje tagning sitt eget tempo. [Öppna de tre filmerna för denna bildutgåva](http://127.0.0.1:4317/modellering/rorelseprov?dealer=paulina&revision=9ce142c1ab2ab640fc9d7e2559f6624da88bad5506eab0c15a82c6d9049cd4db#jamfor-giv)
+
 | Tagning | Modellens SHA-256 | Kontroll |
 | --- | --- | --- |
 | `tvahandsgiv-v2-v1` | `7e010b68bee38f561e6686ad028fb90de8f63b371fe6a3cdfba6bab983bb0bf6` | 54/54 provrutor fria från uppmätta genomskärningar. I ruta 15–17 är avstånden till de fem gripytorna 0,18–0,61 mm. Kortets hörn flyttas 0,000 mm efter landning i ruta 26. |
