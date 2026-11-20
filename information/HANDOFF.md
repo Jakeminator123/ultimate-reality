@@ -8,9 +8,9 @@ Ultimate Reality är en lokal dealerstudio. Starta i projektroten och följ [REA
 | --- | --- |
 | **Ta över Ultimate Reality-arbetet** | Paulinas bildserie, gemensamma kroppsrigg, ansikte, händer och versionsbundna rörelseprov. Samordnar gemensamma tagningar vid bordet. |
 | **BB** | Har lämnat över bakgrund, ljus, bord, kortsko, kort, markeringar och panoramavyer till **Ta över Ultimate Reality-arbetet**. [Granskade panoramavyer](../test/bakgrund/panorama/giv-sam-v4-v5-v6/README.md) · [Automatisk gallring](UNDERHALL.md#automatisk-gallring) |
-| **OMVAG** | Studions UI/UX, menyer, namn och indelning i officiella arbetsytor och prov. Förvaltar granskningen av [YouTube-referenserna](random/blackjack-rorelsereferenser/MATERIAL.md) och [Jakobs 35 lokala klipp](random/desk-v2-rorelsereferenser/GRANSKNING.md). |
+| **OMVAG** | Levererade studions UI/UX, menyer och Rörelseprov i `bd004dd`. Chatten är arkiverad vid överlämningen. [YouTube-referenserna](random/blackjack-rorelsereferenser/MATERIAL.md) · [Jakobs 35 lokala klipp](random/desk-v2-rorelsereferenser/GRANSKNING.md) |
 
-Vid en gemensam tagning anger **Ta över Ultimate Reality-arbetet** rigg, animation, kortbana, scenversion, stol och bildruta. OMVAG får syfte, material-ID, källversion och fungerande länk när resultatet ska synas i en officiell arbetsyta. Lokala prov ligger under `test/<ämne>/<provversion>/`. Återanvändbara avatarutgåvor, riggar och filmkvitton finns under `avatars/<dealer>/`. [Projektets lagring](UNDERHALL.md)
+Vid en gemensam tagning anger **Ta över Ultimate Reality-arbetet** rigg, animation, kortbana, scenversion, stol och bildruta. UI-arbetet utgår från syfte, material-ID, källversion och fungerande länk när resultatet ska synas i en officiell arbetsyta. Lokala prov ligger under `test/<ämne>/<provversion>/`. Återanvändbara avatarutgåvor, riggar och filmkvitton finns under `avatars/<dealer>/`. [Projektets lagring](UNDERHALL.md)
 
 Bildgranskaren följer ändringar i webviewn, granskar originalruta och stol, återkopplar till ägaren och öppnar den korrigerade vyn igen. [Bildgranskarens uppdrag](../.codex/agents/bildgranskare.toml)
 

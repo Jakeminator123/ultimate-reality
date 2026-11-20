@@ -12,6 +12,17 @@ const meshes = root => {
   return result;
 };
 
+function mirroredPrintUV(geometry) {
+  const uv = geometry.getAttribute("uv");
+  for (let i=0; i<(geometry.index?.count ?? uv.count); i+=3) {
+    const [a,b,c] = [i,i+1,i+2].map(index => geometry.index?.getX(index) ?? index);
+    const winding = (uv.getX(b)-uv.getX(a))*(uv.getY(c)-uv.getY(a))
+                  - (uv.getY(b)-uv.getY(a))*(uv.getX(c)-uv.getX(a));
+    if (Math.abs(winding)>=1e-10) return winding>0;
+  }
+  return false;
+}
+
 function faceTexture(code) {
   const rank = code.slice(0,-1), suit = code.at(-1);
   const symbol = { S:"♠", H:"♥", D:"♦", C:"♣" }[suit];
@@ -119,11 +130,18 @@ async function start() {
     const body = motions.get(step.motion);
     const card = body.card.clone(true), parts = meshes(card);
     const front = parts.find(part => part.material.name?.includes("värdetryck"));
-    if (step.face) {
+    if (step.face || (step.card === "KORT-02" && front?.material.map)) {
       if (!front) throw Error("Givens separata värdesida kunde inte identifieras.");
       front.material = front.material.clone();
-      front.material.map = faceTexture(step.face);
-      front.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      const print = step.face ? faceTexture(step.face) : front.material.map.clone();
+      // KORT-02's front primitive uses the back's UV order. Preserve the master artwork.
+      if (mirroredPrintUV(front.geometry)) {
+        print.offset.x += print.repeat.x;
+        print.repeat.x *= -1;
+      }
+      print.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      print.needsUpdate = true;
+      front.material.map = print;
       front.material.needsUpdate = true;
     }
     const layer = layerHeights.get(step.targetSeat) ?? 0;
