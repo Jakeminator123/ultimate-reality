@@ -10,6 +10,7 @@ import { cropSource, dimensions, roleName } from "./material-types";
 import { bodyPixels, checkSeatedFrame, floorSpread, readSeatedMeasurement, seatedStandard } from "./seated-review";
 import { verifiedPhotoReview } from "./photo-review";
 import type { DealerMaterial, Edition, FilmRecord, FilmReview, ModelRecord, MotionRecord, Photo } from "./material-types";
+import type dealingStudy from "../../information/paulina-rorelseunderlag.json";
 import { LocalError } from "./storage";
 
 const hex = /^[a-f0-9]{64}$/;
@@ -278,6 +279,15 @@ export async function materialFile(query: URLSearchParams, range: string | null)
   if (!data) throw new LocalError("Materialfilen saknas lokalt.", 404);
   if (digest(data) !== expected) bad("Materialfilen avviker från den valda versionen.");
   if (type === "video/mp4") {
+    if (query.has("ruta")) {
+      const still = (await readDealingStudy(dealer))?.decodedStill;
+      if (!still || still.movie !== expected || String(still.frame) !== query.get("ruta"))
+        throw new LocalError("En avkodad kontrollbild saknas för denna film och ruta.", 404);
+      const frame = await bytes(path.resolve("..", "test/dealer/paulina/samspel-v2-bildkontroll-v1/avkodad-ruta-53.png"));
+      if (!frame) throw new LocalError("Kontrollbilden finns inte på den här datorn.", 404);
+      if (digest(frame) !== still.sha256) bad("Kontrollbilden avviker från den granskade rutan.");
+      return new Response(new Uint8Array(frame), { headers: { ...cacheHeaders, "Content-Type": "image/png" } });
+    }
     const movie = data;
     return rangedResponse(movie.length, type, range, (start, end) => new Uint8Array(movie.subarray(start, end + 1)), cacheHeaders["Cache-Control"]);
   }
@@ -286,6 +296,12 @@ export async function materialFile(query: URLSearchParams, range: string | null)
     type = "image/webp";
   }
   return new Response(new Uint8Array(data), { headers: { ...cacheHeaders, "Content-Type": type } });
+}
+
+export type DealingStudy = typeof dealingStudy;
+export async function readDealingStudy(dealer: string) {
+  if (dealer !== "paulina") return null;
+  return record<DealingStudy>(path.resolve("..", "information", "paulina-rorelseunderlag.json"));
 }
 
 export function materialMarkdown(project: DealerMaterial) {

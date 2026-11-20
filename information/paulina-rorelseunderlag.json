@@ -1,0 +1,42 @@
+{
+  "geometry": "e8e45003a9bc8add5b25839601039782f368e0fffcf176da1da6cf861683dff8",
+  "appearance": "0f389edf5c50a09ebf9ce9159fe67f2d9b154915cf5ea1be7fc05762ed467a8d",
+  "takes": [
+    {
+      "take": "tvahandsgiv-v2-v1",
+      "motion": "7e010b68bee38f561e6686ad028fb90de8f63b371fe6a3cdfba6bab983bb0bf6",
+      "movie": "73f73c76486c27fb5114e11050e24404f24673b36fffd4830ef72783fd7b91a6"
+    },
+    {
+      "take": "samspel-v2-v1",
+      "motion": "624a4f873b884cd8956c5ca7aa3b1ddcbd8625b670ee00928fe020aca59ffa28",
+      "movie": "0988a825bb0402c559b57d9365cdc6780cea0e5fb46bc5a1dc2156968b1d1bc3"
+    }
+  ],
+  "timing": {
+    "source": "Howcast",
+    "url": "https://www.youtube.com/watch?v=qd5oc9hLrXg&t=177s",
+    "frames": [4259, 4300],
+    "referenceSha256": "b58fd58f4aa6cac65d6b11b413154c00109550818a670ea14601e3a64bbaa1c5"
+  },
+  "comparison": {
+    "source": "VIP",
+    "url": "https://www.youtube.com/watch?v=AZ2sb5B_JmA&t=78s"
+  },
+  "draw": {
+    "frames": [0, 7],
+    "frontEdgeOutMm": [4.0, 112.6],
+    "frontEdgeHeightMm": [15.8, 0.4]
+  },
+  "handover": {
+    "frame": 15,
+    "cardCentreHeightMm": 122,
+    "leftElbowAboveShoulderMm": 64.15,
+    "jointNames": ["l_lowarm", "l_uparm"]
+  },
+  "decodedStill": {
+    "movie": "0988a825bb0402c559b57d9365cdc6780cea0e5fb46bc5a1dc2156968b1d1bc3",
+    "frame": 53,
+    "sha256": "7cbba25e8bf5509727e4e1c54499905f3be0d32b4534e24e7fe1a6be94011af1"
+  }
+}

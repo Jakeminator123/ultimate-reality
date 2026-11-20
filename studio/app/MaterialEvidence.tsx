@@ -48,11 +48,14 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   </div>;
 }
 
-export function FilmEvidence({ film, expanded, children }: { film: DealerMaterial["films"][number]; expanded?: boolean; children?: ReactNode }) {
+export function FilmEvidence({ film, expanded, context, children }: {
+  film: DealerMaterial["films"][number]; expanded?: boolean; context?: ReactNode; children?: ReactNode;
+}) {
   const player = useRef<HTMLVideoElement>(null);
   return <details open={expanded}>
     <summary>{film.title}</summary>
-    <p>{dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
+    <p>Tagning <code>{film.take}</code> · {dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
+    {context}
     <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/>
     <div className={styles.frameMarks}>{film.marks.map(m => m.seconds === undefined ?
       <span key={m.frame}>{m.label} · ruta {m.frame}</span> :
@@ -62,7 +65,7 @@ export function FilmEvidence({ film, expanded, children }: { film: DealerMateria
       }}>{m.label} · ruta {m.frame}</button>)}</div>
     <p>Rutorna räknas från 0.</p>
     {film.reviews.map(review => <p key={review.camera + review.note}><b>{review.camera} · ruta {review.frames.join(", ")}</b> · {review.note}</p>)}
-      {children}
+    {children}
   </details>;
 }
 

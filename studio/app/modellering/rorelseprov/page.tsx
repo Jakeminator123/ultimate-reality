@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { dealerMaterial } from "../../../lib/dealer-material";
+import { dealerMaterial, readDealingStudy, type DealingStudy } from "../../../lib/dealer-material";
 import type { DealerMaterial } from "../../../lib/material-types";
 import { LocalError, requireLocal } from "../../../lib/storage";
 import { FilmEvidence } from "../../MaterialEvidence";
@@ -9,8 +9,8 @@ import styles from "../../modeling.module.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Rörelseprov · 3D-modellering" };
 
-function Trial({ id, title, description, films, material }: {
-  id: string; title: string; description: string; films: DealerMaterial["films"]; material: DealerMaterial;
+function Trial({ id, title, description, films, material, study }: {
+  id: string; title: string; description: string; films: DealerMaterial["films"]; material: DealerMaterial; study?: DealingStudy | null;
 }) {
   return <section id={id} className={id === "samspel" ? styles.combinedProof + " " + styles.proof : styles.proof}>
     <h2>{title}</h2><p>{description}</p>
@@ -18,7 +18,22 @@ function Trial({ id, title, description, films, material }: {
     {films.map((film, index) => {
       const motion = material.motions.find(m => m.sha256 === film.motion);
       const sources = motion?.motion.components?.map(hash => material.motions.find(m => m.sha256 === hash)?.motion.take ?? hash);
-      return <FilmEvidence key={film.url} film={film} expanded={index === 0}>
+      const audit = study?.geometry === film.geometry && study.appearance === film.appearance &&
+        study.takes.some(t => t.take === film.take && t.movie === film.sha256 && t.motion === film.motion) ? study : null;
+      return <FilmEvidence key={film.url} film={film} expanded={index === 0} context={audit &&
+        <p><b>Rörelsen är animerad i kod.</b> Howcast gav händelsernas ordning och tidpunkter. VIP användes för jämförelse.
+          Lyftbåge, ledvinklar och fingerkontakt passades mot vår sko och vårt kort.</p>}>
+        {audit && <details><summary>Källfilmer och uppmätt rörelse</summary>
+          <p>Rutorna {audit.timing.frames.join("–")} i Howcast ligger till grund för utdrag, handbyte, vändning och släpp.
+            VIP visar ett lågt handbyte från en annan kamera. Fingerdjupet och den fysiska lyfthöjden är okända i källfilmerna.
+            {" "}<a href={audit.timing.url}>Spader två i Howcast</a> · <a href={audit.comparison.url}>Klöver nio i VIP</a></p>
+          <p>Ruta {audit.draw.frames.join("–")} i vår modell går kortets framkant {Math.round(audit.draw.frontEdgeOutMm[1] - audit.draw.frontEdgeOutMm[0])} mm ut ur mynningen.
+            Höjden över filten sjunker från {audit.draw.frontEdgeHeightMm[0].toLocaleString("sv-SE")} till {audit.draw.frontEdgeHeightMm[1].toLocaleString("sv-SE")} mm.</p>
+          <p>Vid handbytet i ruta {audit.handover.frame} är kortets mitt {audit.handover.cardCentreHeightMm} mm över filten.
+            Vänster armbågsled hamnar {(audit.handover.leftElbowAboveShoulderMm / 10).toLocaleString("sv-SE", { maximumFractionDigits: 1 })} cm över axelleden. Den höga armbågen och den tvära handleden behöver korrigeras.</p>
+        </details>}
+        {audit?.decodedStill.movie === film.sha256 && <p><a href={film.url + "&ruta=" + audit.decodedStill.frame}>
+          Öppna originalfilmens ruta {audit.decodedStill.frame} som PNG</a></p>}
         {sources && sources.length > 0 && <p>Källtagningar · {sources.join(" + ")}</p>}
         {motion && <a href={motion.url} download={film.take + ".glb"}>Hämta tagningens animerade 3D-modell</a>}
       </FilmEvidence>;
@@ -29,9 +44,11 @@ function Trial({ id, title, description, films, material }: {
 export default async function Page({ searchParams }: { searchParams: Promise<{ dealer?: string; revision?: string }> }) {
   const { dealer = "paulina", revision } = await searchParams;
   let material: DealerMaterial | undefined, message = "";
+  let study: DealingStudy | null = null;
   try {
     requireLocal(new Request("http://localhost", { headers: await headers() }));
     material = await dealerMaterial(dealer, revision || null);
+    study = await readDealingStudy(dealer);
   } catch (error) {
     if (!(error instanceof LocalError)) throw error;
     message = error.message;
@@ -44,10 +61,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
     <header className={styles.archiveHeader}><h1>Rörelseprov</h1>
       {material?.activeModel && <p>{material.activeModel.name} · {material.geometry?.joints} leder</p>}</header>
     {material ? <div className={styles.proofGrid}>
-      {films.some(f => f.take.startsWith("samspel-")) && <Trial id="samspel" title="Ansikte och händer i samma giv" material={material}
+      {films.some(f => f.take.startsWith("samspel-")) && <Trial id="samspel" title="Ansikte och händer i samma giv" material={material} study={study}
         description="Se ansikte, händer och kort tillsammans. De två stolarna visar samma giv. Bildrutorna följer kortet från skon till filten och ögonlocken under återgången."
         films={films.filter(f => f.take.startsWith("samspel-"))}/>}
-      <Trial id="hander" title="Händer och kort" material={material}
+      <Trial id="hander" title="Händer och kort" material={material} study={study}
         description="Följ vänsterhandens utdrag, handbytet, högerhandens vändning och släppet. Jämför samma bildruta från de två stolarna."
         films={films.filter(f => f.take.startsWith("tvahandsgiv-"))}/>
       <Trial id="ansikte" title="Ansikte och blinkning" material={material}
