@@ -15,6 +15,17 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
   const [message, setMessage] = useState("");
   const [unavailable, setUnavailable] = useState<string[]>([]);
   const [filmControls, setFilmControls] = useState(false);
+  const [speed, setSpeed] = useState(1);
+
+  function changeSpeed(rate: number) {
+    setSpeed(rate);
+    for (const player of [modelPlayer.current, ...references.current]) {
+      if (player) {
+        player.defaultPlaybackRate = rate;
+        player.playbackRate = rate;
+      }
+    }
+  }
 
   function position(phase: Phase) {
     if (phase !== "draw") setFilmControls(false);
@@ -27,6 +38,7 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
     for (const { player, time } of positions) {
       if (!player || player.error) continue;
       player.pause();
+      player.playbackRate = speed;
       player.currentTime = time + 0.000001;
     }
     return positions;
@@ -45,7 +57,7 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
 
   return <section id="jamfor-giv" className={styles.comparison} aria-labelledby="jamfor-giv-rubrik">
     <h3 id="jamfor-giv-rubrik">Jämför handbytet och släppet</h3>
-    <p>Välj en händelse för att pausa alla filmer vid motsvarande rörelse. Vid uppspelning behåller varje tagning sitt eget tempo.</p>
+    <p>Välj en händelse för att pausa alla filmer vid motsvarande rörelse. Hastigheten gäller alla tre filmerna.</p>
     <div className={styles.actions} role="group" aria-label="Styr de tre filmerna">
       <button type="button" onClick={() => position("handover")}>Handbyte</button>
       <button type="button" onClick={() => position("release")}>Släpp</button>
@@ -54,6 +66,14 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
         modelPlayer.current?.pause();
         references.current.forEach(player => player?.pause());
       }}>Pausa alla</button>
+      <label>Hastighet
+        <select value={speed} onChange={event => changeSpeed(Number(event.target.value))}>
+          <option value={0.25}>0,25×</option>
+          <option value={0.5}>0,5×</option>
+          <option value={0.75}>0,75×</option>
+          <option value={1}>1×</option>
+        </select>
+      </label>
       <label><input type="checkbox" checked={filmControls} onChange={event => setFilmControls(event.target.checked)}/> Visa filmreglage</label>
     </div>
     {message && <p role="status">{message}</p>}
