@@ -5,8 +5,9 @@ import {
   ArrowRight, ArrowUpRight, BookOpen, Box, ChevronLeft, ChevronRight,
   FolderOpen, ImageOff, Images, RefreshCw,
 } from "lucide-react";
-import { seriesCount } from "../lib/material-types";
+import { seriesCount, type DealerMaterial } from "../lib/material-types";
 import MaterialEvidence, { PhotoCameraGuides, PhotoEvidence } from "./MaterialEvidence";
+import { takeLink } from "./MotionTake";
 import { useCurrentModel } from "./useModelingInventory";
 import styles from "./modeling.module.css";
 
@@ -19,6 +20,18 @@ const shortNames: Record<string, string> = {
   front: "Front", trekvart: "Trekvart", profil: "Profil",
   handryggar: "Handryggar", "kortdrag-vanster": "Kortdrag", "kortvandning-hoger": "Vändning",
 };
+
+function latestReviewedDeal(material: DealerMaterial | null) {
+  if (!material?.geometry || !material.activeModel) return;
+  const geometry = material.geometry.sha256;
+  const appearance = material.appearance?.sha256 ?? null;
+  return material.films.filter(film =>
+    film.take.startsWith("samspel-") && film.motion && film.card && film.geometry === geometry && film.appearance === appearance &&
+    ["Stol 4", "Stol 1"].every(seat => film.cameras.some(camera => camera.id === seat) &&
+      film.reviews.some(review => review.camera === seat && review.note.trim() &&
+        review.frames.some(frame => Number.isInteger(frame) && frame >= 0 && frame < film.frames))))
+    .sort((a, b) => b.take.localeCompare(a.take, "sv", { numeric: true }))[0];
+}
 
 export default function ModelingStudio() {
   const [checkedRoute, setCheckedRoute] = useState(false);
@@ -58,6 +71,8 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
   const proofQuery = new URLSearchParams({ dealer });
   if (inventory?.revision) proofQuery.set("revision", inventory.revision);
   const proofPage = "/modellering/rorelseprov?" + proofQuery;
+  const reviewedDeal = latestReviewedDeal(inventory);
+  const reviewedLink = reviewedDeal && inventory ? takeLink(inventory, reviewedDeal.take) : undefined;
   const markMissing = (id: string) => setMissing(ids => ids.includes(id) ? ids : [...ids, id]);
 
   function stepPhoto(direction: number) {
@@ -91,9 +106,13 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
 
     <section className={styles.modelPanel} aria-labelledby="current-model">
       <header className={styles.panelHeader}>
-        <div><p className={styles.meta}>3D-arbetsmodell</p><h2 id="current-model">{model?.name ?? "Modell för " + name}</h2></div>
+        <div><p className={styles.meta}>3D-visare · grundmodellen i vila</p><h2 id="current-model">{model?.name ?? "Modell för " + name}</h2></div>
         <Box size={23} strokeWidth={1.5} aria-hidden/>
       </header>
+      {reviewedDeal && reviewedLink && <div className={styles.modelFilm}>
+        <a className={styles.inlineLink} href={reviewedLink}>Öppna senaste granskade given <ArrowRight size={15}/></a>
+        <code>{reviewedDeal.take}</code>
+      </div>}
       <div className={styles.modelSurface}>
         {model ? <PoseReview key={model.url} model={model} cameraDetail={cameraDetail} cameraAngle={cameraDetail === "händer" ? undefined : selected?.targetAngle}
           reference={selected?.group === "Sittande" ? selected : undefined} guides={cameraGuides} onGuides={setCameraGuides}/> : <div className={styles.empty} role="status">
@@ -127,7 +146,8 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
           )}</div>
           {group === "Sittande" && paulinaFirst && <a className={styles.heightLink} href="/bildstandard/sitthojd">Jämför sitthöjd och bildskala <ArrowRight size={13}/></a>}
           {group === "Ansikte" && <a className={styles.heightLink} href={proofPage + "#ansikte"}>Granska blinkningen <ArrowRight size={13}/></a>}
-          {group === "Händer" && <a className={styles.heightLink} href={proofPage + "#hander"}>Följ kortet genom given <ArrowRight size={13}/></a>}
+          {group === "Händer" && <a className={styles.heightLink} href={reviewedLink ?? proofPage + "#hander"}>
+            {reviewedLink ? "Följ kortet i den granskade given" : "Öppna handproven"} <ArrowRight size={13}/></a>}
         </section>
       )}</div>
     </section>
@@ -138,7 +158,8 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
       <ol>
         <li><strong>Passa bildserien mot en kropp.</strong> Sittfronten ger grundposen. Sittvinklarna kontrollerar hållningen, och porträtten och handryggarna ger detaljer till fotoytan.</li>
         <li><strong>Prova ansikte och händer parallellt.</strong> Kontrollera hur ögonlocken täcker iris. Följ samma kort från skon genom handbytet tills det ligger stilla på filten. <a href={proofPage}>Öppna rörelseproven</a></li>
-        <li><strong>Spela upp båda rörelserna på samma rigg vid bordet.</strong> Låt blicken följa kortet och händerna återgå till vila. Rendera samma tagning från stol 4 och stol 1.</li>
+        {reviewedLink && <li><strong>Giv med blinkning på samma kropp.</strong> Filmen visar kortet, händerna och ögonlocken från stol 4 och stol 1.
+          {" "}<a href={reviewedLink}>Öppna den granskade tagningen</a></li>}
         <li><strong>Bedöm den färdiga filmrutan.</strong> Jämför handkontakt, ansiktsuttryck, hår, tyg och skuggor i båda kamerorna. När en fingerkontakt skyms i referensfilmen behövs en samtidig sidovy för att mäta djupet.</li>
       </ol>
     </details>

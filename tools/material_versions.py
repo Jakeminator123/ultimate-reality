@@ -91,6 +91,21 @@ def glb(file):
         return document, atlas
 
 
+def body_atlas_sha(file, document):
+    body, = [mesh for mesh in document["meshes"] if mesh.get("extras", {}).get("appearancePart") == "body"]
+    material = document["materials"][body["primitives"][0]["material"]]
+    texture = document["textures"][material["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
+    image = document["images"][texture["source"]]
+    view = document["bufferViews"][image["bufferView"]]
+    with file.open("rb") as stream:
+        stream.seek(12)
+        json_length, = struct.unpack("<I", stream.read(4))
+        stream.seek(28 + json_length + view.get("byteOffset", 0))
+        data = stream.read(view["byteLength"])
+    check(len(data) == view["byteLength"], "Ofullständig inbäddad kroppstextur.")
+    return hashlib.sha256(data).hexdigest()
+
+
 def animation_times(document, file):
     """Läs de samplade tidsvärdena för alla animationsspår ur GLB:s binärdel."""
     indices = {clip["samplers"][channel["sampler"]]["input"] for clip in document.get("animations", [])
@@ -224,6 +239,16 @@ def register_model(store, file, run=None):
         record["motion"] = dict(geometry=extras["geometrySHA256"], appearance=motion_base if motion_base != extras["geometrySHA256"] else None,
                                 take=take, card=card, pathSha256=path_hash,
                                 start=times[0], end=times[-1], keyframes=len(times))
+        if "faceSurface" in extras:
+            face = extras["faceSurface"]
+            base = store / "filer" / (motion_base + ".glb")
+            base_doc, _ = glb(base)
+            photos = base_doc["asset"]["extras"].get("appearanceInputSHA256", {})
+            check(face["baseAppearanceSHA256"] == motion_base and bool(face["photos"]) and
+                  all(photos.get(name) == key for name, key in face["photos"].items()), "Ansiktsytans fotounderlag avviker.")
+            check(body_atlas_sha(base, base_doc) == face["sourceBodyAtlasSHA256"] and
+                  body_atlas_sha(file, document) == face["bodyAtlasSHA256"], "Ansiktsytan avviker från GLB-filen eller fotobasen.")
+            record["motion"]["faceSurface"] = face
         if "componentMotionsSHA256" in extras:
             components = extras["componentMotionsSHA256"]
             check(isinstance(components, list) and components and all(isinstance(c, str) for c in components)

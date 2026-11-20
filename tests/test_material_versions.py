@@ -117,6 +117,9 @@ class MaterialTests(unittest.TestCase):
         self.assertEqual(versions.registered_motion(self.store, versions.register_model(self.store, combined))["components"], sources)
         with self.assertRaisesRegex(ValueError, "underlag saknas"):
             versions.register_model(self.store, animated_file("annan", "KORT-02", "cardPathSHA256", componentMotionsSHA256=["f" * 64]))
+        with self.assertRaisesRegex(ValueError, "fotounderlag"):
+            versions.register_model(self.store, animated_file("fel-fotoyta", "KORT-02", "cardPathSHA256",
+                faceSurface=dict(baseAppearanceSHA256=self.look, photos={"sittande/front.png": "0" * 64})))
         self.assertEqual(len(list((self.store / "rorelser").glob("*.json"))), 3)
 
     def test_film_frame_times_and_review_belong_to_one_take(self):

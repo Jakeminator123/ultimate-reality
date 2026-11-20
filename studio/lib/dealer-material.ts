@@ -280,10 +280,15 @@ export async function materialFile(query: URLSearchParams, range: string | null)
   if (digest(data) !== expected) bad("Materialfilen avviker från den valda versionen.");
   if (type === "video/mp4") {
     if (query.has("ruta")) {
-      const still = (await readDealingStudy(dealer))?.decodedStill;
-      if (!still || still.movie !== expected || String(still.frame) !== query.get("ruta"))
+      const study = (await readDealingStudies(dealer)).find(candidate =>
+        candidate.takes.some(take => take.movie === expected) && candidate.decodedStill.movie === expected &&
+        String(candidate.decodedStill.frame) === query.get("ruta"));
+      const still = study?.decodedStill;
+      if (!still || !hex.test(still.sha256))
         throw new LocalError("En avkodad kontrollbild saknas för denna film och ruta.", 404);
-      const frame = await bytes(path.resolve("..", "test/dealer/paulina/samspel-v2-bildkontroll-v1/avkodad-ruta-53.png"));
+      let frame = await bytes(path.join(store, "filer", still.sha256 + ".png"));
+      if (!frame && study?.takes.some(take => take.take === "samspel-v2-v1" && take.movie === expected))
+        frame = await bytes(path.resolve("..", "test/dealer/paulina/samspel-v2-bildkontroll-v1/avkodad-ruta-53.png"));
       if (!frame) throw new LocalError("Kontrollbilden finns inte på den här datorn.", 404);
       if (digest(frame) !== still.sha256) bad("Kontrollbilden avviker från den granskade rutan.");
       return new Response(new Uint8Array(frame), { headers: { ...cacheHeaders, "Content-Type": "image/png" } });
@@ -298,10 +303,18 @@ export async function materialFile(query: URLSearchParams, range: string | null)
   return new Response(new Uint8Array(data), { headers: { ...cacheHeaders, "Content-Type": type } });
 }
 
-export type DealingStudy = typeof dealingStudy;
-export async function readDealingStudy(dealer: string) {
-  if (dealer !== "paulina") return null;
-  return record<DealingStudy>(path.resolve("..", "information", "paulina-rorelseunderlag.json"));
+export type DealingStudy = typeof dealingStudy & {
+  handover: { note?: string };
+  frameLayout?: "two-seats-with-details";
+  handReference?: { file: string; sha256: string; frames: number[] };
+};
+export async function readDealingStudies(dealer: string): Promise<DealingStudy[]> {
+  if (dealer !== "paulina") return [];
+  const dir = path.resolve("..", "information");
+  const names = (await fs.readdir(/* turbopackIgnore: true */ dir))
+    .filter(name => /^paulina-rorelseunderlag(?:-v[1-9]\d*)?\.json$/.test(name));
+  const studies = await Promise.all(names.map(name => record<DealingStudy>(path.join(dir, name))));
+  return studies.filter((study): study is DealingStudy => study !== null);
 }
 
 export function materialMarkdown(project: DealerMaterial) {
@@ -352,7 +365,8 @@ export function materialMarkdown(project: DealerMaterial) {
   for (const { sha256, motion } of project.motions) rows.push("- " + motion.take + " · GLB " + sha256 +
       " · " + motion.keyframes + " samplade tidslägen · " + motion.start + "–" + motion.end + " s" +
       (motion.card ? " · kort " + motion.card + " · kortbana " : " · rörelsens tidslinje ") + motion.pathSha256 +
-      (motion.components?.length ? " · källtagningar " + motion.components.join(", ") : ""));
+      (motion.components?.length ? " · källtagningar " + motion.components.join(", ") : "") +
+      (motion.faceSurface ? " · ansiktsyta " + motion.faceSurface.revision + " · textur " + motion.faceSurface.bodyAtlasSHA256 : ""));
   rows.push("", "## Registrerade filmer", "");
   if (!project.films.length) rows.push("Inga verifierade filmer för modellparet.");
   for (const film of project.films) {

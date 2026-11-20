@@ -1,0 +1,100 @@
+{
+  "geometry": "e8e45003a9bc8add5b25839601039782f368e0fffcf176da1da6cf861683dff8",
+  "appearance": "0f389edf5c50a09ebf9ce9159fe67f2d9b154915cf5ea1be7fc05762ed467a8d",
+  "takes": [
+    {
+      "take": "samspel-v2-v3",
+      "motion": "0aff21e40b35de654e0376050e10abefd55a7b07d21453b4631d7f9f16b023ec",
+      "movie": "f5f6e0e57ca21e82ef4086d981c9f79625d9d7e117d8d94fb8c511cb7dfa0dec"
+    }
+  ],
+  "frameLayout": "two-seats-with-details",
+  "timing": {
+    "source": "Howcast",
+    "url": "https://www.youtube.com/watch?v=qd5oc9hLrXg&t=177s",
+    "frames": [
+      4259,
+      4300
+    ],
+    "referenceSha256": "b58fd58f4aa6cac65d6b11b413154c00109550818a670ea14601e3a64bbaa1c5"
+  },
+  "comparison": {
+    "source": "VIP",
+    "url": "https://www.youtube.com/watch?v=AZ2sb5B_JmA&t=78s"
+  },
+  "draw": {
+    "frames": [
+      0,
+      7
+    ],
+    "frontEdgeOutMm": [
+      4.0,
+      112.6
+    ],
+    "frontEdgeHeightMm": [
+      15.8,
+      0.4
+    ]
+  },
+  "handover": {
+    "frame": 15,
+    "cardCentreHeightMm": 66.0,
+    "leftElbowAboveShoulderMm": -33.89,
+    "jointNames": [
+      "l_lowarm",
+      "l_uparm"
+    ],
+    "note": "Vänsterns fingrar ligger flatare över kortet och återvänder samlade till skon. Från stol 4 syns ryggen vid handbytet och högerns krokiga pekfinger under vändningen. Från stol 1 syns värdesidan i ruta 15 och själva nypet skyms i ruta 18."
+  },
+  "faceSurface": {
+    "revision": "ansiktsyta-v2-v1b",
+    "donorSHA256": "89a13b5bd7d8e4fe854311ef48160d5686db05b3bb91bd3362b37714189f100b",
+    "baseAppearanceSHA256": "0f389edf5c50a09ebf9ce9159fe67f2d9b154915cf5ea1be7fc05762ed467a8d",
+    "sourceBodyAtlasSHA256": "3fa17aaf3d3e7298a0130884f581ae9c1dabca27d1cc7221678eee49bce8fab4",
+    "bodyAtlasSHA256": "4c5693e5f72377b661c55c9b51e380e7ab416c92a278418dbfcd352c002a729d",
+    "imageIndex": 0,
+    "projections": {
+      "front": {
+        "portraitSHA256": "52394fde95714d843ad6ca1cfd4571906cdc02d9de5c0c48224d42d54c639d49",
+        "estimateSHA256": "f38be32e807825b41e7b4fb7eaa69732ba52b957749643fdaa18b20e117db18c"
+      },
+      "profil": {
+        "portraitSHA256": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736",
+        "estimateSHA256": "a23a7da989286de4cec9565a101a696374e63736dcd5a01cb4a300528ec3e344"
+      }
+    },
+    "sourceRun": "sam-20261120T015406Z-f427a95156b7",
+    "photos": {
+      "ansikte/front.png": "52394fde95714d843ad6ca1cfd4571906cdc02d9de5c0c48224d42d54c639d49",
+      "ansikte/profil.png": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736"
+    },
+    "photoFill": {
+      "material": "Paulina Fas 1 · ansikte, hals, kostym och händer v2 · ansiktsyta v1",
+      "amount": 0.72,
+      "albedoLevel": 0.9,
+      "neckWeight": 0.36
+    }
+  },
+  "landing": {
+    "frame": 26
+  },
+  "blink": {
+    "peakFrame": 46
+  },
+  "decodedStill": {
+    "movie": "f5f6e0e57ca21e82ef4086d981c9f79625d9d7e117d8d94fb8c511cb7dfa0dec",
+    "frame": 53,
+    "sha256": "2b37e280ab2185206cd728e3a51e66a320b08009d706dd97e82434c005843709"
+  },
+  "handReference": {
+    "file": "pos4-v.mp4",
+    "sha256": "fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883",
+    "frames": [
+      8,
+      12,
+      15,
+      18,
+      24
+    ]
+  }
+}

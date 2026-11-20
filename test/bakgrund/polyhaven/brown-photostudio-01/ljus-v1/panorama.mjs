@@ -32,7 +32,7 @@ async function start() {
       const { bindTableFinishes } = await import("./materialval.mjs");
       await bindTableFinishes(panel, table, layout, renderer, () => renderer.render(scene, camera));
     }
-    if (playback) playback(document.querySelector("#givkontroll"), () => renderer.render(scene, camera));
+    if (playback) playback(() => renderer.render(scene, camera));
     const shadowControl = document.querySelector("#kontaktskugga");
     if (shadowControl) {
       const { createContactShadows } = await import("./golv-v2.mjs");

@@ -32,7 +32,7 @@ export async function placeTable(scene, renderer, seatId, view) {
   if (view === "giv") {
     card.visible = false; // KORT-02 and its bending track are embedded in this take.
     const { loadDeal } = await import("./giv.mjs");
-    playback = await loadDeal(scene);
+    playback = await loadDeal(scene, document.querySelector("#givkontroll"));
   } else if (study) {
     await study.placePaulina(scene, take, draw);
   } else {

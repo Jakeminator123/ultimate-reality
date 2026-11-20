@@ -18,3 +18,5 @@ Studions meny följer det som Jakob arbetar med. En specialvy ligger under den a
 | `information/` | Beslut, metod, källregister och överlämning. Filmreferensernas register länkar till sin privata lokala mediemapp. [Filmregister](random/blackjack-rorelsereferenser/MATERIAL.md) · [Underhåll och Git](UNDERHALL.md) |
 
 När BB lämnar en ny officiell scenyta till OMVAG följer syfte, material-ID, källversion och länk med. OMVAG placerar den där Jakob söker materialet och kontrollerar att länken fungerar. [Scenvyernas register](../studio/app/scenmiljo/navigation.ts)
+
+Bildgranskaren öppnar den ändrade vyn som Jakob använder. För ett fel i en giv anger granskaren tagning, stol, kort och ruta. UI-fel går till OMVAG, scenfel till BB och fel i Paulinas anatomi eller rörelse till Paulina-chatten. Efter korrigeringen kontrolleras samma vy igen. [Bildgranskarens uppdrag](../.codex/agents/bildgranskare.toml)

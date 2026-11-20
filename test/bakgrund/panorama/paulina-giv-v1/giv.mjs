@@ -1,28 +1,30 @@
 import { AnimationMixer, LoopOnce } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { applyDealerFaceLight } from "./dealer-face-light.mjs";
 
-const motion = "624a4f873b884cd8956c5ca7aa3b1ddcbd8625b670ee00928fe020aca59ffa28";
-const fps = 24;
-
-export async function loadDeal(scene) {
+export async function loadDeal(scene, panel) {
+  const { motion, take } = panel.dataset;
+  const fps = Number(panel.dataset.fps);
+  const lastFrame = Number(panel.querySelector("#giv-ruta").max);
   // The material endpoint verifies the registered GLB against its SHA-256.
   const model = await new GLTFLoader().loadAsync("/api/material?dealer=paulina&model=" + motion);
-  const clip = model.animations.find(animation => animation.name === "samspel-v2-v1");
-  if (!clip || Math.round(clip.duration * fps) !== 53) throw Error("Tagningen för Paulinas giv saknas.");
+  applyDealerFaceLight(model);
+  const clip = model.animations.find(animation => animation.name === take);
+  if (!clip || Math.round(clip.duration * fps) !== lastFrame) throw Error("Givens animation och registrerade tidslinje stämmer inte överens.");
   model.scene.traverse(mesh => { if (mesh.isSkinnedMesh) mesh.frustumCulled = false; });
   scene.add(model.scene);
   const mixer = new AnimationMixer(model.scene);
   const action = mixer.clipAction(clip).setLoop(LoopOnce, 1);
   action.clampWhenFinished = true;
   action.play();
-  return (panel, redraw) => bindPlayer(panel, frame => {
+  return redraw => bindPlayer(panel, frame => {
     action.paused = false;
     mixer.setTime(Math.min(frame / fps, clip.duration));
     redraw();
-  }, Math.round(clip.duration * fps));
+  }, lastFrame, fps);
 }
 
-function bindPlayer(panel, draw, lastFrame) {
+function bindPlayer(panel, draw, lastFrame, fps) {
   const button = panel.querySelector("#spela");
   const slider = panel.querySelector("#giv-ruta");
   const output = panel.querySelector("#giv-tid");
@@ -44,12 +46,14 @@ function bindPlayer(panel, draw, lastFrame) {
     slider.value = String(frame);
     output.value = frame + " / " + lastFrame;
     for (const link of links) link.href = frameUrl(link.href).href;
+    const address = frameUrl(location.href);
+    address.searchParams.set("tagning", panel.dataset.take);
+    if (address.href !== location.href) history.replaceState(history.state, "", address);
   }
   function pause() {
     if (tick !== null) cancelAnimationFrame(tick);
     tick = null;
     button.textContent = frame === lastFrame ? "Spela igen" : "Spela upp";
-    history.replaceState(history.state, "", frameUrl(location.href));
   }
   function seek(next) {
     show(next);

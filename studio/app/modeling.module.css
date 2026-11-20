@@ -84,6 +84,8 @@
 .photoGuides line { stroke-dasharray: 4 4; }
 .photoGuides path { stroke: #364438; filter: drop-shadow(0 1px 1px white); }
 .modelSurface { background: #f8f9f6; display: block; }
+.modelFilm { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 8px 14px; }
+.modelFilm code { color: var(--muted); font-size: 12px; }
 .modelSurface :global(.pose-review) { height: auto; }
 .modelSurface :global(.pose-canvas) { order: 0; flex: none; height: var(--view-height); }
 .modelSurface :global(.pose-tools) { order: 1; border-top: 1px solid var(--line); }

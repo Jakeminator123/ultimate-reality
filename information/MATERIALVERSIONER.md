@@ -12,7 +12,11 @@ Studion visar den valda bildutgåvan, kroppsmodellen, fotoytan och filmerna som 
 
 ## Automatisk registrering
 
-En blinkning sparar rörelsens tidslinje och sin kropp och fotoyta. Vid en sammansatt giv anger GLB-filen SHA-256 för varje ingående rörelse. Registret kontrollerar källtagningarnas filer och matchar deras kropp och fotoyta innan den gemensamma tagningen sparas. `samspel-v2-v1` kombinerar `tvahandsgiv-v2-v1` med `ansiktsrigg-v2-v2`. I studion visas den spelbara GLB-filen, komponenternas namn, den renderade filmen och anteckningar för respektive kamera och bildruta. [Rörelseprov](http://127.0.0.1:4317/modellering/rorelseprov#samspel)
+Den första versionssiffran i `ansiktsrigg-v2-v2` anger kroppens version och den andra anger blinkprovets version. Studion visar **Blinkning · prov 2** och anger kroppen separat. En sammansatt giv använder ett skelett och en tidslinje. GLB-filen anger SHA-256 för de hand- och ögonlocksrörelser som ingår. Registret matchar deras geometri och fotoyta. Under filmen går det att öppna källrörelser och granskade bildrutor. [Rörelseprov](http://127.0.0.1:4317/modellering/rorelseprov)
+
+När en tagning får korrigerad fotoyta anger den grundtexturens SHA-256, den inbäddade nya texturens SHA-256 och vilka porträtt som använts. Vid registrering verifieras båda texturerna och porträttens koppling till grundmodellens bildserie. Den spelbara given behåller kroppens ursprungliga leder och bindning. [Prov 2 med korrigerad yta](paulina-rorelseunderlag-v2.json)
+
+I **Giv med blinkning · prov 3** kombineras handprov 3 och blinkprov 2 på samma sittmodell v2. Handprov 3 anger exakt vilka rutor i `pos4-v.mp4` som användes för fingerformen. I studion visas dessa källrutor under den giv där rörelsen ingår. [Givprov 3 med källor och mätning](paulina-rorelseunderlag-v3.json)
 
 Kropps- och fotoyteverktygen registrerar färdiga avatarfiler automatiskt. Modellens inbäddade fingeravtryck bestämmer källrelationerna. Vid ny export till ett upptaget arbetsnamn får den ändrade filen ett eget versionsnamn. Återkörning av samma innehåll återanvänder det sparade objektet. En öppen studio hämtar nya uppgifter när en modellutgåva, animation, film eller granskning registreras.
 
@@ -33,7 +37,7 @@ För en annan registrerad dealer öppnas `/?dealer=<namn>#modellering`. Kamerapr
 
 ## Nästa prov för att få Paulina naturlig
 
-V2:s gemensamma tagning visar ett kort till plats 4 och en blinkning vid återgången i 54 rutor från två stolar. Handbytet syns tydligast från stol 1. Vid ruta 26 ligger kortet plant och stilla. Armbågens höjd, handledens stelhet och den stilla blicken syns i spelarens utsnitt. [Se tagningen och bildgranskarens rutor](http://127.0.0.1:4317/modellering/rorelseprov#samspel)
+V2:s givprover visar KORT-02 till plats 4 och en blinkning vid återgången i 54 rutor från två stolar. I prov 2 sjunker armbågen, högern vänder upp kortet och huvudet följer kortbanan. Vid ruta 26 ligger kortet plant och stilla. När en handled skymmer fingrarna från ena stolen, öppna samma ruta från den andra. [Se givprov 2 och bildgranskarens rutor](http://127.0.0.1:4317/modellering/rorelseprov?dealer=paulina&revision=9ce142c1ab2ab640fc9d7e2559f6624da88bad5506eab0c15a82c6d9049cd4db&tagning=samspel-v2-v2#vald-tagning)
 
 1. Filma **ett verkligt kortdrag samtidigt framifrån och från sidan**. Låt tummen, pekfingret, skons öppning och kortkanten synas. Spara synkpunkten och markera grepp, kort på kant och släpp.
 2. Sänk armbågen vid handbytet, mjuka upp handleden och rikta blicken mot kortet. Kontrollera grepp, släpp och landning i samma rutor från båda stolarna.

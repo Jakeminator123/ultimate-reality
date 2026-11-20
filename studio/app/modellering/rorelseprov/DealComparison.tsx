@@ -1,15 +1,16 @@
 "use client";
 
-import { useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { dealReferences } from "../../../lib/deal-references";
 import type { DealerMaterial } from "../../../lib/material-types";
 import styles from "./comparison.module.css";
 
 type Film = DealerMaterial["films"][number];
 type Phase = "draw" | "handover" | "release";
+const speedKey = "rorelseprov:hastighet";
 
-export default function DealComparison({ film, modelPlayer, handover, release }: {
-  film: Film; modelPlayer: RefObject<HTMLVideoElement | null>; handover: number; release: number;
+export default function DealComparison({ film, modelPlayer, handover, release, viewGuide }: {
+  film: Film; modelPlayer: RefObject<HTMLVideoElement | null>; handover: number; release: number; viewGuide?: string;
 }) {
   const references = useRef<(HTMLVideoElement | null)[]>([]);
   const [message, setMessage] = useState("");
@@ -17,14 +18,27 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
   const [filmControls, setFilmControls] = useState(false);
   const [speed, setSpeed] = useState(1);
 
-  function changeSpeed(rate: number) {
-    setSpeed(rate);
+  useEffect(() => {
+    try {
+      const stored = Number(sessionStorage.getItem(speedKey));
+      if ([0.25, 0.5, 0.75, 1].includes(stored)) setSpeed(stored);
+    } catch { /* The current take still works when the browser blocks storage. */ }
+  }, []);
+
+  useEffect(() => {
     for (const player of [modelPlayer.current, ...references.current]) {
       if (player) {
-        player.defaultPlaybackRate = rate;
-        player.playbackRate = rate;
+        player.defaultPlaybackRate = speed;
+        player.playbackRate = speed;
       }
     }
+  }, [speed, modelPlayer]);
+
+  function changeSpeed(rate: number) {
+    setSpeed(rate);
+    try {
+      sessionStorage.setItem(speedKey, String(rate));
+    } catch { /* Keep the selection for this take. */ }
   }
 
   function position(phase: Phase) {
@@ -57,7 +71,7 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
 
   return <section id="jamfor-giv" className={styles.comparison} aria-labelledby="jamfor-giv-rubrik">
     <h3 id="jamfor-giv-rubrik">Jämför handbytet och släppet</h3>
-    <p>Välj en händelse för att pausa alla filmer vid motsvarande rörelse. Hastigheten gäller alla tre filmerna.</p>
+    <p>Handbyte och Släpp pausar alla tre filmerna vid motsvarande rörelse. Hastigheten gäller också alla tre.</p>
     <div className={styles.actions} role="group" aria-label="Styr de tre filmerna">
       <button type="button" onClick={() => position("handover")}>Handbyte</button>
       <button type="button" onClick={() => position("release")}>Släpp</button>
@@ -80,6 +94,7 @@ export default function DealComparison({ film, modelPlayer, handover, release }:
     <div className={styles.players}>
       <figure className={styles.model}>
         <figcaption><strong>Paulina · konstruerad rörelsestudie</strong><span>{film.cameras.map(c => c.id).join(" och ")} · {film.take}</span></figcaption>
+        {viewGuide && <p>{viewGuide}</p>}
         <video controls={filmControls} playsInline preload="auto" ref={modelPlayer} aria-label={film.title} src={film.url}/>
       </figure>
       {dealReferences.map((clip, i) => <figure key={clip.sha256}>

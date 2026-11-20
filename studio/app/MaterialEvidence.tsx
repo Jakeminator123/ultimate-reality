@@ -1,9 +1,10 @@
 "use client";
-import { useRef, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
 import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-review";
 import { modelPhotoRoles } from "../lib/photo-review";
 import DealComparison from "./modellering/rorelseprov/DealComparison";
+import { MotionComponents, takeLabel } from "./MotionTake";
 import styles from "./modeling.module.css";
 
 export function PhotoCameraGuides({ photo }: { photo: Photo }) {
@@ -49,24 +50,32 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   </div>;
 }
 
-export function FilmEvidence({ film, expanded, context, children, comparison }: {
+export function FilmEvidence({ film, expanded, context, children, comparison, anchorId, viewGuide }: {
   film: DealerMaterial["films"][number]; expanded?: boolean; context?: ReactNode; children?: ReactNode;
+  anchorId?: string; viewGuide?: string;
   comparison?: { handover: number; release: number };
 }) {
   const player = useRef<HTMLVideoElement>(null);
-  return <details open={expanded}>
-    <summary>{film.title}</summary>
+  const frameHeading = useId();
+  const name = takeLabel(film.take, film.title);
+  return <details open={expanded} id={anchorId}>
+    <summary>{name}</summary>
+    {name !== film.title && <p>{film.title}</p>}
     <p>Tagning <code>{film.take}</code> · {dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
     {context}
-    {comparison ? <DealComparison film={film} modelPlayer={player} {...comparison}/> :
-      <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/>}
-    <div className={styles.frameMarks}>{film.marks.map(m => m.seconds === undefined ?
+    {comparison ? <DealComparison film={film} modelPlayer={player} {...comparison} viewGuide={viewGuide}/> :
+      <>{viewGuide && <p>{viewGuide}</p>}
+        <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/></>}
+    {comparison && <><h3 id={frameHeading}>Bildrutor i Paulinas film</h3>
+      <p>Knapparna nedan pausar Paulinas film på den valda rutan. Första bildrutan är 0.</p></>}
+    <div className={styles.frameMarks} role={comparison ? "group" : undefined} aria-labelledby={comparison ? frameHeading : undefined}>
+      {film.marks.map(m => m.seconds === undefined ?
       <span key={m.frame}>{m.label} · ruta {m.frame}</span> :
       <button key={m.frame} onClick={() => {
         // ffprobe prints microseconds. Seek just past the rounded onset of this displayed frame.
         if (player.current && m.seconds !== undefined) { player.current.pause(); player.current.currentTime = m.seconds + .000001; }
       }}>{m.label} · ruta {m.frame}</button>)}</div>
-    <p>Rutorna räknas från 0.</p>
+    {!comparison && <p>Rutorna räknas från 0.</p>}
     {film.reviews.map(review => <p key={review.camera + review.note}><b>{review.camera} · ruta {review.frames.join(", ")}</b> · {review.note}</p>)}
     {children}
   </details>;
@@ -97,9 +106,16 @@ export default function MaterialEvidence({ project }: { project: DealerMaterial 
       <p>Rörelsen skapas i riggens leder. Greppbilderna visar var fingrarna ska möta kortet. När kortbanan och lederna följer samma tidslinje kan samma giv renderas från båda stolarna.</p>
     </div>}
     {project.issues.length > 0 && <ul>{project.issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul>}
-    {project.motions.map(({ sha256, motion, url }) => <details key={sha256}><summary>{motion.card ? "Kortprov" : "Rörelseprov"} · {motion.take}</summary>
-      <p>{motion.card && motion.card + " · "}{motion.keyframes} samplade lägen · {(motion.end - motion.start).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} s</p>
-      <a href={url} download={motion.take + ".glb"}>Hämta den animerade GLB-filen</a></details>)}
+    {project.motions.length > 0 && <h3>Animationer på grundmodellen</h3>}
+    {project.motions.length > 0 && project.activeModel && <p>Rörelseproven använder samma kropp, {project.activeModel.name}.</p>}
+    {project.motions.map(record => {
+      const { sha256, motion, url } = record;
+      const film = project.films.find(f => f.motion === sha256 && f.take === motion.take);
+      return <details key={sha256}><summary>{takeLabel(motion.take, film?.title ?? (motion.card ? "Kortprov" : "Rörelseprov"))}</summary>
+        <p>Tagning <code>{motion.take}</code> · {motion.card && motion.card + " · "}{motion.keyframes} samplade lägen · {(motion.end - motion.start).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} s</p>
+        <MotionComponents material={project} motion={record}/>
+        <a href={url} download={motion.take + ".glb"}>Hämta den animerade GLB-filen</a></details>;
+    })}
     {model && <details><summary>Bildmått genom SAM-körningen</summary>
       <p>{model.run ?? "Körnings-ID saknas"}</p>
       <div className={styles.dataScroll}><table><thead><tr><th>Bild</th><th>Original</th><th>Inläst bild</th><th>Kroppsutsnitt</th><th>Handutsnitt</th></tr></thead>
@@ -111,7 +127,10 @@ export default function MaterialEvidence({ project }: { project: DealerMaterial 
       {Array.from(new Set(model.sources.flatMap(s => s.processing?.crop ? [s.processing.crop.evidence] : []))).map(source =>
         <p key={source}>Utsnittens storlek kommer från {cropSource[source]}.</p>)}
     </details>}
-    {project.films.map(film => <FilmEvidence key={film.url} film={film}/>)}
+    {project.films.length > 0 && <h3>Renderade filmprov</h3>}
+    {project.films.map(film => <FilmEvidence key={film.url} film={film}>
+      <MotionComponents material={project} motion={project.motions.find(m => m.sha256 === film.motion)}/>
+    </FilmEvidence>)}
     <a className={styles.jsonLink} href={doc + "json"} target="_blank" rel="noreferrer">Visa källfiler och kameravärden i JSON ↗</a>
   </section>;
 }

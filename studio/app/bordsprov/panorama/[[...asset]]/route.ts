@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { LocalError, requireLocal } from "../../../../lib/storage";
 import { panoramaRooms } from "../../../../lib/panorama-rooms";
+import { panoramaDeals, seatedPaulina } from "../../../../lib/panorama-deals";
+import { dealerMaterial, readDealingStudies } from "../../../../lib/dealer-material";
 import { tableFinishes } from "../../../../lib/table-finishes";
 
 export async function GET(request: Request, { params }: { params: Promise<{ asset?: string[] }> }) {
@@ -18,9 +20,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       const seat = selectedSeat === "4" || selectedSeat === "1" ? selectedSeat : "";
       const requestedView = query.get("vy");
       const view = seat && (requestedView === "golv" || requestedView === "paulina" || requestedView === "giv") ? requestedView : "";
+      const deals = view === "giv" ? panoramaDeals(...await Promise.all([
+        dealerMaterial("paulina", seatedPaulina), readDealingStudies("paulina"),
+      ])) : [];
+      const requestedTake = query.get("tagning");
+      const deal = requestedTake ? deals.find(candidate => candidate.take === requestedTake) : deals[0];
+      if (view === "giv" && !deal) return new Response("Givtagningen saknar verifierat material i studion.", { status: 404 });
       const frame = Number(query.get("ruta"));
-      const frameQuery = view === "giv" && Number.isInteger(frame) && frame > 0 ? "&amp;ruta=" + Math.min(53, frame) : "";
-      const viewQuery = view ? "&amp;vy=" + view + frameQuery : "";
+      const frameQuery = deal && Number.isInteger(frame) && frame > 0 ? "&amp;ruta=" + Math.min(deal.lastFrame, frame) : "";
+      const viewQuery = view ? "&amp;vy=" + view + (deal ? "&amp;tagning=" + deal.take : "") + frameQuery : "";
       const materials = tableFinishes.map(surface => ({
         ...surface, active: surface.options.find(option => option.value === query.get(surface.key)) ?? surface.options[0],
       }));
@@ -54,10 +62,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
           : `<a href="?stol=${seat}&amp;vy=paulina${matQuery}">Placeringsprov med Paulina</a>`;
       }
       controls = dealLink + controls;
-      const playback = view === "giv" ? `<fieldset id="givkontroll" disabled><legend>Giv till plats 4</legend>
+      const takeMenu = deals.length > 1 ? `<nav aria-label="Tagning">${deals.map(candidate =>
+        `<a${candidate === deal ? ' aria-current="page"' : ""} href="?stol=${seat}&amp;vy=giv&amp;tagning=${candidate.take}${frameQuery}${matQuery}">${candidate.take}</a>`).join("")}</nav>` : "";
+      const playback = deal ? `<fieldset id="givkontroll" disabled data-take="${deal.take}" data-motion="${deal.motion}" data-fps="${deal.fps}"><legend>Giv till plats 4 · ${deal.take}</legend>${takeMenu}
         <button type="button" id="spela">Spela upp</button>
-        <label>Bildruta <input type="range" id="giv-ruta" min="0" max="53" value="0" step="1"></label><output for="giv-ruta" id="giv-tid">0 / 53</output>
-        <button type="button" data-frame="15">Handbyte</button><button type="button" data-frame="26">Landning</button><button type="button" data-frame="46">Blinkning</button></fieldset>` : "";
+        <label>Bildruta <input type="range" id="giv-ruta" min="0" max="${deal.lastFrame}" value="0" step="1"></label><output for="giv-ruta" id="giv-tid">0 / ${deal.lastFrame}</output>
+        ${deal.jumps.map(jump => `<button type="button" data-frame="${jump.frame}">${jump.label}</button>`).join("")}</fieldset>` : "";
       const title = view === "giv" ? "Paulinas giv · " + room.name : view === "paulina" ? "Placeringsprov · Paulina v2 · pose 17" : room.name;
       return new Response(html.replaceAll("{{rum}}", room.name).replaceAll("{{title}}", title).replaceAll("{{id}}", key).replaceAll("{{blick}}", room.eye.join(",")).replaceAll("{{plats}}", seat).replace("{{vy}}", view).replace("{{matta}}", materials.find(surface => surface.key === "matta")!.active.value).replace("{{materialval}}", panel).replace("{{givkontroll}}", playback).replace("{{platser}}", seatMenu).replace("{{rumslankar}}", roomLinks).replace("{{standardsynfalt}}", seat ? "48" : "63").replace("{{kontroller}}", controls), {
         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-cache" },
@@ -69,6 +79,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ asse
       ["golv-v2.mjs", ["test/bakgrund/panorama/golv-v2/kontaktskugga.mjs", "text/javascript"]],
       ["placering.mjs", ["test/bakgrund/panorama/paulina-placering-v1/placering.mjs", "text/javascript"]],
       ["giv.mjs", ["test/bakgrund/panorama/paulina-giv-v1/giv.mjs", "text/javascript"]],
+      ["dealer-face-light.mjs", ["studio/lib/dealer-face-light.mjs", "text/javascript"]],
       ["grasmatta.mjs", ["test/bakgrund/polyhaven/grass-ground-v1/grasmatta.mjs", "text/javascript"]],
       ["materialval.mjs", ["test/bord/materialval-v1/materialval.mjs", "text/javascript"]],
       ["studio.hdr", [room.photo, "application/octet-stream"]],

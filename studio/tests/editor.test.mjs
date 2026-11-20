@@ -8,6 +8,7 @@ import test from "node:test";
 import { pathToFileURL } from "node:url";
 import next from "next";
 import { chromium } from "playwright-core";
+import sharp from "sharp";
 
 test(
   "två beskurna bilder, exakt JSON och filmgranskning återkommer från en sparad version",
@@ -124,7 +125,10 @@ test(
           for (const seat of ["4", "1"]) {
             const view = seat === "4" ? "paulina" : "giv";
             const query = new URLSearchParams({ stol: seat, vy: view, matta: "gras", tra: "furu", reling: "denim" });
-            if (view === "giv") query.set("ruta", "26");
+            if (view === "giv") {
+              query.set("tagning", "samspel-v2-v1");
+              query.set("ruta", "26");
+            }
             const response = await page.request.get(origin + route + "?" + query);
             assert.equal(response.status(), 200);
             const state = await page.evaluate(html => {
@@ -155,6 +159,29 @@ test(
         }
         await page.setViewportSize({ width: 1280, height: 900 });
         await nav.getByRole("link", { name: "Översikt", exact: true }).click();
+      });
+      await t.test("panoramat delar den spelade tagningen och blinkrutan från den vanliga adressen", async (panoramaTest) => {
+        if (process.env.STUDIO_TEST_NO_WEBGL) return panoramaTest.skip("Panoramaspelaren kräver WebGL.");
+        const view = await browser.newPage();
+        try {
+          await view.goto(origin + "/bordsprov/panorama/gothic-manor?stol=4&vy=giv");
+          await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
+          const take = await view.locator("#givkontroll").getAttribute("data-take");
+          assert.match(take, /^samspel-v2-v[1-9]\d*$/);
+          assert.equal(new URL(view.url()).searchParams.get("tagning"), take);
+          const blink = view.getByRole("button", { name: "Blinkning", exact: true });
+          const frame = await blink.getAttribute("data-frame");
+          await blink.click();
+          const shared = new URL(view.url());
+          assert.equal(shared.searchParams.get("tagning"), take);
+          assert.equal(shared.searchParams.get("ruta"), frame);
+          await view.reload();
+          await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
+          assert.equal(await view.locator("#givkontroll").getAttribute("data-take"), take);
+          assert.equal(await view.locator("#giv-ruta").inputValue(), frame);
+        } finally {
+          await view.close();
+        }
       });
       await t.test("dealervalet öppnar Paulinas rigg eller ett tomt bildutkast och faserna följer med", async () => {
         async function mobileWidth() {
@@ -187,6 +214,18 @@ test(
         for (const photo of material.photos) {
           assert.ok(markdown.includes(photo.sha256));
           assert.ok(markdown.includes(photo.width + " × " + photo.height));
+        }
+        const combined = material.motions.find(record => record.motion.take === "samspel-v2-v2");
+        if (combined) {
+          const entry = page.locator("details").filter({ has: page.locator('a[download="samspel-v2-v2.glb"]') });
+          const title = entry.locator(":scope > summary");
+          assert.equal(await title.innerText(), "Giv med blinkning · prov 2");
+          await title.click();
+          const parts = entry.locator("li");
+          assert.equal(await parts.count(), combined.motion.components.length);
+          await parts.filter({ hasText: "Händer och kort · prov 2" }).getByText("tvahandsgiv-v2-v2", { exact: true }).waitFor();
+          await parts.filter({ hasText: "Blinkning · prov 2" }).getByText("ansiktsrigg-v2-v2", { exact: true }).waitFor();
+          await title.click();
         }
         const quarter = material.photos.find(photo => photo.id === "sittande/trekvart");
         if (quarter?.review) {
@@ -340,11 +379,17 @@ test(
           const joints = page.getByRole("button", { name: "Leder", exact: true });
           await skeleton.click(); await joints.click();
           await page.getByLabel("Led att prova").selectOption("c_jaw");
-          const closedJaw = await canvas.screenshot();
+          // Scrolling to the controls can round the element's outer pixel into the page background.
+          const facePixels = async () => {
+            const image = sharp(await canvas.screenshot());
+            const { width, height } = await image.metadata();
+            return image.extract({ left: 1, top: 1, width: width - 2, height: height - 2 }).raw().toBuffer();
+          };
+          const closedJaw = await facePixels();
           await page.getByRole("slider", { name: /Käköppning/ }).press("End");
-          assert.notDeepEqual(await canvas.screenshot(), closedJaw);
+          assert.ok(!(await facePixels()).equals(closedJaw), "Käköppningen ska synas i modellen.");
           await page.getByRole("button", { name: "Återställ leder" }).click();
-          assert.deepEqual(await canvas.screenshot(), closedJaw);
+          assert.ok((await facePixels()).equals(closedJaw), "Återställning ska ge samma bild av ansiktet.");
           await skeleton.click(); await joints.click();
           await page.getByLabel("Led att prova").selectOption("l_lowarm");
           await page.getByRole("button", { name: "Trekvart", exact: true }).click();
