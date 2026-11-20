@@ -1,4 +1,4 @@
-"""Bake the active Fas 1 portraits and seated photographs onto the versioned seated rig."""
+"""Bake the Fas 1 portraits and the rig's actual seated photo sources onto its surface."""
 import argparse
 import hashlib
 from io import BytesIO
@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PHOTOS = ROOT / "avatars/paulina/fas-1/v1"
 BASENAME = "paulina-fas1-v2"
 BASE = ROOT / "avatars/paulina/3d/fas1-v2" / (BASENAME + ".glb")
+# Historical v2 review tools import these paths and the original SAM run.
 DEST = BASE.parent / "utseende" / (BASENAME + "-utseende.glb")
 REVIEW = ROOT / "test/dealer/paulina/fas1-sittande-v2/utseende"
 RUN_ID = "sam-20261120T015406Z-f427a95156b7"
@@ -41,6 +42,19 @@ SEATED_MARKS = [
     [(210,161),(275,161),(246,203),(243,228),(245,262),(242,75),(167,72),(307,80),(139,183),(344,184),(181,280),(297,280),(195,300),(287,300)],
     [(239,163),(287,163),(247,202),(258,229),(259,266),(255,83),(226,95),(364,37),(215,159),(241,274),(350,273),(281,304)],
     [(176,162),(135,205),(149,230),(155,272),(183,77),(240,53),(294,40),(366,138),(373,217),(328,279),(264,301),(212,306)]
+]
+# Measured in the corrected 1083 × 1452 seated profile. The twelve points
+# correspond in order to PORTRAIT_MARKS[2]; the clothing contour is at 410 px.
+CORRECTED_PROFILE_SHA = "13e98b1eeac531a1feeadcc866016a930b5145aa6211b1086e40f5469bcd3580"
+CORRECTED_PROFILE_MARKS = [(565,184),(522,219),(535,251),(545,289),(556,104),(615,70),
+                           (664,59),(755,130),(770,229),(739,294),(676,312),(607,332)]
+CORRECTED_PROFILE_CONTOUR = [
+    (257,124),(267,122),(275,136),(284,157),(287,176),(284,201),(278,225),
+    (276,252),(278,282),(273,320),(263,343),(137,347),(128,350),(122,358),
+    (121,406),(119,448),(119,487),(120,514),(84,515),(45,512),(42,509),
+    (45,503),(70,498),(80,485),(84,468),(83,419),(82,365),(83,327),(88,315),
+    (99,307),(113,303),(127,300),(156,282),(173,281),(180,274),(189,267),
+    (194,247),(195,224),(189,207),(189,190),(195,174),(210,154),(231,137)
 ]
 PORTRAIT_MARKS = [
     [(226,222),(329,222),(284,289),(279,328),(284,382),(282,80),(168,72),(395,88),(108,252),(440,252),(173,410),(376,410),(205,432),(353,432)],
@@ -231,10 +245,31 @@ class Glb:
 
 
 class Source:
-    def __init__(self,idx,lab,faces,registered):
+    def __init__(self,idx,lab,faces,registered,run_input=None,edition=None):
         view=VIEWS[idx]
-        self.file=PHOTOS/"sittande"/(view+".png")
+        original="sittande/"+view+".png"
+        if run_input is None:
+            run_input=read_json(lab/"run.json")["inputs"][idx]
+        if edition is None:
+            edition={row["fil"]:row["sha256"] for row in read_json(PHOTOS/"bildregister.json")["bilder"]}
+        input_hash=run_input["sha256"]
+        if input_hash != registered["photoSha256"]:
+            raise ValueError("The photo in run.json does not match the geometry source")
+        self.file=Path(run_input["path"]).resolve()
+        if not self.file.is_relative_to(PHOTOS) or not self.file.is_file():
+            # Legacy runs used lab input copies. Resolve the edition original
+            # only when the saved input bytes have the very same fingerprint.
+            self.file=PHOTOS/original
+            if input_hash != edition[original] and idx == 2:
+                for row in read_json(PHOTOS/"granskning/sittprofilprov.json")["views"]:
+                    if row["sourceSha256"] == input_hash:
+                        self.file=(PHOTOS/row["file"]).resolve()
+                        if not self.file.is_relative_to(PHOTOS):
+                            raise ValueError("The profile photograph is outside the edition")
+                        break
         self.portrait_file=PHOTOS/"ansikte"/(view+".png")
+        if sha(self.portrait_file) != edition["ansikte/"+view+".png"]:
+            raise ValueError("The portrait does not match its registered photograph")
         name=registered["estimate"]
         if Path(name).name != name or registered["index"] != idx+1 or sha(self.file) != registered["photoSha256"]:
             raise ValueError("The seated photograph does not match the geometry source")
@@ -262,9 +297,16 @@ class Source:
         self.faces=faces
         self.ids=triangles_at(self.xy,faces,w,h,np.argsort(self.v[:,2][faces].mean(axis=1))[::-1])
         self.mask=np.zeros((h,w),np.uint8)
-        for contour in CONTOURS[idx]:
+        if idx == 2 and input_hash == CORRECTED_PROFILE_SHA:
+            contours=[CORRECTED_PROFILE_CONTOUR]
+            src=np.asarray(CORRECTED_PROFILE_MARKS)
+        elif input_hash == edition[original]:
+            contours=CONTOURS[idx]
+            src=np.array(SEATED_MARKS[idx])+OFFSETS[idx]
+        else:
+            raise ValueError(f"No calibrated photographic landmarks for {view} {input_hash}")
+        for contour in contours:
             cv2.fillPoly(self.mask,[np.rint(np.array(contour)*w/410).astype(np.int32)],255)
-        src=np.array(SEATED_MARKS[idx])+OFFSETS[idx]
         dst=np.array(PORTRAIT_MARKS[idx])*2
         aff=np.linalg.lstsq(np.column_stack([src,np.ones(len(src))]),dst,rcond=None)[0]
         self.aff=aff
@@ -449,9 +491,22 @@ def build(args):
     cv2.setNumThreads(4)
     glb=Glb(args.base)
     provenance=glb.doc["asset"]["extras"]
-    run=read_json(args.run/"run.json")
+    run_path=args.run
+    if run_path is None:
+        run_id=provenance["run"]
+        if Path(run_id).name != run_id or run_id in ("", ".", ".."):
+            raise ValueError("Invalid run ID in the seated rig")
+        storage=Path(os.environ.get("ULTIMATE_REALITY_STORAGE","D:/" if Path("D:/").is_dir() else ROOT/".lab-data"))
+        run_path=storage/"ultimate-reality-lab/saved"/run_id
+    run=read_json(run_path/"run.json")
     if run["state"] != "complete" or run["id"] != provenance["run"] or sha(args.model) != provenance["mhrModelSha256"]:
         raise ValueError("The run or MHR weights do not belong to this seated rig")
+    if len(run["inputs"]) != len(VIEWS) or len(provenance["sourceViews"]) != len(VIEWS):
+        raise ValueError("Expected three seated photos and three estimates for this rig")
+    edition={row["fil"]:row["sha256"] for row in read_json(PHOTOS/"bildregister.json")["bilder"]}
+    rig_version=args.base.parent.name
+    output_path=args.output or args.base.parent/"utseende"/(args.base.stem+"-utseende.glb")
+    review=args.review or ROOT/"test/dealer/paulina"/rig_version.replace("fas1-", "fas1-sittande-", 1)/"utseende"
     prim=glb.doc["meshes"][0]["primitives"][0]
     attrs=prim["attributes"]
     original_attrs={name:glb.read(index) for name,index in attrs.items()}
@@ -477,8 +532,11 @@ def build(args):
     hand=mass(lambda n:any(x in n for x in ("wrist","thumb","pinky","ring","middle","index")) and "wrist_twist" not in n)
     torso=mass(lambda n:n.startswith("c_spine") or "clavicle" in n)
     groups=np.column_stack([mix(.15,.75,head+.88*neck),mix(.32,.79,hand),mix(.20,.76,torso),mix(.19,.72,head)])
-    refs=[Source(i,args.run,faces,provenance["sourceViews"][i]) for i in range(3)]
+    refs=[Source(i,run_path,faces,source,run["inputs"][i],edition)
+          for i,source in enumerate(provenance["sourceViews"])]
     hands=HandPhoto(refs[0],names)
+    if sha(hands.file) != edition["hander/handryggar.png"]:
+        raise ValueError("The hand reference does not match its registered photograph")
     rest=m.rest_vertices.numpy()
     reflected=rest.copy()
     reflected[:,0]*=-1
@@ -491,7 +549,8 @@ def build(args):
     attrs["_SAM_INDEX"]=glb.accessor(vertex.astype("<u2"),"SCALAR")
     attrs["TEXCOORD_0"]=glb.accessor(uv[uv_index].astype("<f4"),"VEC2")
     prim["indices"]=glb.accessor(indices.ravel().astype("<u2"),"SCALAR",True)
-    prim["material"]=glb.material("Paulina Fas 1 · ansikte, hals, kostym och händer v2",atlas,.83)
+    label=rig_version.removeprefix("fas1-")
+    prim["material"]=glb.material("Paulina Fas 1 · ansikte, hals, kostym och händer "+label,atlas,.83)
     points,normals,huv,hfaces,hair=hair_surface(refs[0],refs[2],original_attrs["POSITION"],head>.89)
     headjoint=names.index("c_head")
     bj=np.zeros((len(points),4),"<u2")
@@ -501,18 +560,18 @@ def build(args):
     hair_attrs={k:glb.accessor(np.asarray(v,dtype=d),kind) for k,v,d,kind in [
         ("POSITION",points,"<f4","VEC3"),("NORMAL",normals,"<f4","VEC3"),
         ("TEXCOORD_0",huv,"<f4","VEC2"),("JOINTS_0",bj,"<u2","VEC4"),("WEIGHTS_0",bw,"<f4","VEC4")]}
-    hprim={"attributes":hair_attrs,"material":glb.material("Paulina Fas 1 · blond page v2",hair,.82),
+    hprim={"attributes":hair_attrs,"material":glb.material("Paulina Fas 1 · blond page "+label,hair,.82),
            "indices":glb.accessor(hfaces.ravel().astype("<u2"),"SCALAR",True),"mode":4}
     glb.doc["meshes"].append({"name":"Blond page","extras":{"appearancePart":"hair"},"primitives":[hprim]})
     glb.doc["meshes"][0]["extras"]={"appearancePart":"body"}
     glb.doc["nodes"].append({"name":"Paulinas hår","mesh":len(glb.doc["meshes"])-1,"skin":0})
     glb.doc["scenes"][0]["nodes"].append(len(glb.doc["nodes"])-1)
-    version="fas1-v2-utseende"
+    version=rig_version+"-utseende"
     inputs={str(p.relative_to(PHOTOS)).replace(chr(92),"/"):sha(p) for r in refs for p in [r.file,r.portrait_file]}
     inputs["hander/handryggar.png"]=sha(hands.file)
     glb.doc["asset"].setdefault("extras",{}).update(appearanceVersion=version,appearanceInputSHA256=inputs,
                                                      sourceModelSHA256=sha(args.base),sourceModel=args.base.name)
-    output=glb.save(args.output)
+    output=glb.save(output_path)
     check=Glb(output)
     for k,array in original_attrs.items():
         if not np.array_equal(check.read(attrs[k]),array[vertex]):
@@ -520,8 +579,7 @@ def build(args):
     check_faces=check.read(prim["indices"]).ravel()
     if not np.array_equal(vertex[check_faces],faces.ravel()):
         raise ValueError("Topology changed")
-    REVIEW.mkdir(parents=True,exist_ok=True)
-    register_model(store_for("paulina"), args.base, args.run)
+    register_model(store_for("paulina"), args.base, run_path)
     register_model(store_for("paulina"), output)
     record={"version":version,"rig":output.name,"sha256":sha(output),"baseSha256":sha(args.base),"sources":inputs,
             "run":run["id"],"npz":{r.npz.name:sha(r.npz) for r in refs},"joints":len(names),
@@ -530,15 +588,20 @@ def build(args):
             "limitations":["Hair at rear inferred from side locks. Left side mirrored for unseen locks.",
                            "Rear clothing, occluded skin and soles filled with material colours; no rear photograph.",
                            "Body is the neutral fitted SAM surface beneath the suit. Photos represent three separate poses."]}
-    save_version(REVIEW/"kallor.json",(json.dumps(record,indent=2,ensure_ascii=False)+"\n").encode())
+    if provenance["sourceViews"][2]["photoSha256"] == CORRECTED_PROFILE_SHA:
+        record["profileAlignment"] = {"photoSha256":CORRECTED_PROFILE_SHA,
+            "seatedPixels":CORRECTED_PROFILE_MARKS, "portraitPixels":(2*np.array(PORTRAIT_MARKS[2])).tolist(),
+            "method":"Twelve visually estimated corresponding facial, hair and neck landmarks."}
+    save_version(review/"kallor.json",(json.dumps(record,indent=2,ensure_ascii=False)+"\n").encode())
     print(output,coverage,flush=True)
 
 
 if __name__=="__main__":
     cli=argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--base",type=Path,default=BASE)
-    cli.add_argument("--output",type=Path,default=DEST)
-    cli.add_argument("--run",type=Path,default=Path(os.environ.get("ULTIMATE_REALITY_STORAGE","D:/" if Path("D:/").is_dir() else ROOT/".lab-data"))/"ultimate-reality-lab/saved"/RUN_ID)
+    cli.add_argument("--output",type=Path)
+    cli.add_argument("--review",type=Path)
+    cli.add_argument("--run",type=Path,help="Saved SAM run; defaults to the run recorded inside --base")
     cli.add_argument("--model",type=Path,default=Path(os.environ.get("SAM3D_ROOT",ROOT.parent/"sam-3d-body"))/"checkpoints/sam-3d-body-dinov3/assets/mhr_model.pt")
     cli.add_argument("--size",type=int,default=2048)
     build(cli.parse_args())

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { dealerMaterial, readDealingStudies, type DealingStudy } from "../../../lib/dealer-material";
+import { dealReferences, referencesForTake } from "../../../lib/deal-references";
 import type { DealerMaterial } from "../../../lib/material-types";
 import { LocalError, requireLocal } from "../../../lib/storage";
 import { FilmEvidence } from "../../MaterialEvidence";
@@ -33,9 +34,9 @@ function elbowHeight(mm: number) {
   return `${cm} cm ${mm > 0 ? "över" : "under"} axelleden`;
 }
 
-function Trial({ id, title, description, films, material, audits, comparedMovie, selectedMovie }: {
+function Trial({ id, title, description, films, material, audits, comparedMovie, selectedMovie, compareHowcastVip }: {
   id: string; title: string; description: string; films: Film[]; material: DealerMaterial;
-  audits: Map<string, DealingStudy>; comparedMovie?: string; selectedMovie?: string;
+  audits: Map<string, DealingStudy>; comparedMovie?: string; selectedMovie?: string; compareHowcastVip: boolean;
 }) {
   const openMovie = selectedMovie ?? films.find(film => film.sha256 === comparedMovie)?.sha256 ?? films[0]?.sha256;
   return <section id={id} className={id === "samspel" ? styles.combinedProof + " " + styles.proof : styles.proof}>
@@ -48,23 +49,35 @@ function Trial({ id, title, description, films, material, audits, comparedMovie,
     {films.map(film => {
       const motion = material.motions.find(m => m.sha256 === film.motion);
       const audit = audits.get(film.sha256);
-      const handover = film.marks.find(m => m.frame === audit?.handover.frame)?.seconds;
+      const clips = referencesForTake(audit?.timing.referenceSha256);
+      const secondsAt = (frame?: number) => film.marks.find(m => m.frame === frame)?.seconds;
+      const handover = secondsAt(audit?.handover.frame);
       const release = film.marks.find(m => /lämnar kortet|släpp/i.test(m.label))?.seconds;
-      const comparison = film.sha256 === comparedMovie && handover !== undefined && release !== undefined ? { handover, release } : undefined;
+      const comparison = audit && clips.length > 0 && film.sha256 === comparedMovie && handover !== undefined && release !== undefined ? {
+        clips: compareHowcastVip ? dealReferences : clips, times: { draw: secondsAt(audit.draw.frames[0]) ?? 0, push: secondsAt(audit.draw.pressFrame),
+          handover, turn: secondsAt(audit.turn?.frame), release },
+      } : undefined;
       const selected = film.sha256 === selectedMovie;
       const v1 = film.take === "samspel-v2-v1" || film.take === "tvahandsgiv-v2-v1";
       const note = audit?.handover.note ?? (v1 ? "Den höga armbågen och den tvära handleden behöver korrigeras." : undefined);
       return <FilmEvidence key={film.url} film={film} anchorId={selected ? "vald-tagning" : undefined}
         expanded={film.sha256 === openMovie} comparison={comparison} viewGuide={viewGuide(material, film, audit)} context={audit &&
-        <p><b>Rörelsen är animerad i kod.</b> Howcast gav händelsernas ordning och tidpunkter. VIP användes för jämförelse.
-          Lyftbåge, ledvinklar och fingerkontakt passades mot vår sko och vårt kort.</p>}>
+        <><p><b>Rörelsen är animerad i kod.</b> {audit.timing.source} gav händelsernas ordning och tidpunkter.
+          {clips.length > 1 && audit.comparison && " " + audit.comparison.source + " användes för jämförelse."}
+          {" "}Kortets bana, ledvinklarna och fingrarnas lägen anpassades till vår sko och vårt kort.</p>
+          {comparison && clips.length === 1 && <nav className={styles.archiveJumps} aria-label="Välj referensklipp för given">
+            <a href={takeLink(material, film.take, "original")} aria-current={!compareHowcastVip ? "page" : undefined}>{clips[0].title}</a>
+            <a href={takeLink(material, film.take, "howcast-vip")} aria-current={compareHowcastVip ? "page" : undefined}>Jämför med Howcast och VIP</a>
+          </nav>}</>}>
         {audit && <details><summary>Källfilmer och uppmätt rörelse</summary>
-          <p>Rutorna {audit.timing.frames.join("–")} i Howcast ligger till grund för utdrag, handbyte, vändning och släpp.
-            VIP visar ett lågt handbyte från en annan kamera. Fingerdjupet och den fysiska lyfthöjden är okända i källfilmerna.
-            {" "}<a href={audit.timing.url}>Spader två i Howcast</a> · <a href={audit.comparison.url}>Klöver nio i VIP</a></p>
+          <p>Källrutorna {audit.timing.frames.join(audit.timing.frames.length === 2 ? "–" : ", ")} i {audit.timing.source} ger tiderna för utdrag, handbyte, vändning och släpp.
+            {clips.length > 1 && audit.comparison && " " + audit.comparison.source + " visar ett lågt handbyte från en annan kamera."}
+            {" "}Fingerdjup och fysisk lyfthöjd är okända i källmaterialet.
+            {" "}<a href={audit.timing.url}>{clips[0]?.title ?? audit.timing.source}</a>
+            {clips.length > 1 && audit.comparison && <> · <a href={audit.comparison.url}>{clips[1].title}</a></>}</p>
           {audit.handReference && <p><b>Fingerplacering.</b> Källrutorna {audit.handReference.frames.join(", ")} i Jakobs film{" "}
             <code title={"SHA-256 " + audit.handReference.sha256}>{audit.handReference.file.split(/[\\/]/).pop()}</code>{" "}
-            används för att passa modellens fingrar mot kortet. Givens tidpunkter följer Howcast.</p>}
+            används för att passa modellens fingrar mot kortet.</p>}
           <p>Ruta {audit.draw.frames.join("–")} i vår modell går kortets framkant {Math.round(audit.draw.frontEdgeOutMm[1] - audit.draw.frontEdgeOutMm[0])} mm ut ur mynningen.
             Framkanten är {audit.draw.frontEdgeHeightMm[0].toLocaleString("sv-SE")} mm över filten i början av utdraget och {audit.draw.frontEdgeHeightMm[1].toLocaleString("sv-SE")} mm i slutet.</p>
           <p>Vid handbytet i ruta {audit.handover.frame} är kortets mitt {audit.handover.cardCentreHeightMm} mm över filten.
@@ -79,8 +92,8 @@ function Trial({ id, title, description, films, material, audits, comparedMovie,
   </section>;
 }
 
-export default async function Page({ searchParams }: { searchParams: Promise<{ dealer?: string; revision?: string; tagning?: string }> }) {
-  const { dealer = "paulina", revision, tagning } = await searchParams;
+export default async function Page({ searchParams }: { searchParams: Promise<{ dealer?: string; revision?: string; tagning?: string; referenser?: string }> }) {
+  const { dealer = "paulina", revision, tagning, referenser } = await searchParams;
   let material: DealerMaterial | undefined, message = "";
   let studies: DealingStudy[] = [];
   try {
@@ -102,7 +115,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
   const selected = films.find(f => f.take === tagning);
   const audited = films.filter(f => audits.has(f.sha256));
   const comparedMovie = (selected ?? audited.find(f => f.take.startsWith("samspel-")) ?? audited.find(f => f.take.startsWith("tvahandsgiv-")))?.sha256;
-  const trialProps = { audits, comparedMovie, selectedMovie: selected?.sha256 };
+  const trialProps = { audits, comparedMovie, selectedMovie: selected?.sha256, compareHowcastVip: referenser === "howcast-vip" };
   return <StudioSubpage area="rorelseprov"><main className={styles.archive}>
     <nav className={styles.archiveNav}><a href={"/?" + query + "#modellering"}>← Bildserie och 3D-modell</a></nav>
     <header className={styles.archiveHeader}><h1>Rörelseprov</h1>

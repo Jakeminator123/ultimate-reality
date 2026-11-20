@@ -4,6 +4,8 @@
 
 35/35 original inventerades med SHA-256 och ffprobe. 8/35 klipp (23 %) rörelsegranskades i alla 371 visningsrutor. Alla 35 är H.264, 1080 × 1920, med jämna tidssteg vid 24 fps. R0 är första rutan. Tid i sekunder är rutnumret delat med 24. Vänster och höger anges från dealerns perspektiv. De vita kortsidorna saknar läsbar färg och valör. [Källista med fullständiga hashvärden](kallor.json)
 
+I `pos4-v.mp4` ligger vänsterfingrarna samlade på den mörka ryggen i R3–9. Tummen syns vid sidan. Kortet följer mynningen ned mot filten medan högern väntar nära den fria kanten. I R11 lyfter vänstern. Högern för kortet vidare i samma svep, visar dess kant kring R15–16 och följer det till underlaget. Fingrarnas exakta kontakt på den dolda undersidan och deras kraft kan inte avläsas. Studion kan spela det 39 rutor långa originalet med verifierad SHA-256. [Spela Jakobs giv](http://127.0.0.1:4317/api/givreferens?film=fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883) · [Se utskjutet ruta för ruta](bildkartor/detalj-pos4-v-r00-15.jpg)
+
 ## Två givningar till mitten
 
 | Original och SHA-256-prefix | Uttag och handbyte | Vändning och släpp | Återgång |

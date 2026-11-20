@@ -24,7 +24,9 @@ export function panoramaDeals(material: DealerMaterial, studies: DealingStudy[])
     if (!Number.isFinite(fps) || fps <= 0 || !Number.isInteger(lastFrame) || lastFrame < 1 ||
         motion.motion.start !== 0 || Math.round(motion.motion.end * fps) !== lastFrame) return [];
     const jumps = [
+      { label: "Utskjut", frame: film.marks.find(mark => mark.frame === study.draw?.pressFrame && /utskjut/i.test(mark.label))?.frame },
       { label: "Handbyte", frame: study.handover.frame },
+      { label: "Vändning", frame: film.marks.find(mark => mark.frame === study.turn?.frame && /vänd(?:er|ning)/i.test(mark.label))?.frame },
       { label: "Landning", frame: film.marks.find(mark => /landning/i.test(mark.label))?.frame },
       { label: "Blinkning", frame: film.marks.find(mark => /slutningsmaximum|maximal blinkning/i.test(mark.label))?.frame },
     ].filter(jump => jump.frame !== undefined && Number.isInteger(jump.frame) && jump.frame >= 0 && jump.frame <= lastFrame);

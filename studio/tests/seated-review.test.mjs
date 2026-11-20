@@ -1,10 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { hasReviewedSeatCameras } from "../lib/material-types.ts";
 import { angleDifference, bodyPixels, checkSeatedFrame, floorSpread, readSeatedMeasurement } from "../lib/seated-review.ts";
 
 const identity = { file: "sittande/front.png", sha256: "a".repeat(64), width: 1083, height: 1452 };
 const row = { file: identity.file, width: 1083, height: 1452, sourceSha256: identity.sha256 };
 const edition = "fas-1/v1";
+
+test("en giv kräver kameraunderlag och giltiga granskningsrutor från båda stolarna", () => {
+  const seats = ["Stol 4", "Stol 1"];
+  const film = {
+    frames: 54,
+    cameras: seats.map(id => ({ id, samples: [{ frame: 0 }] })),
+    reviews: seats.map(camera => ({ schema: 1, camera, note: "Kortet ligger på filten.", frames: [22, 53] })),
+  };
+  assert.equal(hasReviewedSeatCameras(film), true);
+  assert.equal(hasReviewedSeatCameras({ ...film, reviews: [film.reviews[0], film.reviews[0]] }), false);
+  assert.equal(hasReviewedSeatCameras({ ...film, cameras: [film.cameras[0], { id: "Stol 1" }] }), false);
+  assert.equal(hasReviewedSeatCameras({ ...film, reviews: [film.reviews[0], { ...film.reviews[1], frames: [54] }] }), false);
+  assert.equal(hasReviewedSeatCameras({ ...film, reviews: [film.reviews[0], { ...film.reviews[1], note: "" }] }), false);
+});
+
 const scale = { release: edition, views: [{ ...row, crownY: 56, soleY: 1395, seatX: 343, seatY: 953 }] };
 const marks = { schema: 1, release: edition, views: [{ ...row, uncertaintyPx: 2, eye: { x: 540, y: 185, landmark: "midpoint" },
   feet: [1279, 1279, 1341, 1341].map((y, i) => ({ x: 300 + 100 * i, y, visible: "centre" })) }] };

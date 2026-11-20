@@ -7,10 +7,11 @@ export function takeLabel(take: string, fallback: string) {
   return match ? `${names[match[1] as keyof typeof names]} · prov ${match[2]}` : fallback;
 }
 
-export function takeLink(material: DealerMaterial, take: string) {
+export function takeLink(material: DealerMaterial, take: string, references?: "howcast-vip" | "original") {
   const query = new URLSearchParams({ dealer: material.dealer, tagning: take });
   if (material.revision) query.set("revision", material.revision);
-  return "/modellering/rorelseprov?" + query + "#vald-tagning";
+  if (references) query.set("referenser", references);
+  return "/modellering/rorelseprov?" + query + (references ? "#jamfor-giv" : "#vald-tagning");
 }
 
 export function MotionComponents({ material, motion }: { material: DealerMaterial; motion?: MotionRecord }) {

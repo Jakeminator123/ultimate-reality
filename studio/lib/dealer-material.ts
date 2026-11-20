@@ -6,7 +6,7 @@ import { rangedResponse } from "./byte-range";
 import { bildrecept } from "../fotomall/bildrecept";
 import type { GranskadVy } from "../fotomall/bildserie";
 import { currentModel as legacyModel } from "./current-model";
-import { cropSource, dimensions, roleName } from "./material-types";
+import { cropSource, dimensions, hasReviewedSeatCameras, roleName } from "./material-types";
 import { bodyPixels, checkSeatedFrame, floorSpread, readSeatedMeasurement, seatedStandard } from "./seated-review";
 import { verifiedPhotoReview } from "./photo-review";
 import type { DealerMaterial, Edition, FilmRecord, FilmReview, ModelRecord, MotionRecord, Photo } from "./material-types";
@@ -59,7 +59,8 @@ export async function materialStamp(dealer: string, revision: string | null = nu
     active ? JSON.parse(active.toString("utf8")) as Edition : null;
   const edition = release?.edition ?? "fas-1/v1";
   if (!editionPath.test(edition)) bad("Ogiltig bildutgåva.");
-  const observations = await Promise.all(["bildegenskaper.json", "sittande-bildskala.json", "sittande-kamerapunkter-v1.json", "utgavegranskning-v1.json"]
+  const observations = await Promise.all(["bildegenskaper.json", "sittande-bildskala.json", "sittande-kamerapunkter-v1.json", "utgavegranskning-v1.json",
+    "granskning/sittprofilprov.json", "granskning/sittmodellprov.json"]
     .map(name => bytes(path.join(avatar, edition, name))));
   return digest(Buffer.from(JSON.stringify([active?.toString(), ...registered, revision, ...observations.map(b => b && digest(b))])));
 }
@@ -162,20 +163,47 @@ async function modelRecord(store: string, key: string, kind: ModelRecord["kind"]
   return model;
 }
 
-export async function seatedTrialModel(material: DealerMaterial, trial: Photo) {
+export async function seatedTrialModel(material: DealerMaterial, trial: Photo, includeFilm = false) {
   const avatar = avatarDir(material.dealer);
-  type Candidate = { schema: number; baseRevision: string; profile: string; geometry: string; modelRecord: string; name: string; run: string };
+  type Candidate = { schema: number; baseRevision: string; profile: string; geometry: string; modelRecord: string;
+    appearance?: string; appearanceRecord?: string; motion?: string; filmRecord?: string; name: string; run: string };
   const candidate = await record<Candidate>(path.join(avatar, material.edition, "granskning", "sittmodellprov.json"));
   if (!candidate || candidate.baseRevision !== material.revision || candidate.profile !== trial.sha256) return null;
   if (candidate.schema !== 1 || !hex.test(candidate.modelRecord) || !candidate.name) bad("Sittmodellprovet saknar versionsunderlag.");
-  const model = await modelRecord(path.join(avatar, "3d", "versioner"), candidate.geometry, "geometry", candidate.modelRecord);
+  const store = path.join(avatar, "3d", "versioner");
+  const model = await modelRecord(store, candidate.geometry, "geometry", candidate.modelRecord);
   if (!model || !material.geometry) return null;
   const original = material.photos.find(photo => photo.id === "sittande/profil");
   const expected = material.geometry.sources.map(source => ({ role: source.role, sha256: source.sha256 === original?.sha256 ? trial.sha256 : source.sha256 }));
   if (model.run !== candidate.run || !expected.some(source => source.role === "posture" && source.sha256 === trial.sha256) ||
       model.sources.length !== expected.length || expected.some(s => !model.sources.some(c => c.sha256 === s.sha256 && c.role === s.role)))
     bad("Sittmodellprovets källbilder avviker från fotona i jämförelsen.");
-  return { id: candidate.geometry, name: candidate.name, url: url(material.dealer, { model: candidate.geometry }) };
+  const body = { id: model.sha256, name: candidate.name, run: model.run, url: url(material.dealer, { model: model.sha256 }) };
+  if (candidate.appearance === undefined && candidate.appearanceRecord === undefined) return body;
+  try {
+    if (!candidate.appearance || !candidate.appearanceRecord || !hex.test(candidate.appearanceRecord))
+      bad("Sittmodellprovets fotoyta saknar ett giltigt kvitto.");
+    const look = await modelRecord(store, candidate.appearance, "appearance", candidate.appearanceRecord);
+    if (!look || look.parent !== model.sha256) bad("Sittmodellprovets fotoyta saknas eller tillhör en annan kropp.");
+    const film = includeFilm && candidate.motion && candidate.filmRecord ?
+      await reviewedTrialFilm(material.dealer, store, model.sha256, look.sha256, candidate.motion, candidate.filmRecord) : undefined;
+    return { ...body, appearanceUrl: url(material.dealer, { model: look.sha256 }), film };
+  } catch (error) {
+    if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
+    return { ...body, appearanceError: "Fotoytan kunde inte verifieras för den här SAM-kroppen. Provet visas med neutral yta." };
+  }
+}
+async function reviewedTrialFilm(dealer: string, store: string, geometry: string, appearance: string, motion: string, receipt: string) {
+  if (!hex.test(motion) || !hex.test(receipt)) return;
+  try {
+    const motions = await motionsFor(dealer, store, geometry, appearance, []);
+    const animation = motions.find(m => m.sha256 === motion && m.schema === 1 && m.parent === appearance && m.motion.appearance === appearance);
+    if (!animation) return;
+    const [film] = await filmsFor(dealer, store, geometry, appearance, [animation], [], receipt);
+    if (film?.appearance === appearance && film.motion === motion && hasReviewedSeatCameras(film)) return film;
+  } catch (error) {
+    if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
+  }
 }
 async function motionsFor(dealer: string, store: string, geometry: string, appearance: string | null, issues: string[]) {
   const folder = path.join(store, "rorelser"), motions: DealerMaterial["motions"] = [];
@@ -189,13 +217,13 @@ async function motionsFor(dealer: string, store: string, geometry: string, appea
   }
   return motions;
 }
-async function filmsFor(dealer: string, store: string, geometry: string, appearance: string | null, motions: DealerMaterial["motions"], issues: string[]) {
+async function filmsFor(dealer: string, store: string, geometry: string, appearance: string | null, motions: DealerMaterial["motions"], issues: string[], receipt?: string) {
   const folder = path.join(store, "filmer");
   const films: DealerMaterial["films"] = [];
   const reviewFolder = path.join(store, "granskningar");
   const reviews = await Promise.all((await records(reviewFolder)).map(name => lockedRecord<FilmReview>(reviewFolder, name.slice(0, -5))));
-  for (const name of await records(folder)) {
-    const key = name.slice(0, -5);
+  const keys = receipt ? [receipt] : (await records(folder)).map(name => name.slice(0, -5));
+  for (const key of keys) {
     const film = await lockedRecord<FilmRecord>(folder, key);
     if (!film || film.schema !== 1 || film.geometry !== geometry || (film.appearance && film.appearance !== appearance)) continue;
     if (film.motion && !motions.some(m => m.sha256 === film.motion && m.motion.take === film.take && m.motion.card === film.card)) {
@@ -304,6 +332,8 @@ export async function materialFile(query: URLSearchParams, range: string | null)
 }
 
 export type DealingStudy = typeof dealingStudy & {
+  draw: { pressFrame?: number };
+  turn?: { frame: number };
   handover: { note?: string };
   frameLayout?: "two-seats-with-details";
   handReference?: { file: string; sha256: string; frames: number[] };
@@ -317,7 +347,7 @@ export async function readDealingStudies(dealer: string): Promise<DealingStudy[]
   return studies.filter((study): study is DealingStudy => study !== null);
 }
 
-export function materialMarkdown(project: DealerMaterial) {
+export function materialMarkdown(project: DealerMaterial, origin?: string) {
   const rows = ["# " + (project.activeModel?.name ?? project.dealer), "", "Bildutgåva " + project.edition,
     "Modellutgåva " + (project.revision ?? "saknas"), "", "## Bildoriginal", ""];
   const front = project.photos.find(p => p.id === "sittande/front");
@@ -359,6 +389,11 @@ export function materialMarkdown(project: DealerMaterial) {
           ", kroppsutsnitt " + dimensions(crop.body) + ", handutsnitt " + dimensions(crop.hand) + " (" + cropSource[crop.evidence] + ")." : ". Utsnitt saknas."));
       }
     }
+  }
+  if (project.seatedTrial) {
+    const { name, id, film } = project.seatedTrial;
+    rows.push("", "## SAM-kroppsprov", "", name + " · GLB " + id);
+    if (film) rows.push("", "[" + film.take + "](" + (origin ? new URL(film.url, origin).href : film.url) + ") · film " + film.sha256);
   }
   rows.push("", "## Registrerade animationer", "");
   if (!project.motions.length) rows.push("Inga verifierade animationer för modellparet.");

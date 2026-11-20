@@ -21,6 +21,21 @@ test("panoramat föredrar en styrkt ny giv och behåller den tidigare tagningen"
   const choices = panoramaDeals(material, studies);
   assert.deepEqual(choices.map(c => c.motion), [second.motion, first.motion]);
   assert.deepEqual(choices[0].jumps.map(j => j.frame), [15, 26, 46]);
+  const originalJumps = choices[0].jumps;
+  const press = { label: "Utskjut ur skon", frame: 4 };
+  const turn = { label: "Höger vänder upp kortet", frame: 21 };
+  const timedStudy = { ...studies[1], draw: { pressFrame: press.frame }, turn: { frame: turn.frame } };
+  function jumpsFor(study, extraMarks) {
+    const film = { ...material.films[1], marks: [...material.films[1].marks, ...extraMarks] };
+    return panoramaDeals({ ...material, films: [film] }, [study])[0].jumps;
+  }
+  const pushJump = { label: "Utskjut", frame: press.frame };
+  const turnJump = { label: "Vändning", frame: turn.frame };
+  assert.deepEqual(jumpsFor(timedStudy, [press, turn]), [pushJump, originalJumps[0], turnJump, ...originalJumps.slice(1)]);
+  assert.deepEqual(jumpsFor(timedStudy, [turn, { ...press, frame: 5 }]), [originalJumps[0], turnJump, ...originalJumps.slice(1)]);
+  assert.deepEqual(jumpsFor({ ...timedStudy, turn: undefined }, [press, turn]), [pushJump, ...originalJumps]);
+  assert.deepEqual(jumpsFor(studies[1], [press, turn]), originalJumps);
+  assert.deepEqual(jumpsFor(timedStudy, [{ ...turn, label: "Annan händelse" }]), originalJumps);
   for (const incomplete of [
     panoramaDeals(material, studies.slice(0, 1)),
     panoramaDeals({ ...material, motions: material.motions.slice(0, 1) }, studies),

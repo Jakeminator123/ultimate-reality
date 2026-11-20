@@ -2,9 +2,9 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import type { ActiveDealerModel } from "../../../lib/modeling";
-import type { Photo } from "../../../lib/material-types";
+import type { DealerMaterial, Photo } from "../../../lib/material-types";
 import { bodyPixels, checkSeatedFrame, seatedStandard, type SeatedMeasurement } from "../../../lib/seated-review";
-import { PhotoCameraGuides } from "../../MaterialEvidence";
+import { FilmEvidence, PhotoCameraGuides } from "../../MaterialEvidence";
 import styles from "../../modeling.module.css";
 
 const PoseReview = dynamic(() => import("../../PoseReview"), { ssr: false, loading: () => <p role="status">Öppnar 3D-modellen…</p> });
@@ -13,11 +13,12 @@ const number = (n: number) => n.toLocaleString("sv-SE", { maximumFractionDigits:
 
 export default function ProfileComparison({ trial, front, previous, model, candidate, candidateError, openCandidate }: {
   trial: ComparisonPhoto; front: ComparisonPhoto; previous: ComparisonPhoto; model: ActiveDealerModel;
-  candidate: ActiveDealerModel | null; candidateError: string; openCandidate: boolean;
+  candidate: (ActiveDealerModel & { run: string | null; appearanceError?: string; film?: DealerMaterial["films"][number] }) | null;
+  candidateError: string; openCandidate: boolean;
 }) {
   const [source, setSource] = useState<"trial" | "previous" | "front">("trial");
   const [guides, setGuides] = useState(false);
-  const [body, setBody] = useState<"appearance" | "geometry" | "candidate">(openCandidate && candidate ? "candidate" : "appearance");
+  const [body, setBody] = useState<"films" | "candidate">(openCandidate && candidate ? "candidate" : "films");
   const viewedModel = body === "candidate" && candidate ? candidate : model;
   const photo = { trial, previous, front }[source];
   const names = { trial: "Ny sittprofil", previous: "Tidigare sittprofil", front: "Sittfront" } as const;
@@ -41,18 +42,32 @@ export default function ProfileComparison({ trial, front, previous, model, candi
       </div>
     </section>
     <section className={styles.modelPanel}>
-      <header className={styles.panelHeader}><div><p className={styles.meta}>{body === "candidate" ? "3D-prov med ny profil" : "3D-arbetsmodell"}</p><h2>{viewedModel.name}</h2></div></header>
-      <div className={styles.modelSurface}><PoseReview key={body} model={viewedModel} initialVersion={body === "appearance" ? "utseende" : "front"} cameraAngle={photo.targetAngle}
+      <header className={styles.panelHeader}><div><p className={styles.meta}>{body === "candidate" ? "SAM-kroppsprov från sittbilderna" : "Kroppsmodell för de tidigare givfilmerna"}</p><h2>{viewedModel.name}</h2></div></header>
+      <div className={styles.modelSurface}><PoseReview key={viewedModel.url} model={viewedModel}
+        initialVersion={viewedModel.appearanceUrl ? "utseende" : "front"} cameraAngle={photo.targetAngle}
         reference={photo} guides={guides} onGuides={setGuides}/></div>
       <div className={styles.sourceNote}>
         {candidate && <div className={styles.archiveLinks} role="group" aria-label="Välj kroppsmodell">
-          <button aria-pressed={body !== "candidate"} onClick={() => setBody("geometry")}>Aktiv rigg · v2</button>
-          <button aria-pressed={body === "candidate"} onClick={() => setBody("candidate")}>Kroppsprov · v3</button>
+          <button aria-pressed={body === "candidate"} onClick={() => setBody("candidate")}>SAM-kropp med ny sittprofil</button>
+          <button aria-pressed={body === "films"} onClick={() => setBody("films")}>{candidate.film ? "De tidigare givfilmernas kropp" : "Givfilmernas kropp"}</button>
         </div>}
-        <p>{body === "candidate" ? "Sittfronten ger kroppen. Trekvarten och den nya profilen styr huvudets och nackens hållning. V3 är ett prov av kroppens geometri."
-          : "Den här riggens hållning och fotoyta bygger på den tidigare bildutgåvan. Den nya profilen visas som jämförelse."}</p>
+        {body === "candidate" && candidate ? <>
+          <p>Sittfronten ger kroppsformen. Trekvarten och den nya sittprofilen ligger till grund för hållningen.
+            {candidate.appearanceUrl && " Växla mellan Kroppsform och Fotoutseende under modellen för att jämföra samma kameravy."}
+            {!candidate.appearanceUrl && !candidate.appearanceError && " Kroppsprovet visas med neutral yta."}
+            {" "}De tidigare givfilmerna använder {model.name}.</p>
+          {candidate.appearanceError && <p role="status">{candidate.appearanceError}</p>}
+          {candidate.film && <p><a href="#givfilm">Se given på den här SAM-kroppen från stol 4 och stol 1</a></p>}
+          {candidate.run && <small>SAM-körning <code>{candidate.run}</code></small>}
+        </> : <p>Den här kroppen och dess tidigare sittprofil hör till de registrerade givfilmerna.</p>}
         {candidateError && <p role="status">{candidateError}</p>}
+        {openCandidate && !candidate && !candidateError && <p role="status">SAM-provet med den nya sittprofilen saknas för den här utgåvan.</p>}
       </div>
     </section>
+    {body === "candidate" && candidate?.film && <section id="givfilm" className={styles.proof + " " + styles.combinedProof} aria-labelledby="provfilm-rubrik">
+      <h2 id="provfilm-rubrik">Givfilm på {candidate.name}</h2>
+      <p>Stol 4 och stol 1 visar samma tagning på provkroppens egen fotoyta.</p>
+      <FilmEvidence film={candidate.film} expanded/>
+    </section>}
   </section>;
 }

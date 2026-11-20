@@ -19,7 +19,7 @@ async function loadComparison() {
     throw new LocalError("Modellens sittfront och tidigare profil behöver matcha bildutgåvan.", 409);
   if (!material.activeModel) throw new LocalError("Den jämförda kroppens modellfil saknas lokalt.", 404);
   let candidate = null, candidateError = "";
-  try { candidate = await seatedTrialModel(material, trial.photo); }
+  try { candidate = await seatedTrialModel(material, trial.photo, true); }
   catch (error) {
     if (!(error instanceof LocalError || error instanceof SyntaxError)) throw error;
     candidateError = "Kroppsprovet kunde inte verifieras mot sina källor.";
@@ -36,7 +36,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ m
   return <StudioSubpage area="bilder"><main className={styles.archive}>
     <nav className={styles.archiveNav}><a href="/#modellering">← 3D-modellering</a><a href="/bildstandard/sitthojd">Sittande i tre vinklar</a></nav>
     <header className={styles.archiveHeader}><h1>Paulinas sittprofil</h1>
-      <p>Jämför den nya bilden från sittfronten med Paulinas befintliga arbetsmodell.</p></header>
+      <p>Jämför den nya sittprofilen med SAM-kroppsprovet och kroppsmodellen från Paulinas tidigare givfilmer.</p></header>
     {comparison ? <ProfileComparison {...comparison} openCandidate={modell === "prov"}/> : <p role="status">{message}</p>}
   </main></StudioSubpage>;
 }

@@ -38,9 +38,17 @@ export type Edition = {
 export type DealerMaterial = {
   dealer: string; edition: string; revision: string | null; stamp: string; versions: { key: string; name: string }[];
   photos: Photo[]; issues: string[]; activeModel: ActiveDealerModel | null;
+  seatedTrial?: { id: string; name: string; film?: Pick<FilmRecord, "take" | "sha256"> & { url: string } };
   geometry: ModelRecord | null; appearance: ModelRecord | null; motions: (MotionRecord & { url: string })[];
   films: (FilmRecord & { url: string; reviews: FilmReview[] })[];
 };
+
+export function hasReviewedSeatCameras(film: DealerMaterial["films"][number]) {
+  const validFrame = (frame: number) => Number.isInteger(frame) && frame >= 0 && frame < film.frames;
+  return ["Stol 4", "Stol 1"].every(seat =>
+    film.cameras?.some(camera => camera.id === seat && camera.samples?.some(sample => validFrame(sample.frame))) &&
+    film.reviews?.some(review => review.schema === 1 && review.camera === seat && review.note?.trim() && review.frames?.some(validFrame)));
+}
 
 export const roleName = { geometry: "Kroppsgeometri", posture: "Hållningsreferens", surface: "Fotoyta" } as const;
 export const cropSource = { "saved-run": "sparad med körningen", "installed-config": "lokal SAM-konfiguration, kontrollerad i efterhand" } as const;

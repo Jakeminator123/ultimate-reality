@@ -9,6 +9,9 @@
 .players figcaption { display: grid; gap: 3px; }
 .players figcaption span { color: var(--muted); font-size: 13px; }
 .comparison .players video { display: block; width: 100%; max-width: none; margin: 5px 0 0; background: #17261f; border-radius: 6px; }
+.pair { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
+.pair .model { grid-row: auto; }
+.comparison .pair figure + figure video { width: min(100%, 360px); aspect-ratio: 9 / 16; object-fit: contain; }
 @container (max-width: 540px) {
   .players { grid-template-columns: minmax(0, 1fr); }
   .model { grid-row: auto; }

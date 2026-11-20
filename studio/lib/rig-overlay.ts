@@ -79,12 +79,12 @@ export function makeRigOverlay(body: T.Group) {
   const start = new T.Vector3(), end = new T.Vector3(), direction = new T.Vector3(), size = new T.Vector3();
   const up = new T.Vector3(0, 1, 0);
 
-  function refresh() {
+  function refresh(worldUnitsPerCssPixel: number) {
     if (!group.visible) return;
     body.updateWorldMatrix(true, true);
     shown.forEach((bone, i) => {
       end.setFromMatrixPosition(bone.matrixWorld);
-      const radius = fineJoint(bone) ? .005 : .012;
+      const radius = (fineJoint(bone) ? 2 : 2.75) * worldUnitsPerCssPixel;
       markers.setMatrixAt(i, matrix.compose(end, zeroRotation, size.setScalar(radius)));
     });
     links.forEach(([parent, child], i) => {
@@ -93,7 +93,7 @@ export function makeRigOverlay(body: T.Group) {
       direction.subVectors(end, start);
       const length = direction.length();
       rotation.setFromUnitVectors(up, direction.normalize());
-      const radius = fineJoint(child) ? .0024 : .0045;
+      const radius = (fineJoint(child) ? 0.55 : 0.75) * worldUnitsPerCssPixel;
       segments.setMatrixAt(i, matrix.compose(start.lerp(end, .5), rotation, size.set(radius, length, radius)));
     });
     markers.instanceMatrix.needsUpdate = segments.instanceMatrix.needsUpdate = true;
@@ -107,15 +107,19 @@ export function makeRigOverlay(body: T.Group) {
     if (shown !== next) {
       shown = next;
       const included = new Set<T.Object3D>(shown);
+      const linked = new Set<T.Bone>();
       links = [];
-      shown.forEach((child, i) => {
-        markers.setColorAt(i, jointColour(child));
-        let parent = child.parent;
-        while (parent instanceof T.Bone && !included.has(parent)) parent = parent.parent;
-        // body_world sets the coordinate system and has no anatomical segment to the pelvis.
-        if (parent instanceof T.Bone && parent.name !== "body_world") {
+      shown.forEach((bone, i) => {
+        markers.setColorAt(i, jointColour(bone));
+        // Keep real parent segments through hidden joints, including each wrist twist.
+        let child = bone;
+        while (child.parent instanceof T.Bone && child.parent.name !== "body_world" && !linked.has(child)) {
+          const parent = child.parent;
           segments.setColorAt(links.length, jointColour(child));
           links.push([parent, child]);
+          linked.add(child);
+          if (included.has(parent)) break;
+          child = parent;
         }
       });
       segments.count = links.length;
@@ -123,11 +127,13 @@ export function makeRigOverlay(body: T.Group) {
       if (segments.instanceColor) segments.instanceColor.needsUpdate = true;
       if (markers.instanceColor) markers.instanceColor.needsUpdate = true;
     }
-    refresh();
   }
 
   show(initialRigLayers);
-  return { group, show, refresh, mainCount: main.length, total: bones.length, dispose() {
+  const head = bones.find(bone => bone.name === "c_head");
+  const hasFaceRig = head?.parent?.name === "c_neck" &&
+    ["c_head_null", "c_jaw", "l_eye", "r_eye"].every(name => head.children.some(child => child.name === name));
+  return { group, show, refresh, hasFaceRig, mainCount: main.length, total: bones.length, dispose() {
     group.removeFromParent();
     segments.geometry.dispose(); markers.geometry.dispose();
     segments.dispose(); markers.dispose(); material.dispose();

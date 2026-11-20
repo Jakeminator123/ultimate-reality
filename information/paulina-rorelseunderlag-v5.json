@@ -1,0 +1,266 @@
+{
+  "geometry": "e8e45003a9bc8add5b25839601039782f368e0fffcf176da1da6cf861683dff8",
+  "appearance": "0f389edf5c50a09ebf9ce9159fe67f2d9b154915cf5ea1be7fc05762ed467a8d",
+  "takes": [
+    {
+      "take": "samspel-v2-v5",
+      "motion": "24dafbeb75c7157e954616379948d08b4b01bf071555d246b3203cb9e0339898",
+      "movie": "a205653ed737fe145f8c45274c1dea8b2aa334a1ca3691986d73b18de6e0152b"
+    }
+  ],
+  "frameLayout": "two-seats-with-details",
+  "timing": {
+    "source": "pos4-v.mp4",
+    "url": "/api/givreferens?film=fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883",
+    "frames": [
+      0,
+      25
+    ],
+    "referenceSha256": "fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883"
+  },
+  "comparison": {
+    "source": "pos4-v.mp4",
+    "url": "/api/givreferens?film=fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883"
+  },
+  "draw": {
+    "frames": [
+      1,
+      8
+    ],
+    "pressFrame": 4,
+    "frontEdgeOutMm": [
+      4,
+      108.2256
+    ],
+    "frontEdgeHeightMm": [
+      15.7664,
+      35.9025
+    ]
+  },
+  "handover": {
+    "frame": 9,
+    "cardCentreHeightMm": 22.4,
+    "leftElbowAboveShoulderMm": -18.83,
+    "jointNames": [
+      "l_lowarm",
+      "l_uparm"
+    ],
+    "note": "Stol 4 och stol 1 visar samma utskjut i ruta 4, låga handbyte i 9, vändning i 16, landning på plats 4 i 22 och släpp i 25. Blicken är öppen i 43, sluten i 46 och åter öppen i 51. Stol 1 ruta 53 visar en sammanhängande näsöppning och en kvarvarande lodrät skugga mot överläppen. Höger lillfinger spretar i ruta 16 och sminket sträcks i ruta 46."
+  },
+  "handReference": {
+    "file": "pos4-v.mp4",
+    "sha256": "fbf7a8906d4062fedbab8911a94aa7d7778e0511982d414ce5fd5b38af03e883",
+    "frames": [
+      0,
+      3,
+      7,
+      9,
+      11,
+      16,
+      22,
+      25
+    ]
+  },
+  "faceSurface": {
+    "revision": "nasprofil-v2-v1",
+    "donorSHA256": "f817c5be34e1e265baaf47ef97a3bd80924ebc06a70cabb1e85f7d9720e9c236",
+    "baseAppearanceSHA256": "0f389edf5c50a09ebf9ce9159fe67f2d9b154915cf5ea1be7fc05762ed467a8d",
+    "sourceBodyAtlasSHA256": "3fa17aaf3d3e7298a0130884f581ae9c1dabca27d1cc7221678eee49bce8fab4",
+    "bodyAtlasSHA256": "033f3ee9e06bc3c8166bbd3c95325a5d2814471c4f8726c30b438e8800fd7de0",
+    "imageIndex": 0,
+    "projections": {
+      "front": {
+        "portraitSHA256": "52394fde95714d843ad6ca1cfd4571906cdc02d9de5c0c48224d42d54c639d49",
+        "estimateSHA256": "f38be32e807825b41e7b4fb7eaa69732ba52b957749643fdaa18b20e117db18c"
+      },
+      "profil": {
+        "portraitSHA256": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736",
+        "estimateSHA256": "a23a7da989286de4cec9565a101a696374e63736dcd5a01cb4a300528ec3e344"
+      }
+    },
+    "sourceRun": "sam-20261120T015406Z-f427a95156b7",
+    "photos": {
+      "ansikte/front.png": "52394fde95714d843ad6ca1cfd4571906cdc02d9de5c0c48224d42d54c639d49",
+      "ansikte/profil.png": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736"
+    },
+    "photoFill": {
+      "material": "Paulina Fas 1 · ansikte, hals, kostym och händer v2 · ansiktsyta v1",
+      "amount": 0.72,
+      "albedoLevel": 0.9,
+      "neckWeight": 0.36
+    },
+    "previousDonorSHA256": "89a13b5bd7d8e4fe854311ef48160d5686db05b3bb91bd3362b37714189f100b",
+    "previousRevision": "ansiktsyta-v2-v1b",
+    "previousMotionSHA256": "9b5b0d0a074aeca679244af3f366ee2cecc9b0ec50ccf3da770fd36dc84fce94",
+    "previousBodyAtlasSHA256": "4c5693e5f72377b661c55c9b51e380e7ab416c92a278418dbfcd352c002a729d",
+    "portraitSHA256": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736",
+    "shape": {
+      "sourceSHA256": "9b5b0d0a074aeca679244af3f366ee2cecc9b0ec50ccf3da770fd36dc84fce94",
+      "portraitSHA256": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736",
+      "orthographicComparisonSHA256": "5e8987ec4b05dcba7f39fcad3baa4f073c0cd17d09da76e4e555f7b5abba464c",
+      "eyeMidpointLocalM": [
+        -0.0002743527293205261,
+        1.1539654731750488,
+        0.09399430453777313
+      ],
+      "symmetryAxisOffsetMm": 1.6,
+      "parts": [
+        {
+          "vertices": 19455,
+          "changedVertices": 209,
+          "positionAccessorBefore": 6,
+          "positionAccessorAfter": 172,
+          "normalAccessorBefore": 7,
+          "normalAccessorAfter": 173,
+          "maxTranslationMm": 1.6989748105136633,
+          "weightedBlinkVerticesMoved": [
+            0
+          ],
+          "offsetBoundsMm": [
+            [
+              0.0,
+              2.169612752018511e-05,
+              -0.34805733845683445
+            ],
+            [
+              0.0,
+              1.6629406170715424,
+              -4.5410499460852555e-06
+            ]
+          ]
+        },
+        {
+          "vertices": 81270,
+          "changedVertices": 0,
+          "positionAccessorBefore": 161,
+          "positionAccessorAfter": 161,
+          "normalAccessorBefore": 162,
+          "normalAccessorAfter": 162,
+          "maxTranslationMm": 0,
+          "weightedBlinkVerticesMoved": [
+            0
+          ],
+          "offsetBoundsMm": null
+        }
+      ],
+      "method": "Compact smooth offset in rest space, original shading normals transformed by the inverse-transpose of the local deformation Jacobian."
+    },
+    "texturePatch": {
+      "photoSHA256": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736",
+      "frontPhotoSHA256": "52394fde95714d843ad6ca1cfd4571906cdc02d9de5c0c48224d42d54c639d49",
+      "sourceAtlasSHA256": "4c5693e5f72377b661c55c9b51e380e7ab416c92a278418dbfcd352c002a729d",
+      "derivedAtlasSHA256": "033f3ee9e06bc3c8166bbd3c95325a5d2814471c4f8726c30b438e8800fd7de0",
+      "changedTexels": 17745,
+      "method": "Kontinuerlig omplacering av den befintliga fotograferade näsborren per sida, passad mot profilporträttet.",
+      "coordinates": "Ansiktslokalt cylindriskt fotoutsnitt, relativt ögonens mittpunkt.",
+      "targetHeightMm": [
+        25.0,
+        31.0,
+        37.0,
+        43.7,
+        49.0,
+        54.0,
+        60.0,
+        68.0
+      ],
+      "previousHeightMm": [
+        25.0,
+        31.5,
+        42.7,
+        52.1,
+        55.8,
+        58.5,
+        62.3,
+        68.0
+      ],
+      "oppositeSide": "Den motstående profilens likhet är skattad."
+    }
+  },
+  "turn": {
+    "frame": 16
+  },
+  "landing": {
+    "frame": 22
+  },
+  "release": {
+    "frame": 25
+  },
+  "contact": {
+    "leftMaxPadDistanceToMarkedBackMm": {
+      "index": 0.6,
+      "middle": 0.6,
+      "ring": 0.6
+    },
+    "rightPadDistanceAtHandoverMm": {
+      "thumb": 0.74,
+      "index": 7.0418,
+      "middle": 0.3151
+    },
+    "rightToCardBeforeReleaseMm": 0.65,
+    "rightToCardAtReleaseMm": 4.1865
+  },
+  "blink": {
+    "peakFrame": 46
+  },
+  "decodedStill": {
+    "movie": "a205653ed737fe145f8c45274c1dea8b2aa334a1ca3691986d73b18de6e0152b",
+    "frame": 4,
+    "sha256": "dfa0757ce4bd3cb4ffc751d1dda7e3ff758ae0f2f580c61492d620f6463a0c38"
+  },
+  "previousTake": {
+    "take": "samspel-v2-v4",
+    "motion": "9b5b0d0a074aeca679244af3f366ee2cecc9b0ec50ccf3da770fd36dc84fce94",
+    "movie": "625e81d0dfe426c2e77d08b3421b37e49c1f439ccc54fcb378bbc4bff2afb515"
+  },
+  "faceShape": {
+    "sourceSHA256": "9b5b0d0a074aeca679244af3f366ee2cecc9b0ec50ccf3da770fd36dc84fce94",
+    "portraitSHA256": "35d6bf5fd5eee9135e8656b273174a8fb0ca943fed9d36d1f56e30f9202fa736",
+    "orthographicComparisonSHA256": "5e8987ec4b05dcba7f39fcad3baa4f073c0cd17d09da76e4e555f7b5abba464c",
+    "eyeMidpointLocalM": [
+      -0.0002743527293205261,
+      1.1539654731750488,
+      0.09399430453777313
+    ],
+    "symmetryAxisOffsetMm": 1.6,
+    "parts": [
+      {
+        "vertices": 19455,
+        "changedVertices": 209,
+        "positionAccessorBefore": 6,
+        "positionAccessorAfter": 172,
+        "normalAccessorBefore": 7,
+        "normalAccessorAfter": 173,
+        "maxTranslationMm": 1.6989748105136633,
+        "weightedBlinkVerticesMoved": [
+          0
+        ],
+        "offsetBoundsMm": [
+          [
+            0.0,
+            2.169612752018511e-05,
+            -0.34805733845683445
+          ],
+          [
+            0.0,
+            1.6629406170715424,
+            -4.5410499460852555e-06
+          ]
+        ]
+      },
+      {
+        "vertices": 81270,
+        "changedVertices": 0,
+        "positionAccessorBefore": 161,
+        "positionAccessorAfter": 161,
+        "normalAccessorBefore": 162,
+        "normalAccessorAfter": 162,
+        "maxTranslationMm": 0,
+        "weightedBlinkVerticesMoved": [
+          0
+        ],
+        "offsetBoundsMm": null
+      }
+    ],
+    "method": "Compact smooth offset in rest space, original shading normals transformed by the inverse-transpose of the local deformation Jacobian."
+  }
+}

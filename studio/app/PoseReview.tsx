@@ -53,7 +53,8 @@ export default function PoseReview(props: ReviewProps) {
   const [canPose, setCanPose] = useState(false);
   const [jawVersions, setJawVersions] = useState<Version[]>([]);
   const [layers, setLayers] = useState<RigLayers>(initialRigLayers);
-  const [rigCount, setRigCount] = useState<{ main: number; total: number } | null>(null);
+  const [rigCount, setRigCount] = useState<{ main: number; total: number; hasFaceRig: boolean } | null>(null);
+  const [cameraDetail, setCameraDetail] = useState<CameraDetail | null>(null);
   const [cameraValues, setCameraValues] = useState<CameraValues>(frontCamera);
   const frontUrl = pose ? resultUrl(pose, "front") : model.url;
   const tableUrl = pose?.hasTablePose ? resultUrl(pose, "bordsvila") : "";
@@ -97,6 +98,7 @@ export default function PoseReview(props: ReviewProps) {
     controls.minZoom = 0.55;
     controls.maxZoom = 7;
     let overlay: ReturnType<typeof makeRigOverlay> = null;
+    let currentLayers = initialRigLayers;
     const offset = new T.Vector3();
     const orbit = new T.Spherical();
     let leftEye: T.Object3D | undefined, rightEye: T.Object3D | undefined;
@@ -145,6 +147,7 @@ export default function PoseReview(props: ReviewProps) {
     function draw() {
       // Keep the reference plane vertical and behind the body as the camera orbits.
       wall.rotation.y = Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z);
+      overlay?.refresh((camera.top - camera.bottom) / (camera.zoom * Math.max(1, renderer.domElement.clientHeight)));
       renderer.render(scene, camera);
       if (activeRig) {
         reportCamera();
@@ -170,6 +173,7 @@ export default function PoseReview(props: ReviewProps) {
       draw();
     }
     function face(degrees: number) {
+      setCameraDetail(null);
       controls.target.copy(wholeBodyTarget);
       camera.up.set(0, 1, 0);
       const radians = T.MathUtils.degToRad(degrees);
@@ -188,6 +192,7 @@ export default function PoseReview(props: ReviewProps) {
       const left = joint(part === "ansikte" ? "l_eye" : "l_middle1");
       const right = joint(part === "ansikte" ? "r_eye" : "r_middle1");
       if (!left || !right) return;
+      setCameraDetail(part);
       controls.target.copy(left).lerp(right, 0.5);
       if (part === "ansikte") controls.target.y -= 0.043;
       const yaw = T.MathUtils.degToRad(degrees);
@@ -261,9 +266,19 @@ export default function PoseReview(props: ReviewProps) {
     }
     function changePose(selected: Version) {
       for (const [key, body] of bodies) body.visible = key === selected;
-      leftEye = bodies.get(selected)?.getObjectByName("l_eye");
-      rightEye = bodies.get(selected)?.getObjectByName("r_eye");
-      if (activeRig) renderer.domElement.dataset.model = (selected === "utseende" ? lookUrl : frontUrl) || "";
+      const body = bodies.get(selected);
+      leftEye = body?.getObjectByName("l_eye");
+      rightEye = body?.getObjectByName("r_eye");
+      if (activeRig && body) {
+        renderer.domElement.dataset.model = (selected === "utseende" ? lookUrl : frontUrl) || "";
+        overlay?.dispose();
+        overlay = makeRigOverlay(body);
+        if (overlay) {
+          scene.add(overlay.group);
+          overlay.show(currentLayers);
+        }
+        setRigCount(overlay ? { main: overlay.mainCount, total: overlay.total, hasFaceRig: overlay.hasFaceRig } : null);
+      }
       measureJoint();
       draw();
     }
@@ -300,13 +315,11 @@ export default function PoseReview(props: ReviewProps) {
           if (hinge) { joints.set("c_jaw", [...(joints.get("c_jaw") ?? []), hinge]); jawModels.push(key); }
         }
         setJawVersions(jawModels);
-        overlay = makeRigOverlay(bodies.get("front")!);
-        if (overlay) scene.add(overlay.group);
-        setRigCount(overlay ? { main: overlay.mainCount, total: overlay.total } : null);
       }
       viewport.current = {
         changePose, adjustCamera, measureJoint, showGrid: on => { guides.visible = on; draw(); }, face, detail,
         showLayers: next => {
+          currentLayers = next;
           if (!overlay) return;
           bodies.forEach(body => body.traverse(object => { if (object instanceof T.Mesh) object.visible = next.surface; }));
           overlay.show(next);
@@ -314,13 +327,12 @@ export default function PoseReview(props: ReviewProps) {
         },
         bend: (name, degrees) => {
           for (const j of joints.get(name) ?? []) j.bone.quaternion.copy(j.rest).multiply(new T.Quaternion().setFromAxisAngle(j.axis, T.MathUtils.degToRad(degrees)));
-          overlay?.refresh();
           measureJoint();
           draw();
         },
         resetJoints: () => {
           for (const group of joints.values()) for (const j of group) j.bone.quaternion.copy(j.rest);
-          overlay?.refresh(); measureJoint(); draw();
+          measureJoint(); draw();
         },
       };
       const visible = bodies.has(selectedVersion.current) ? selectedVersion.current : "front";
@@ -394,6 +406,9 @@ export default function PoseReview(props: ReviewProps) {
           Alla {rigCount.total} leder</label>
         <span>{layers.all ? rigCount.total : rigCount.main} visas</span>
         <span className="rig-left">Vänster</span><span className="rig-right">Höger</span><span className="rig-centre">Mittlinje</span>
+        {cameraDetail === "ansikte" && rigCount.hasFaceRig && <p className="rig-face-note">
+          Den gröna linjen går från huvudleden till riggens ändpunkt i skallen. Käkleden och ögonens rotationscentrum ligger inne i huvudet.
+          Pupillerna syns i fotoytan. Nästippen saknar egen led.</p>}
       </div>}
     </div>
     {props.model && <RigCamera ready={ready} values={cameraValues} adjust={v => viewport.current?.adjustCamera(v)}

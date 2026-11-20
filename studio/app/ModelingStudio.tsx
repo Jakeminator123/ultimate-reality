@@ -5,7 +5,7 @@ import {
   ArrowRight, ArrowUpRight, BookOpen, Box, ChevronLeft, ChevronRight,
   FolderOpen, ImageOff, Images, RefreshCw,
 } from "lucide-react";
-import { seriesCount, type DealerMaterial } from "../lib/material-types";
+import { hasReviewedSeatCameras, seriesCount, type DealerMaterial } from "../lib/material-types";
 import MaterialEvidence, { PhotoCameraGuides, PhotoEvidence } from "./MaterialEvidence";
 import { takeLink } from "./MotionTake";
 import { useCurrentModel } from "./useModelingInventory";
@@ -27,9 +27,7 @@ function latestReviewedDeal(material: DealerMaterial | null) {
   const appearance = material.appearance?.sha256 ?? null;
   return material.films.filter(film =>
     film.take.startsWith("samspel-") && film.motion && film.card && film.geometry === geometry && film.appearance === appearance &&
-    ["Stol 4", "Stol 1"].every(seat => film.cameras.some(camera => camera.id === seat) &&
-      film.reviews.some(review => review.camera === seat && review.note.trim() &&
-        review.frames.some(frame => Number.isInteger(frame) && frame >= 0 && frame < film.frames))))
+    hasReviewedSeatCameras(film))
     .sort((a, b) => b.take.localeCompare(a.take, "sv", { numeric: true }))[0];
 }
 
@@ -109,9 +107,17 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
         <div><p className={styles.meta}>3D-visare · grundmodellen i vila</p><h2 id="current-model">{model?.name ?? "Modell för " + name}</h2></div>
         <Box size={23} strokeWidth={1.5} aria-hidden/>
       </header>
-      {reviewedDeal && reviewedLink && <div className={styles.modelFilm}>
+      {inventory?.seatedTrial && <div className={styles.modelFilm}>
+        <a className={styles.inlineLink} href="/bildstandard/sittprofil?modell=prov#jamforelse">
+          Öppna {inventory.seatedTrial.name} <ArrowRight size={15}/></a>
+      </div>}
+      {inventory?.seatedTrial?.film && <div className={styles.modelFilm}>
+        <a className={styles.inlineLink} href={inventory.seatedTrial.film.url}>Spela given på {inventory.seatedTrial.name} <ArrowRight size={15}/></a>
+        <span>Stol 4 och stol 1 · <code>{inventory.seatedTrial.film.take}</code></span>
+      </div>}
+      {reviewedDeal && reviewedLink && model && <div className={styles.modelFilm}>
         <a className={styles.inlineLink} href={reviewedLink}>Öppna senaste granskade given <ArrowRight size={15}/></a>
-        <code>{reviewedDeal.take}</code>
+        <span>Givfilmens kropp · {model.name} · <code>{reviewedDeal.take}</code></span>
       </div>}
       <div className={styles.modelSurface}>
         {model ? <PoseReview key={model.url} model={model} cameraDetail={cameraDetail} cameraAngle={cameraDetail === "händer" ? undefined : selected?.targetAngle}

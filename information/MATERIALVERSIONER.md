@@ -18,6 +18,14 @@ När en tagning får korrigerad fotoyta anger den grundtexturens SHA-256, den in
 
 I **Giv med blinkning · prov 3** kombineras handprov 3 och blinkprov 2 på samma sittmodell v2. Handprov 3 anger exakt vilka rutor i `pos4-v.mp4` som användes för fingerformen. I studion visas dessa källrutor under den giv där rörelsen ingår. [Givprov 3 med källor och mätning](paulina-rorelseunderlag-v3.json)
 
+Givprov 4 och 5 använder fortfarande sittmodell v2. Prov 4 ändrar utskjut, handbyte och placering. Prov 5 ändrar ytan vid näsan och har samma rörelsespår som prov 4. När rörelsen flyttas till sittmodell v4 används den nya kroppens viloform, hudbindning och fotoyta. Den exporterade animationen får ett eget fingeravtryck och kortkontakterna mäts om på den kroppen. Varje film registreras med sina egna granskningar från båda stolarna. [Givprov 4](paulina-rorelseunderlag-v4.json) · [Givprov 5](paulina-rorelseunderlag-v5.json) · [Mätning på SAM-sittmodell v4](../test/dealer/paulina/giv-sam-v4-v1/matning.json)
+
+För en giv med utskjut ur skon granskar vi fingerblommornas läge på den synliga kortsidan, kortets väg längs mynningen och mottagarhandens avstånd från filten vid bytet. Källfilmen visar ordning och form. Avstånd i millimeter mäts i den animerade modellen. Kontaktkraft kräver en fysisk mätning.
+
+**Leder mot fotoyta.** I både sittmodell v2 och v4 har den neutrala kroppen och dess fotoyta identiska vilopositioner för alla 127 leder. Vid byte av yta läser visaren den valda GLB-filens skelett. Ögonpunkterna markerar ögonens rotationscentrum och pupillerna ligger i texturen. Den gröna huvudlinjen binder samman huvudleden och dess ändpunkt inne i skallen. I v2 ligger huvudleden 79,8 mm bakom ögonens mittpunkt i modellens framåtriktning. Markörerna har fast visningsstorlek vid zoomning. Urvalet med 77 leder ritar förbindelsen till handleden genom dess dolda vridled. [Överlägg i 3D-modelleringen](http://127.0.0.1:4317/#modellering) · [Hur ledpunkterna ritas](../studio/lib/rig-overlay.ts)
+
+En arm med rätt benlängder kan ändå vrida huden tvärt mellan två rutor. Kontrollera den verkliga GLB-filens lokala rotation i handleds- och underarmslederna och ange led, första ruta, andra ruta och vinkel. I prov 3 vrids vänster underarmsled `l_lowarm_twist3_proc` 178,07° mellan ruta 11 och 12. Det skiljer sig från vinkeln mellan underarm och handflata i en stillbild. [Mät rotationen mellan filmrutor](../tools/arm_rotation_check.py)
+
 Kropps- och fotoyteverktygen registrerar färdiga avatarfiler automatiskt. Modellens inbäddade fingeravtryck bestämmer källrelationerna. Vid ny export till ett upptaget arbetsnamn får den ändrade filen ett eget versionsnamn. Återkörning av samma innehåll återanvänder det sparade objektet. En öppen studio hämtar nya uppgifter när en modellutgåva, animation, film eller granskning registreras.
 
 När en modell och en bildserie hör ihop väljer man den kombination som studion ska visa. Då kontrolleras fotoytans grundrigg och varje källbild. Valet sparar också bildoriginalen och bildregistret för senare granskning. Tidigare val finns kvar i versionsväljaren. Original, modeller, tagningar och granskningar ligger lokalt under `avatars/<dealer>/3d/versioner/`. [Verktyget](../tools/material_versions.py)
@@ -37,9 +45,9 @@ För en annan registrerad dealer öppnas `/?dealer=<namn>#modellering`. Kamerapr
 
 ## Nästa prov för att få Paulina naturlig
 
-V2:s givprover visar KORT-02 till plats 4 och en blinkning vid återgången i 54 rutor från två stolar. I prov 2 sjunker armbågen, högern vänder upp kortet och huvudet följer kortbanan. Vid ruta 26 ligger kortet plant och stilla. När en handled skymmer fingrarna från ena stolen, öppna samma ruta från den andra. [Se givprov 2 och bildgranskarens rutor](http://127.0.0.1:4317/modellering/rorelseprov?dealer=paulina&revision=9ce142c1ab2ab640fc9d7e2559f6624da88bad5506eab0c15a82c6d9049cd4db&tagning=samspel-v2-v2#vald-tagning)
+I den första filmexporten på sittmodell v4 skjuter vänsterhanden ut KORT-02 i ruta 4. Högern möter i 9, vänder i 16 och lägger kortet på plats 4 i 22. Kortet ligger kvar när högern börjar lämna i 25. Jämför samma ruta från stol 4 och stol 1 för att se fingrar som skymmer varandra. [Film på sittmodell v4](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#givfilm) · [Uppmätt kortbana och kontaktrutor](../test/dealer/paulina/giv-sam-v4-v1/handelser.json)
 
 1. Filma **ett verkligt kortdrag samtidigt framifrån och från sidan**. Låt tummen, pekfingret, skons öppning och kortkanten synas. Spara synkpunkten och markera grepp, kort på kant och släpp.
-2. Sänk armbågen vid handbytet, mjuka upp handleden och rikta blicken mot kortet. Kontrollera grepp, släpp och landning i samma rutor från båda stolarna.
+2. Jämför högerns lillfinger under vändningen i ruta 16 med samma händelse i referensen. Kontrollera att en justerad fingerpose behåller kantkontakt, släpp och landningspunkt från båda stolarna.
 3. Granska glidning, skuggor och timing i spelarens utsnitt. Där stolen syns behövs också kontakt mellan säte, sits och golv. I viloposens profilprov syns bakgrunden under sätet.
 4. Bedöm hud, hår och kavaj i de två färdiga vyerna. Ta en skarp närbild där ytdetalj saknas, till exempel bakre trekvart för håret. Om rörelsen stämmer men fotoytan brister, prova filmprojektion från en känd kamera på samma rigg.

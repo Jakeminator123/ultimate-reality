@@ -1,9 +1,9 @@
 "use client";
-import { useId, useRef, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
 import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-review";
 import { modelPhotoRoles } from "../lib/photo-review";
-import DealComparison from "./modellering/rorelseprov/DealComparison";
+import DealComparison, { pauseAtMark, PlaybackSpeed, type TakeComparison } from "./modellering/rorelseprov/DealComparison";
 import { MotionComponents, takeLabel } from "./MotionTake";
 import styles from "./modeling.module.css";
 
@@ -53,9 +53,10 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
 export function FilmEvidence({ film, expanded, context, children, comparison, anchorId, viewGuide }: {
   film: DealerMaterial["films"][number]; expanded?: boolean; context?: ReactNode; children?: ReactNode;
   anchorId?: string; viewGuide?: string;
-  comparison?: { handover: number; release: number };
+  comparison?: TakeComparison;
 }) {
   const player = useRef<HTMLVideoElement>(null);
+  const [speed, setSpeed] = useState(1);
   const frameHeading = useId();
   const name = takeLabel(film.take, film.title);
   return <details open={expanded} id={anchorId}>
@@ -65,15 +66,22 @@ export function FilmEvidence({ film, expanded, context, children, comparison, an
     {context}
     {comparison ? <DealComparison film={film} modelPlayer={player} {...comparison} viewGuide={viewGuide}/> :
       <>{viewGuide && <p>{viewGuide}</p>}
-        <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/></>}
+        <PlaybackSpeed speed={speed} onChange={rate => {
+          if (player.current) {
+            player.current.defaultPlaybackRate = rate;
+            player.current.playbackRate = rate;
+          }
+          setSpeed(rate);
+        }}/>
+        <video controls playsInline preload="metadata" ref={player} aria-label={film.title} src={film.url}
+          onRateChange={event => setSpeed(event.currentTarget.playbackRate)}/></>}
     {comparison && <><h3 id={frameHeading}>Bildrutor i Paulinas film</h3>
       <p>Knapparna nedan pausar Paulinas film på den valda rutan. Första bildrutan är 0.</p></>}
     <div className={styles.frameMarks} role={comparison ? "group" : undefined} aria-labelledby={comparison ? frameHeading : undefined}>
       {film.marks.map(m => m.seconds === undefined ?
       <span key={m.frame}>{m.label} · ruta {m.frame}</span> :
       <button key={m.frame} onClick={() => {
-        // ffprobe prints microseconds. Seek just past the rounded onset of this displayed frame.
-        if (player.current && m.seconds !== undefined) { player.current.pause(); player.current.currentTime = m.seconds + .000001; }
+        if (player.current && m.seconds !== undefined) pauseAtMark(player.current, m.seconds);
       }}>{m.label} · ruta {m.frame}</button>)}</div>
     {!comparison && <p>Rutorna räknas från 0.</p>}
     {film.reviews.map(review => <p key={review.camera + review.note}><b>{review.camera} · ruta {review.frames.join(", ")}</b> · {review.note}</p>)}
