@@ -10,6 +10,17 @@ Under **Bakgrund och ljus** visar [Fotopanorama (360°)](http://127.0.0.1:4317/s
 
 ## Grundbilder för en sittande dealer
 
+### Vilka bilder bygger Paulina och vilken rörelse ska vi skapa?
+
+| Underlag | Uppgift i projektet |
+| --- | --- |
+| Stående 0°, 45°, 90° | Håller ihop identitet, kläder och proportioner mellan vyer. |
+| Sittande 0°, 45°, 90° | Sittfronten ger en kropp med 127 leder. I vår passning väger sidoprofilen 80 % och trekvarten 20 % för huvud och nacke. V2 hämtar också synlig ytfärg från de tre sittbilderna. |
+| Ansikte 0°, 45°, 90° och handryggar | Överför färg, ansiktsdrag och handdetaljer till samma kroppsyta i v2. |
+| Vänster kortgrepp och extra höger kortvändning | Visar två enskilda kontaktlägen. Filmerna behövs för att välja rörelseordning, kortets rotation och tidpunkten för släppet. |
+
+Kroppsprov v3 använder den nya sittprofilen. Huvudleden kommer 4,1 mm längre fram än i v2. Granskningen i vila visar liknande silhuetter i alla tre kamerorna. Vi använder v2 med sin fotoyta för nästa film och håller v3 tillgänglig för jämförelse. Nästa leverans är ett återanvändbart kortdrag hela vägen till plats 4, med släpp på filten och handen tillbaka i vila. [Jämför de två riggarna](http://127.0.0.1:4317/bildstandard/sittprofil?modell=prov#jamforelse) · [Filmreferenser och uppdrag](../information/random/blackjack-rorelsereferenser/README.md)
+
 Använd [3D-modellering](http://127.0.0.1:4317/#modellering) för den aktiva Fas 1-serien och sittmodellen v2. [Bildstandarden](http://127.0.0.1:4317/bildstandard) anger kamera och pose för varje vy. [Övrigt](http://127.0.0.1:4317/ovrigt) innehåller den tidigare dockmallen och SAM-försöken.
 
 SAM 3D Body skattar en kropp per bild. Till Paulina v2 används sittfronten som kroppskälla, med trekvart och profil som jämförelser. Modellutgåvans profil har 3,88 % mindre bildskala än sittfronten. Det nya profilprovet från samma sittfront har 1,79 % mindre bildskala och visas bredvid v2. Studion visar originalens mätpunkter, markerar utsnitt som avviker och jämför ögonens bildläge med riggen. Kamera och riktpunkt kan flyttas i höjdled tillsammans. Fysisk sitthöjd och fotots höjdvinkel behöver kalibrerat underlag. [Ny sittprofil och v2](http://127.0.0.1:4317/bildstandard/sittprofil#jamforelse) · [Kamerakontroll](http://127.0.0.1:4317/bildstandard/sitthojd) · [Bildstandard och granskningsgränser](../information/BILDPIPELINE.md#sittserie-och-kamerakontroll) · [SAM 3D Body](https://github.com/facebookresearch/sam-3d-body)

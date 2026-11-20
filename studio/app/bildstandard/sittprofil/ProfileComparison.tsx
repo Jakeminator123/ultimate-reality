@@ -11,11 +11,14 @@ const PoseReview = dynamic(() => import("../../PoseReview"), { ssr: false, loadi
 export type ComparisonPhoto = Photo & { seated: SeatedMeasurement };
 const number = (n: number) => n.toLocaleString("sv-SE", { maximumFractionDigits: 2 });
 
-export default function ProfileComparison({ trial, front, previous, model }: {
+export default function ProfileComparison({ trial, front, previous, model, candidate, candidateError, openCandidate }: {
   trial: ComparisonPhoto; front: ComparisonPhoto; previous: ComparisonPhoto; model: ActiveDealerModel;
+  candidate: ActiveDealerModel | null; candidateError: string; openCandidate: boolean;
 }) {
   const [source, setSource] = useState<"trial" | "previous" | "front">("trial");
   const [guides, setGuides] = useState(false);
+  const [body, setBody] = useState<"appearance" | "geometry" | "candidate">(openCandidate && candidate ? "candidate" : "appearance");
+  const viewedModel = body === "candidate" && candidate ? candidate : model;
   const photo = { trial, previous, front }[source];
   const names = { trial: "Ny sittprofil", previous: "Tidigare sittprofil", front: "Sittfront" } as const;
   const check = checkSeatedFrame(photo, front);
@@ -38,10 +41,18 @@ export default function ProfileComparison({ trial, front, previous, model }: {
       </div>
     </section>
     <section className={styles.modelPanel}>
-      <header className={styles.panelHeader}><div><p className={styles.meta}>3D-arbetsmodell</p><h2>{model.name}</h2></div></header>
-      <div className={styles.modelSurface}><PoseReview model={model} initialVersion="utseende" cameraAngle={photo.targetAngle}
+      <header className={styles.panelHeader}><div><p className={styles.meta}>{body === "candidate" ? "3D-prov med ny profil" : "3D-arbetsmodell"}</p><h2>{viewedModel.name}</h2></div></header>
+      <div className={styles.modelSurface}><PoseReview key={body} model={viewedModel} initialVersion={body === "appearance" ? "utseende" : "front"} cameraAngle={photo.targetAngle}
         reference={photo} guides={guides} onGuides={setGuides}/></div>
-      <div className={styles.sourceNote}><p>Den här riggens hållning och fotoyta bygger på den tidigare bildutgåvan. Den nya profilen visas som jämförelse.</p></div>
+      <div className={styles.sourceNote}>
+        {candidate && <div className={styles.archiveLinks} role="group" aria-label="Välj kroppsmodell">
+          <button aria-pressed={body !== "candidate"} onClick={() => setBody("geometry")}>Aktiv rigg · v2</button>
+          <button aria-pressed={body === "candidate"} onClick={() => setBody("candidate")}>Kroppsprov · v3</button>
+        </div>}
+        <p>{body === "candidate" ? "Sittfronten ger kroppen. Trekvarten och den nya profilen styr huvudets och nackens hållning. V3 är ett prov av kroppens geometri."
+          : "Den här riggens hållning och fotoyta bygger på den tidigare bildutgåvan. Den nya profilen visas som jämförelse."}</p>
+        {candidateError && <p role="status">{candidateError}</p>}
+      </div>
     </section>
   </section>;
 }

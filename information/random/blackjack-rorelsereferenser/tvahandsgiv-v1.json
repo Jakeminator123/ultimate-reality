@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "typ": "Tidsreferens för en tvåhandsgiv",
+  "källa": {
+    "videoId": "qd5oc9hLrXg",
+    "url": "https://www.youtube.com/watch?v=qd5oc9hLrXg&t=177s",
+    "kort": "spader två",
+    "målIOriginalet": "dealerns rad på bar filt",
+    "kamera": "ovanifrån",
+    "bildfrekvens": { "täljare": 24000, "nämnare": 1001 },
+    "förstaBildnummer": 0,
+    "startbild": 4259
+  },
+  "anpassning": {
+    "bildfrekvens": 24,
+    "förstaProvbild": 0,
+    "mål": "plats 4",
+    "kortbreddMm": 63,
+    "kortlängdMm": 89,
+    "koordinater": "Utdragsriktningen följer skons mynning. Greppunkterna följer kortets kant. Landningen följer mottagarens plats på filten.",
+    "tid": "Provrutorna är källbildernas tider relativt startbilden, avrundade till närmaste ruta vid 24 bilder/s. Intervallen märker observerade händelser."
+  },
+  "händelser": [
+    { "läge": "Fingertoppar vid skons urtag", "källbilder": [4259, 4259], "provrutor": [0, 0], "kortetFöljer": "sko", "synlighet": "kortkanten bakom mynningen skyms" },
+    { "läge": "Vänster drar ut ryggen", "källbilder": [4261, 4266], "provrutor": [2, 7], "kortetFöljer": "sko till vänster hand", "synlighet": "rygg och främre hörn syns" },
+    { "läge": "Händerna möts vid kortkanten", "källbilder": [4271, 4276], "provrutor": [12, 17], "kortetFöljer": "vänster till båda till höger", "synlighet": "smal kant syns mellan händerna, exakt bytesruta är osäker" },
+    { "läge": "Höger för värdesidan mot målet", "källbilder": [4278, 4283], "provrutor": [19, 24], "kortetFöljer": "höger hand", "synlighet": "tumme och en böjd fingerkontur syns, undersidan skyms" },
+    { "läge": "Kortet ligger plant medan höger täcker kanten", "källbilder": [4285, 4295], "provrutor": [26, 36], "kortetFöljer": "filt", "synlighet": "kortet ligger stabilt, första fysiska kontakten är osäker" },
+    { "läge": "Höger lämnar kortet", "källbilder": [4297, 4300], "provrutor": [38, 41], "kortetFöljer": "filt", "synlighet": "mellanrummet växer och kortet ligger kvar" }
+  ],
+  "komplettering": "Passa det egna kortets kant till de synliga fingrarna. Skatta eller mät fingerdjup från en egen sidofilm. Förläng därefter animeringen tills handen når projektets vilopose."
+}

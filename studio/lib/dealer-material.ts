@@ -160,6 +160,22 @@ async function modelRecord(store: string, key: string, kind: ModelRecord["kind"]
     bad("GLB-filen avviker från den registrerade modellversionen.");
   return model;
 }
+
+export async function seatedTrialModel(material: DealerMaterial, trial: Photo) {
+  const avatar = avatarDir(material.dealer);
+  type Candidate = { schema: number; baseRevision: string; profile: string; geometry: string; modelRecord: string; name: string; run: string };
+  const candidate = await record<Candidate>(path.join(avatar, material.edition, "granskning", "sittmodellprov.json"));
+  if (!candidate || candidate.baseRevision !== material.revision || candidate.profile !== trial.sha256) return null;
+  if (candidate.schema !== 1 || !hex.test(candidate.modelRecord) || !candidate.name) bad("Sittmodellprovet saknar versionsunderlag.");
+  const model = await modelRecord(path.join(avatar, "3d", "versioner"), candidate.geometry, "geometry", candidate.modelRecord);
+  if (!model || !material.geometry) return null;
+  const original = material.photos.find(photo => photo.id === "sittande/profil");
+  const expected = material.geometry.sources.map(source => ({ role: source.role, sha256: source.sha256 === original?.sha256 ? trial.sha256 : source.sha256 }));
+  if (model.run !== candidate.run || !expected.some(source => source.role === "posture" && source.sha256 === trial.sha256) ||
+      model.sources.length !== expected.length || expected.some(s => !model.sources.some(c => c.sha256 === s.sha256 && c.role === s.role)))
+    bad("Sittmodellprovets källbilder avviker från fotona i jämförelsen.");
+  return { id: candidate.geometry, name: candidate.name, url: url(material.dealer, { model: candidate.geometry }) };
+}
 async function motionsFor(dealer: string, store: string, geometry: string, appearance: string | null, issues: string[]) {
   const folder = path.join(store, "rorelser"), motions: DealerMaterial["motions"] = [];
   for (const name of await records(folder)) {
