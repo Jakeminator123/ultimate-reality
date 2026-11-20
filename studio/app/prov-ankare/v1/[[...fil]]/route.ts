@@ -1,9 +1,4 @@
-import { createReadStream } from "node:fs";
-import { realpath, stat } from "node:fs/promises";
-import path from "node:path";
-import { Readable } from "node:stream";
-import { rangedResponse } from "../../../../lib/byte-range";
-import { errorResponse, requireLocal } from "../../../../lib/storage";
+import { serveTrialResource } from "../../../../lib/local-trial-media";
 
 const ui = "studio/app/prov-ankare/v1";
 const trial = "avatars/paulina/prov-ankare/v1";
@@ -20,26 +15,7 @@ function resource(name: string): [string, string] | undefined {
 }
 
 async function respond(request: Request, context: { params: Promise<{ fil?: string[] }> }) {
-  try {
-    requireLocal(request);
-    const entry = resource((await context.params).fil?.join("/") ?? "");
-    if (!entry) return new Response(null, { status: 404 });
-    const root = await realpath(path.resolve(process.cwd(), ".."));
-    const file = path.join(root, entry[0]);
-    if (await realpath(/* turbopackIgnore: true */ file) !== file) return new Response(null, { status: 404 });
-    const details = await stat(/* turbopackIgnore: true */ file);
-    if (!details.isFile()) return new Response(null, { status: 404 });
-
-    const result = rangedResponse(details.size, entry[1], request.headers.get("range"), (start, end) =>
-      request.method === "HEAD" ? new Uint8Array() :
-        Readable.toWeb(createReadStream(/* turbopackIgnore: true */ file, { start, end })) as ReadableStream,
-      "private, no-store",
-    );
-    return request.method === "HEAD" ? new Response(null, { status: result.status, headers: result.headers }) : result;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return new Response(null, { status: 404 });
-    return errorResponse(error);
-  }
+  return serveTrialResource(request, resource((await context.params).fil?.join("/") ?? ""));
 }
 
 export const GET = respond;

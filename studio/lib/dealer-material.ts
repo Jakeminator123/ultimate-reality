@@ -21,6 +21,11 @@ const photoPath = /^[a-z0-9-]+\/[a-z0-9-]+\.(?:jpe?g|png|webp)$/;
 const profileTrialPath = /^granskning\/sittprofil-front-v[1-9]\d*\/profil\.png$/;
 const digest = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 const cacheHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
+const paulinaTrials = [
+  { field: "motionTrialUrl", url: "/prov-70/v1", receipt: "prov-70/v1/visning/matning.json" },
+  { field: "anchorTrialUrl", url: "/prov-ankare/v1", receipt: "prov-ankare/v1/visning/jämförelse.json" },
+  { field: "seat4DealUrl", url: "/giv-plats-4/v1", receipt: "giv-plats-4/v1/visning/rendering.json" },
+] as const;
 function bad(message: string): never { throw new LocalError(message, 409); }
 function avatarDir(dealer: string) {
   if (!slug.test(dealer)) throw new LocalError("Ogiltig dealer.", 400);
@@ -64,10 +69,7 @@ export async function materialStamp(dealer: string, revision: string | null = nu
     "granskning/sittprofilprov.json", "granskning/sittmodellprov.json"]
     .map(name => bytes(path.join(avatar, edition, name))));
   if (dealer === "paulina" && !revision) {
-    const trialReceipts = await Promise.all([
-      bytes(path.join(avatar, "prov-70", "v1", "visning", "matning.json")),
-      bytes(path.join(avatar, "prov-ankare", "v1", "visning", "jämförelse.json")),
-    ]);
+    const trialReceipts = await Promise.all(paulinaTrials.map(trial => bytes(path.join(avatar, trial.receipt))));
     observations.push(...trialReceipts);
   }
   return digest(Buffer.from(JSON.stringify([active?.toString(), ...registered, revision, ...observations.map(b => b && digest(b))])));
@@ -327,12 +329,9 @@ export async function dealerMaterial(dealer = "paulina", requested: string | nul
     geometry: null, appearance: null, versions: [], motions: [], films: [] };
   if (dealer === "paulina" && !requested) {
     const avatar = avatarDir(dealer);
-    const [motion, anchors] = await Promise.all([
-      checkedPath(path.join(avatar, "prov-70", "v1", "visning", "matning.json")),
-      checkedPath(path.join(avatar, "prov-ankare", "v1", "visning", "jämförelse.json")),
-    ]);
-    if (motion) result.motionTrialUrl = "/prov-70/v1";
-    if (anchors) result.anchorTrialUrl = "/prov-ankare/v1";
+    await Promise.all(paulinaTrials.map(async trial => {
+      if (await checkedPath(path.join(avatar, trial.receipt))) result[trial.field] = trial.url;
+    }));
   }
   if (!release) {
     if (dealer === "paulina") result.activeModel = await legacyModel();

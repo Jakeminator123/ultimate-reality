@@ -1,7 +1,7 @@
 import { chromium } from "playwright-core";
 import sharp from "sharp";
-import { mkdir, readFile, writeFile, link, unlink, mkdtemp, rm } from "node:fs/promises";
-import { createHash, randomUUID } from "node:crypto";
+import { mkdir, readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
+import { digest, publish, readIfPresent } from "./publicera-kamerafil.mjs";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import os from "node:os";
@@ -16,47 +16,8 @@ assert.ok(positional.length <= 2 && !positional.some(value => value.startsWith("
 const scene = positional[0] ? path.resolve(positional[0]) : path.join(root, "rigg/ankare.glb");
 const out = positional[1] ? path.resolve(positional[1]) : path.join(root, "kameror");
 const report = JSON.parse(await readFile(path.join(path.dirname(scene), "posematning.json"), "utf8"));
-const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 assert.equal(digest(await readFile(scene)), report.sceneSha256);
 const asJson = value => Buffer.from(JSON.stringify(value, null, 2) + "\n");
-
-async function readIfPresent(filename) {
-  try {
-    return await readFile(filename);
-  } catch (error) {
-    if (error.code === "ENOENT") return null;
-    throw error;
-  }
-}
-
-async function publish(filename, bytes) {
-  const expected = digest(bytes);
-  const requireSame = existing => {
-    if (digest(existing) !== expected) {
-      throw Error("Annan utgåva finns i " + filename + ". Välj en ny utgåvemapp.");
-    }
-  };
-  const existing = await readIfPresent(filename);
-  if (existing) {
-    requireSame(existing);
-    return;
-  }
-  // Publish the complete file in one exclusive operation, even when two exports race.
-  const staging = filename + "." + randomUUID() + ".tmp";
-  try {
-    await writeFile(staging, bytes, { flag: "wx" });
-    try {
-      await link(staging, filename);
-    } catch (error) {
-      if (error.code !== "EEXIST") throw error;
-      requireSame(await readFile(filename));
-    }
-  } finally {
-    await unlink(staging).catch(error => {
-      if (error.code !== "ENOENT") throw error;
-    });
-  }
-}
 
 const contactSheetName = "kontaktkarta-120.jpg";
 const orbitMovie = "a23-kameraorbit.mp4";

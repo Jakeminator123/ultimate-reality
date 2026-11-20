@@ -29,7 +29,8 @@ export default function DealerOverview({ dirty }: { dirty: boolean }) {
           <div><dt><Box size={17} aria-hidden/> Fas 2 · 3D-modell</dt><dd>{modelStatus}</dd></div>
         </dl>
         {model && <a className={styles.open} href="#modellering">Öppna Paulinas modell</a>}
-        {inventory?.motionTrialUrl && <a className={model ? styles.images : styles.open} href={inventory.motionTrialUrl} {...external}>Se rörelsen vid 0° och 70°</a>}
+        {inventory?.seat4DealUrl && <a className={model ? styles.images : styles.open} href={inventory.seat4DealUrl} {...external}>Spela given till plats 4</a>}
+        {inventory?.motionTrialUrl && <a className={model || inventory.seat4DealUrl ? styles.images : styles.open} href={inventory.motionTrialUrl} {...external}>Se rörelsen vid 0° och 70°</a>}
         {inventory?.anchorTrialUrl && <a className={styles.images} href={inventory.anchorTrialUrl} {...external}>Se händerna vid kortskon från 120 vinklar</a>}
         <a className={model || inventory?.motionTrialUrl ? styles.images : styles.open} href="/bildstandard" {...external}>
           {photoStart ? `Öppna bildserien (${photos.length})` : photos.length ? "Visa bildserien" : "Öppna bildstandarden"}

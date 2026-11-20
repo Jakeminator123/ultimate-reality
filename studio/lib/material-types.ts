@@ -45,6 +45,7 @@ export type DealerMaterial = {
   photos: Photo[]; issues: string[]; activeModel: ActiveDealerModel | null;
   motionTrialUrl?: string;
   anchorTrialUrl?: string;
+  seat4DealUrl?: string;
   seatedTrial?: { id: string; name: string; film?: TrialFilmSummary; films?: TrialFilmSummary[] };
   geometry: ModelRecord | null; appearance: ModelRecord | null; motions: (MotionRecord & { url: string })[];
   films: (FilmRecord & { url: string; reviews: FilmReview[] })[];

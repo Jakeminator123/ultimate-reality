@@ -1,5 +1,6 @@
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+export let captureScene;
 try {
   const renderer = new T.WebGLRenderer({
     canvas: document.querySelector("canvas"),
@@ -45,7 +46,7 @@ try {
   const rim = new T.DirectionalLight(0xe4edff, .85);
   rim.position.set(2, 2, -1);
   world.add(rim);
-  const asset = await new GLTFLoader().loadAsync("/__ankare-prov/ankare.glb");
+  const asset = await new GLTFLoader().loadAsync(renderer.domElement.dataset.scene || "/__ankare-prov/ankare.glb");
   world.add(asset.scene);
   const mixer = new T.AnimationMixer(asset.scene),
     action = mixer.clipAction(asset.animations[0]);
@@ -82,7 +83,7 @@ try {
     obj.receiveShadow = obj !== floor;
     const name = obj.name.toLocaleLowerCase("sv");
     let semantic = black;
-    if (name.startsWith("gult_") || name.startsWith("gult ")) semantic = yellow;else if (/kortskons|skokind|främre.skokind|matningsslits|mynningens|kortstock|översta.kort/.test(name)) semantic = blue;
+    if (name.startsWith("gult_") || name.startsWith("gult ") || name === "utdelat_gult_kort") semantic = yellow;else if (/kortskons|skokind|främre.skokind|matningsslits|mynningens|kortstock|översta.kort/.test(name)) semantic = blue;
     if (obj.isSkinnedMesh) {
       const attr = obj.geometry.attributes,
         colors = new Uint8Array(attr.position.count * 3);
@@ -212,6 +213,7 @@ try {
     };
   }
   window.captureAnchor = capture;
+  captureScene = { asset, renderer, world, camera, mixer, objects, bg, fog, yellow, black, hand, point };
 } catch (e) {
   window.problem = String(e.stack || e);
 }
