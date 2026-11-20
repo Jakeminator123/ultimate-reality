@@ -47,6 +47,12 @@ async function records(folder: string) {
   if (!real) return [];
   return (await fs.readdir(/* turbopackIgnore: true */ real)).filter(name => name.endsWith(".json") && hex.test(name.slice(0, -5))).sort();
 }
+export async function materialStamp(dealer: string) {
+  const store = path.join(avatarDir(dealer), "3d", "versioner");
+  const [active, ...registered] = await Promise.all([bytes(path.join(store, "aktiv.json")),
+    ...["utgavor", "rorelser", "filmer", "granskningar"].map(group => records(path.join(store, group)))]);
+  return createHash("sha256").update(JSON.stringify([active?.toString(), ...registered])).digest("hex");
+}
 async function lockedRecord<T>(folder: string, key: string): Promise<T | null> {
   if (!hex.test(key)) throw new LocalError("Ogiltig version.");
   const data = await bytes(path.join(folder, key + ".json"));
@@ -137,6 +143,8 @@ async function filmsFor(dealer: string, store: string, geometry: string, appeara
 export async function dealerMaterial(dealer = "paulina", requested: string | null = null): Promise<DealerMaterial> {
   const store = path.join(avatarDir(dealer), "3d", "versioner");
   const editions = path.join(store, "utgavor");
+  // Stamp first. If a writer publishes during the read, the next check requests fresh facts.
+  const stamp = await materialStamp(dealer);
   const active = await bytes(path.join(store, "aktiv.json"));
   const revision = requested ?? (active && digest(active));
   const release = revision ? await lockedRecord<Edition>(editions, revision) : null;
@@ -144,7 +152,7 @@ export async function dealerMaterial(dealer = "paulina", requested: string | nul
   if (release && (release.schema !== 1 || !slug.test(release.id))) bad("Ogiltig modellutgåva.");
   const edition = release?.edition ?? "fas-1/v1";
   const { photos, issues } = await readPhotoEdition(dealer, edition, release?.photoRegister);
-  const result: DealerMaterial = { dealer, edition, revision, photos, issues, activeModel: null,
+  const result: DealerMaterial = { dealer, edition, revision, stamp, photos, issues, activeModel: null,
     geometry: null, appearance: null, versions: [], motions: [], films: [] };
   if (!release) {
     if (dealer === "paulina") result.activeModel = await legacyModel();

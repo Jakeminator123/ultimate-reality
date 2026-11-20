@@ -32,7 +32,7 @@ export type Edition = {
   photoRegister: string; geometryRecord: string; appearanceRecord: string | null;
 };
 export type DealerMaterial = {
-  dealer: string; edition: string; revision: string | null; versions: { key: string; name: string }[];
+  dealer: string; edition: string; revision: string | null; stamp: string; versions: { key: string; name: string }[];
   photos: Photo[]; issues: string[]; activeModel: ActiveDealerModel | null;
   geometry: ModelRecord | null; appearance: ModelRecord | null; motions: (MotionRecord & { url: string })[];
   films: (FilmRecord & { url: string; reviews: FilmReview[] })[];

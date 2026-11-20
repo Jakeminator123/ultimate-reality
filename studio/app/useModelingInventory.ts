@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ModelingInventory } from "../lib/modeling";
 import type { DealerMaterial } from "../lib/material-types";
 
@@ -30,7 +30,8 @@ function useLocalModelData<T>(url: string) {
     return () => controller.abort();
   }, [revision, url]);
 
-  return { inventory: loadedUrl === url ? inventory : null, loading, error, refresh: () => setRevision(value => value + 1) };
+  const refresh = useCallback(() => setRevision(value => value + 1), []);
+  return { inventory: loadedUrl === url ? inventory : null, loading, error, refresh };
 }
 
 export function useModelingInventory() {
@@ -39,5 +40,29 @@ export function useModelingInventory() {
 
 export function useCurrentModel(edition?: string, dealer = "paulina") {
   const revision = edition ? "&revision=" + encodeURIComponent(edition) : "";
-  return useLocalModelData<DealerMaterial>("/api/material?report=json&dealer=" + encodeURIComponent(dealer) + revision);
+  const url = "/api/material?dealer=" + encodeURIComponent(dealer);
+  const result = useLocalModelData<DealerMaterial>(url + "&report=json" + revision);
+  const stamp = result.inventory?.stamp, refresh = result.refresh;
+  useEffect(() => {
+    if (!stamp) return;
+    const controller = new AbortController();
+    let checking = false;
+    async function check() {
+      if (document.hidden || checking) return;
+      checking = true;
+      try {
+        const response = await fetch(url + "&stamp=1", { cache: "no-store", signal: controller.signal });
+        if (response.ok && (await response.json()).stamp !== stamp && !controller.signal.aborted) refresh();
+      } catch { /* The next visible check retries when the local preview reconnects. */ }
+      finally { checking = false; }
+    }
+    const timer = window.setInterval(check, 15000);
+    document.addEventListener("visibilitychange", check);
+    window.addEventListener("focus", check);
+    return () => {
+      controller.abort(); window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", check); window.removeEventListener("focus", check);
+    };
+  }, [url, stamp, refresh]);
+  return result;
 }

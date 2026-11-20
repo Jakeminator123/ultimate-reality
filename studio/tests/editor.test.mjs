@@ -136,6 +136,19 @@ test(
           }
         }
       });
+      await t.test("en ny materialversion läses in i den öppna modelleringsvyn", async () => {
+        const stamp = origin + "/api/material?dealer=paulina&stamp=1";
+        assert.match((await (await page.request.get(stamp)).json()).stamp, /^[a-f0-9]{64}$/);
+        await page.route(stamp, r => r.fulfill({ json: { stamp: "simulerad ny export" } }));
+        try {
+          const updated = page.waitForResponse(response => {
+            const url = new URL(response.url());
+            return url.pathname === "/api/material" && url.searchParams.get("report") === "json";
+          });
+          await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+          assert.equal((await updated).status(), 200);
+        } finally { await page.unroute(stamp); }
+      });
       await t.test("sittbilderna kan jämföras i originalens utsnitt och i frontens skala", async () => {
         const link = page.getByRole("link", { name: "Jämför sitthöjd och bildskala" });
         if (await link.count()) await link.click();
