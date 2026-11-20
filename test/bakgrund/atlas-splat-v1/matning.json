@@ -1,0 +1,72 @@
+{
+  "quick": {
+    "file": "forhandsvisning-v1.spz",
+    "bytes": 6208420,
+    "sha256": "7805374b88608a3553a17bca7e7dfab7efefe6d3579134d224eab30ee58029c1",
+    "version": 3,
+    "count": 947213,
+    "shDegree": 0,
+    "fractionalBits": 12,
+    "flags": 1,
+    "reserved": 0,
+    "axisP01": [
+      -3.0871999263763428,
+      -0.555899977684021,
+      -3.4697000980377197
+    ],
+    "axisP99": [
+      3.302000045776367,
+      2.4677999019622803,
+      2.6809000968933105
+    ],
+    "centreBelowFeltPoints": 22970,
+    "centreBelowFeltMedianY": -0.453857421875,
+    "floorModeBinY": -0.45,
+    "floorPoints": 22970,
+    "floorY": -0.453857,
+    "floorP05P95": [
+      -0.4729,
+      -0.434082
+    ],
+    "tileCoverage": 16,
+    "tileMedianRange": [
+      -0.466552734375,
+      -0.442138671875
+    ]
+  },
+  "full": {
+    "file": "full-splat-v1.spz",
+    "bytes": 31195069,
+    "sha256": "41d190b1d7f7a426fa03257bc2361033409b570f5b2869ba1bfb30708d816ba2",
+    "version": 2,
+    "count": 2000000,
+    "shDegree": 0,
+    "fractionalBits": 12,
+    "flags": 64,
+    "reserved": 0,
+    "axisP01": [
+      -3.1816000938415527,
+      -0.5950000286102295,
+      -3.4918999671936035
+    ],
+    "axisP99": [
+      3.323199987411499,
+      2.470900058746338,
+      2.677500009536743
+    ],
+    "centreBelowFeltPoints": 10123,
+    "centreBelowFeltMedianY": -0.46044921875,
+    "floorModeBinY": -0.45,
+    "floorPoints": 10102,
+    "floorY": -0.460449,
+    "floorP05P95": [
+      -0.484619,
+      -0.439209
+    ],
+    "tileCoverage": 16,
+    "tileMedianRange": [
+      -0.4794921875,
+      -0.44921875
+    ]
+  }
+}

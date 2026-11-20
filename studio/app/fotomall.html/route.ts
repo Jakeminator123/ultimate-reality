@@ -122,6 +122,14 @@ export async function GET(request: Request) {
       });
     }
     const exportFile = url.searchParams.get("hamta") === "1";
+    if (url.pathname === "/fotomall.html" && !exportFile) {
+      // Picture and download query URLs stay compatible. Fragments of the old
+      // guide are only visible in the browser, so forward them there.
+      return new Response(`<!doctype html><html lang="sv"><meta charset="utf-8"><title>Dealerstudions fotomall</title>
+        <script>location.replace(location.hash ? "/ovrigt/fotomall" + location.hash : "/bildstandard")</script>
+        <p><a href="/bildstandard">Bildstandard för en dealer</a> · <a href="/ovrigt/fotomall">Äldre fotomall med docka</a></p></html>`,
+        { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "private, no-store" } });
+    }
     const [template, font, examples, references, current, next] =
       await Promise.all([
         readFile(
@@ -156,6 +164,7 @@ export async function GET(request: Request) {
     const data = {
       origin,
       portable: exportFile,
+      phaseOneAvailable: await present(path.join(avatar, "fas-1/v1/index.html")),
       shots: examples,
       refs: references.filter((r) => r !== null),
       current,

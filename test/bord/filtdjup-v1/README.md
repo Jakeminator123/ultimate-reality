@@ -14,7 +14,7 @@ Måtten gäller modellens faktiska geometri. Den nya blackjackformen har en deal
 | Stol 4 | 124 cm | 0 / −0,245 / −0,970 | 14,19° | 48° × 76,72° |
 | Stol 1 | 116 cm | +0,888 / −0,201 / −0,415 | 11,57° | 48° × 76,72° |
 
-Scenversionen utgår från Ultimate Realitys `studio/lib/dealer-scene.ts` vid Git-revision `b3f6ada`. Det ursprungliga skissbordets nominella radier var 80 och 54 cm. Studion och provet använder nu [samma koordinatunderlag](../../../studio/lib/table-layout.json) för bord, kortmål, sko och stolarnas kamerapositioner. Provkamerorna är tillbakadragna en faktor 1,34 i X och Z för att få hela armstödet i bild.
+Scenversionen utgår från Ultimate Realitys `studio/lib/dealer-scene.ts` vid Git-revision `b3f6ada`. Det ursprungliga skissbordets nominella radier var 80 och 54 cm. Provets [sparade koordinatunderlag](layout-v1.json) bevarar ursprunglig sko, bord, kortmål och kameror. [Aktuellt rums- och skoprov](../../bakgrund/kasinorum-v1/README.md) använder studions vinklade kortsko. Provkamerorna är tillbakadragna en faktor 1,34 i X och Z för att få hela armstödet i bild.
 
 Dealers källkod vid `c9d006d` gav två principer för utformningen. `src/scene3d-table.ts` beskriver rundad läderreling, söm och separat filt. `src/scene3d-room.ts` beskriver 3D-parallax. Salong, material, sko och blackjackkontur har skapats i Ultimate Reality. Bilagans 210 × 159 cm, 5° och förslag på 140 cm avser det separata projektet 3d-dealer.
 

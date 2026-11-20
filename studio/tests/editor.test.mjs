@@ -81,6 +81,56 @@ test(
           remote.push(req.url());
       });
       await page.goto(origin);
+      await page.getByRole("heading", { name: "Paulinas bildserie" }).waitFor();
+      assert.equal(await page.getByRole("region", { name: "Paulinas bildserie" }).getByRole("button").count(), 12);
+      await t.test("sittbilderna kan jämföras i originalens utsnitt och i frontens skala", async () => {
+        const link = page.getByRole("link", { name: "Jämför sitthöjd och bildskala" });
+        await link.click();
+        await page.getByRole("heading", { name: "Sittande i tre vinklar" }).waitFor();
+        const figures = page.locator("figure");
+        if (await figures.count()) {
+          assert.equal(await figures.count(), 3);
+          const profile = figures.last().locator("img");
+          assert.match(await profile.getAttribute("style"), /scale\(1\)/);
+          await page.getByRole("button", { name: "Samma bildskala" }).click();
+          assert.match(await profile.getAttribute("style"), /scale\(1\.040/);
+          await page.getByRole("checkbox", { name: "Mätlinjer" }).uncheck();
+          assert.equal(await figures.locator('[aria-hidden="true"]').count(), 0);
+        } else {
+          await page.getByText(/De lokala bilderna och mätningen/).waitFor();
+        }
+        await page.getByRole("link", { name: "3D-modellering" }).click();
+        await page.getByRole("heading", { name: "Paulinas bildserie" }).waitFor();
+      });
+      await t.test("v2 byter synlig modell och fungerar med bara kroppsformen", async (modelTest) => {
+        const current = await (await page.request.get(origin + "/api/modeling?current=1")).json();
+        if (!current.activeModel?.appearanceUrl || process.env.STUDIO_TEST_NO_WEBGL) {
+          modelTest.skip("Fotoutseendet och WebGL behövs för det visuella riggprovet.");
+          return;
+        }
+        const neutral = page.getByRole("button", { name: "Kroppsform", exact: true });
+        const look = page.getByRole("button", { name: "Fotoutseende · prov" });
+        await neutral.click();
+        const canvas = page.locator(".pose-canvas canvas");
+        const neutralPixels = await canvas.screenshot();
+        await look.click();
+        assert.equal(await look.getAttribute("aria-pressed"), "true");
+        assert.notDeepEqual(await canvas.screenshot(), neutralPixels);
+        await page.getByRole("button", { name: "Sittande i trekvart" }).click();
+        assert.equal(await look.getAttribute("aria-pressed"), "true");
+        const file = origin + current.activeModel.appearanceUrl;
+        await page.route(file, route => route.fulfill({ status: 404, body: "" }));
+        try {
+          await page.reload();
+          await page.getByText("En alternativ modellfil kunde inte läsas på den här datorn.").waitFor();
+          assert.equal(await neutral.isEnabled(), true);
+          assert.equal(await neutral.getAttribute("aria-pressed"), "true");
+          assert.equal(await look.isDisabled(), true);
+        } finally {
+          await page.unroute(file);
+        }
+      });
+      await page.getByRole("link", { name: "Filmutkast", exact: true }).click();
       await page.getByText("API-nyckel konfigurerad på servern.").waitFor();
       const config = await page.request.get(origin + "/api/runway");
       assert.deepEqual(await config.json(), { state: "configured" });
@@ -134,9 +184,13 @@ test(
       await page.setViewportSize({ width: 375, height: 840 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await page.getByRole("link", { name: "3D-modellering" }).click();
-      await page.getByText("Inga bevarade SAM-prov hittades.").waitFor();
-      await page.getByRole("button", { name: "referens.png" }).click();
-      assert.equal(await page.getByRole("button", { name: "3D", exact: true }).isDisabled(), true);
+      const archiveOpened = page.waitForEvent("popup");
+      await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Övrigt", exact: true }).click();
+      const archive = await archiveOpened;
+      await archive.setViewportSize({ width: 375, height: 840 });
+      await archive.getByText("Inga bevarade SAM-prov hittades.").waitFor();
+      await archive.getByRole("button", { name: "referens.png" }).click();
+      assert.equal(await archive.getByRole("button", { name: "3D", exact: true }).isDisabled(), true);
       const run = "sam-20261119T120000Z-0123456789ab";
       const saved = path.join(root, "saved", run);
       const referenceName = (await fs.readdir(path.join(root, "inputs"))).find(name => name.startsWith("referens--"));
@@ -148,16 +202,16 @@ test(
       await fs.copyFile(image, path.join(saved, prefix + ".png"));
       await fs.copyFile(image, path.join(saved, prefix + "-jamforelse.png"));
       await fs.writeFile(path.join(saved, prefix + ".html"), "<p>Lokalt vridprov</p>");
-      await page.getByRole("button", { name: "Uppdatera modelleringsunderlag" }).click();
-      await page.getByRole("button", { name: "3D", exact: true }).click();
-      await page.frameLocator("iframe").getByText("Lokalt vridprov").waitFor();
-      const comparison = await page.getByRole("link", { name: "Jämför proportioner och vinklar" }).getAttribute("href");
+      await archive.getByRole("button", { name: "Uppdatera modelleringsunderlag" }).click();
+      await archive.getByRole("button", { name: "3D", exact: true }).click();
+      await archive.frameLocator("iframe").getByText("Lokalt vridprov").waitFor();
+      const comparison = await archive.getByRole("link", { name: "Jämför proportioner och vinklar" }).getAttribute("href");
       const comparisonResponse = await page.request.get(origin + comparison);
       assert.equal(comparisonResponse.status(), 200);
       assert.deepEqual(await comparisonResponse.body(), await fs.readFile(image));
-      await page.getByRole("button", { name: "Överlägg" }).click();
-      await page.locator(".reference-surface img").evaluate(img => img.decode());
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await archive.getByRole("button", { name: "Överlägg" }).click();
+      await archive.locator(".reference-surface img").evaluate(img => img.decode());
+      assert.ok(await archive.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       assert.equal((await page.request.get(origin + "/api/modeling?run=" + run + "&index=2&view=mesh")).status(), 404);
       const modelUrl = origin + "/api/modeling?run=" + run + "&index=1&view=";
       assert.equal((await page.request.get(modelUrl + "front")).status(), 404);
@@ -174,6 +228,7 @@ test(
       }
       const inventory = await (await page.request.get(origin + "/api/modeling")).json();
       assert.ok(inventory.poses.some(p => p.run === run && p.index === 1 && p.hasFront && p.hasTablePose && p.hasAppearance && p.hasUpright));
+      await archive.close();
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.getByRole("link", { name: "Filmutkast" }).click();
       await page.locator("summary").click();
@@ -407,8 +462,138 @@ test(
           await offline.getByRole("button", { name: "Stäng", exact: true }).click();
           assert.equal(await offline.getByRole("button", { name: /^Kopiera prompt / }).count(), 2);
           assert.equal(await offline.locator("[data-studio]").getAttribute("href"), origin + "/#modellering");
+          assert.equal(await offline.getByRole("link", { name: "Bildstandard i studion" }).getAttribute("href"), origin + "/bildstandard");
         } finally {
           await offline.close();
+        }
+      });
+      await t.test("egna foton och roller ger en kopierbar prompt och en komplett bildmall utan exempeldata", async () => {
+        const standard = await browser.newPage({ viewport: { width: 390, height: 844 } });
+        try {
+          await standard.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin });
+          await standard.goto(origin + "/fotomall.html#nya-bilder");
+          await standard.waitForURL("**/ovrigt/fotomall#nya-bilder");
+          await standard.getByRole("link", { name: "Bildstandard i studion" }).click();
+          await standard.goto(origin + "/fotomall.html");
+          await standard.waitForURL("**/bildstandard");
+          const view = standard.getByLabel("Bildvy", { exact: true });
+          assert.equal(await view.locator("option").count(), 12);
+          await view.selectOption("hander/kortdrag-vanster");
+          const prompt = standard.locator("#prompttext");
+          assert.match(await prompt.inputValue(), /cirka 20° över den vita ytan/);
+          assert.match(await prompt.inputValue(), /241, 240, 242/);
+          assert.match(await prompt.inputValue(), /222, 198, 250/);
+          const card = standard.getByRole("img", { name: /Mörkröd kortbaksida med ljust X/ });
+          const ink = await card.evaluate(async (img) => {
+            await img.decode();
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const context = canvas.getContext("2d");
+            context.drawImage(img, 0, 0);
+            const rgb = (x, y) => Array.from(context.getImageData(x, y, 1, 1).data);
+            return { size: [canvas.width, canvas.height], back: rgb(1, 100), x: rgb(126, 178), dot: rgb(40, 40) };
+          });
+          assert.deepEqual(ink, { size: [252, 356], back: [152, 1, 9, 255], x: [241, 240, 242, 255], dot: [222, 198, 250, 255] });
+          const png = await fs.readFile(image);
+          await standard.getByLabel("Välj referensfoton").setInputFiles([
+            { name: "porträtt.png", mimeType: "image/png", buffer: png },
+            { name: "eget-kort.png", mimeType: "image/png", buffer: png },
+          ]);
+          await standard.getByLabel("Roll för eget-kort.png").selectOption("Kortets mönster");
+          const selected = await prompt.inputValue();
+          assert.match(selected, /porträtt\.png.*Identitet/);
+          assert.match(selected, /eget-kort\.png.*Kortets mönster/);
+          assert.doesNotMatch(selected, /241, 240, 242|222, 198, 250|Paulina/);
+          await standard.getByRole("button", { name: "Kopiera prompt" }).click();
+          await standard.getByText("Prompten har kopierats.").waitFor();
+          const clipboard = await standard.evaluate(() => navigator.clipboard.readText());
+          assert.equal(clipboard.replace(/\r\n/g, "\n"), selected);
+
+          const download = standard.waitForEvent("download");
+          await standard.getByRole("button", { name: "Hämta alla vyer som JSON" }).click();
+          const data = JSON.parse(await fs.readFile(await (await download).path(), "utf8"));
+          assert.equal(data.schemaVersion, 1);
+          assert.deepEqual(data.kortstandard, { id: "egen-kortreferens", filer: ["eget-kort.png"] });
+          assert.equal(data.vyer.length, 12);
+          assert.equal(data.vyer.filter((vy) => vy.recept.extra).length, 1);
+          assert.equal(data.vyer.find((vy) => vy.recept.id === "hander/kortdrag-vanster").prompt, selected);
+          assert.ok(data.vyer.every((vy) => vy.filuppgifter.breddPx === null && vy.osakerhet === "" && vy.kalla === ""));
+          assert.doesNotMatch(JSON.stringify(data), /Paulina/i);
+          const localExport = standard.getByRole("button", { name: "Hämta Paulinas ifyllda mall" });
+          if (await localExport.count()) {
+            const pending = standard.waitForEvent("download");
+            await localExport.click();
+            const local = JSON.parse(await fs.readFile(await (await pending).path(), "utf8"));
+            assert.equal(local.avatar, "Paulina");
+            assert.equal(local.kortstandard.id, "vit-ram-punkt-v1");
+            assert.equal(local.vyer.length, data.vyer.length);
+            assert.deepEqual(local.referenser, []);
+            const record = local.vyer.find((vy) => vy.id === "hander/kortdrag-vanster");
+            assert.deepEqual(Object.keys(record.filuppgifter), Object.keys(data.vyer[0].filuppgifter));
+            assert.ok(record.filuppgifter.breddPx > 0 && record.observation.ljus && record.osakerhet);
+            assert.match(record.filuppgifter.sha256, /^[a-f0-9]{64}$/);
+            assert.match(record.prompt, /tunn vit ram/);
+          }
+          await standard.getByLabel("Välj referensfoton").setInputFiles([
+            { name: "helfigur.png", mimeType: "image/png", buffer: png },
+            { name: "sittfront.png", mimeType: "image/png", buffer: png },
+            { name: "sidofoto.png", mimeType: "image/png", buffer: png },
+          ]);
+          await standard.getByLabel("Roll för helfigur.png").selectOption("Godkänd ståfront");
+          await standard.getByLabel("Roll för sittfront.png").selectOption("Godkänd sittfront");
+          for (const [id, included, excluded] of [
+            ["staende/trekvart", "helfigur.png", "sittfront.png"],
+            ["staende/profil", "helfigur.png", "sittfront.png"],
+            ["sittande/front", "helfigur.png", "sittfront.png"],
+            ["sittande/trekvart", "sittfront.png", "helfigur.png"],
+            ["sittande/profil", "sittfront.png", "helfigur.png"],
+          ]) {
+            await view.selectOption(id);
+            const instructions = await prompt.inputValue();
+            assert.ok(instructions.includes(included) && !instructions.includes(excluded));
+            assert.match(instructions, /porträtt\.png.*Identitet/);
+            assert.match(instructions, /sidofoto\.png.*Kompletterande original/);
+          }
+          await view.selectOption("ansikte/profil");
+          assert.doesNotMatch(await prompt.inputValue(), /eget-kort\.png|helfigur\.png|sittfront\.png/);
+          assert.ok(await standard.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+
+          const publicView = await standard.request.get(origin + "/bildstandard", { headers: { "sec-fetch-site": "cross-site" } });
+          assert.equal(publicView.status(), 200);
+          assert.match(await publicView.text(), /lokala exempelbild saknas/);
+        } finally {
+          await standard.close();
+        }
+      });
+      await t.test("fyra egna foton blir ett lokalt Runway-utkast med pris, bildordning och sparade original", async () => {
+        const order = await browser.newPage({ viewport: { width: 390, height: 844 } });
+        try {
+          await order.goto(origin + "/bildstandard");
+          await order.getByRole("link", { name: "Beställ bildserie i Runway" }).click();
+          await order.getByRole("heading", { name: "Beställ en bildserie" }).waitFor();
+          assert.equal(await order.getByRole("button", { name: "Skicka ståfront" }).isDisabled(), true);
+          const png = await fs.readFile(image);
+          const names = ["sidovy.png", "selfie.png", "kropp.png", "ansikte.png"];
+          await order.locator("input[type=file]").setInputFiles(names.map((name) => ({ name, mimeType: "image/png", buffer: png })));
+          await order.getByText("18 / 225 API-krediter").waitFor();
+          const save = order.waitForResponse((res) => res.url() === origin + "/api/bildpipeline" && res.request().method() === "POST");
+          await order.getByRole("button", { name: "Spara lokalt utkast" }).click();
+          const revision = await (await save).json();
+          assert.equal(revision.mode, "draft");
+          assert.deepEqual(revision.steps[0].dependsOn, []);
+          assert.match(revision.steps[0].prompt, /Create a new photograph/);
+          assert.ok(revision.files.length === 4 && Object.values(revision.jobs).every((job) => job.status === "waiting"));
+          await order.waitForFunction((id) => document.querySelector("#pipeline-version")?.value === id, revision.id);
+          const original = await order.request.get(origin + "/api/bildpipeline?" + new URLSearchParams({ id: revision.id, original: "0" }));
+          assert.ok((await original.body()).equals(png));
+          assert.equal((await order.request.get(origin + "/api/bildpipeline", { headers: { "sec-fetch-site": "cross-site" } })).status(), 403);
+          await order.reload();
+          await order.waitForFunction((id) => document.querySelector("#pipeline-version")?.value === id, revision.id);
+          assert.equal(await order.getByRole("button", { name: "Skicka ståfront" }).isEnabled(), true);
+          assert.ok(await order.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        } finally {
+          await order.close();
         }
       });
     } finally {

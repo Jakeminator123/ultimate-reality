@@ -17,7 +17,7 @@ files.set("original.glb",path.join(root,"test/dealer/paulina/filtdjup-v1-sits406
 files.set("sankt-arm.glb",path.join(here,"sankt-arm.glb"));
 files.set("vanster-hand.glb",path.join(here,"vanster-hand-lag.glb"));
 const readJSON = async file => JSON.parse(await fs.readFile(file,"utf8"));
-const layout = await readJSON(path.join(root,"studio/lib/table-layout.json"));
+const layout = await readJSON(path.join(root,"test/bord/filtdjup-v1/layout-v1.json"));
 const cameras = await readJSON(path.join(root,"test/bord/filtdjup-v1/matt.json"));
 const metrics = await readJSON(path.join(here,"matt.json"));
 const reach = await readJSON(path.join(here,"rackvidd-lag.json"));

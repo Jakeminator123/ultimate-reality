@@ -1,0 +1,62 @@
+<!doctype html><html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paulinas kortutdrag · Kasinorum</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#20392f;background:#f4f3eb;font:16px/1.45 "Segoe UI",Arial,sans-serif}main{max-width:1660px;margin:auto;padding:18px clamp(12px,2.2vw,38px) 30px}h1{font:normal clamp(26px,4vw,39px)/1.12 Georgia,serif;margin:0}header,nav,.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}header{justify-content:space-between;margin-bottom:14px}nav{margin:10px 0}button{font:600 14px "Segoe UI",sans-serif;border:0;border-radius:5px;background:#e0e6da;color:inherit;padding:9px 13px;cursor:pointer}button[aria-pressed=true],#play{background:#244938;color:#fff}button:focus-visible,input:focus-visible{outline:3px solid #b18546}section{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:10px}figure{margin:0;position:relative}figure[hidden]{display:none}img{display:block;width:100%;height:auto;border-radius:8px;background:#26382c}figcaption{position:absolute;top:10px;left:10px;background:#172b23e8;color:white;padding:3px 10px;border-radius:4px;font-size:14px}input{width:min(350px,80vw);accent-color:#254635}.controls{margin:14px 0}output{font-variant-numeric:tabular-nums}a{color:#295c47}small{display:block}
+</style>
+<style>[hidden]{display:none!important}</style>
+<main><header><h1>Paulinas vänsterhandsutdrag</h1><span>Kasinorum.glb · 100° mot dealern</span></header>
+<nav aria-label="Kamera"><button data-seat="par">Båda stolarna</button><button data-seat="4">Stol 4</button><button data-seat="1">Stol 1</button><button data-seat="topp">Ovanifrån</button></nav>
+<nav aria-label="Utsnitt"><button data-view="bord">Hela bordet</button><button data-view="hand">Handdetalj</button><button data-view="material">Materialdetalj</button></nav>
+<nav aria-label="Jämför bord"><button data-size="stort">192 × 129,6 cm</button><button data-size="original">Tidigare 160 × 108 cm</button></nav>
+<nav aria-label="Bordets material"><button data-finish="foto">Poly Haven-material</button><button data-finish="skiss">Tidigare material</button></nav>
+<section aria-label="Synkroniserade bilder">
+<figure data-camera="4"><img width="1280" height="720" alt=""><figcaption>Stol 4</figcaption></figure>
+<figure data-camera="1"><img width="1280" height="720" alt=""><figcaption>Stol 1</figcaption></figure>
+<figure data-camera="topp" hidden><img width="1280" height="720" alt=""><figcaption>Ovanifrån · dealern upptill</figcaption></figure>
+</section>
+<div class="controls"><button id="play">Spela utdrag</button><label for="frame">Bildruta</label><input type="range" id="frame" min="1" max="33" value="1"><output id="position"></output></div>
+<small>Det rödryggade kortet dras ur den lutande stapeln. I ovanvyn visar den gula pilen mynningens riktning.</small>
+<p><a id="room" href="/bordsprov/rumsprov.html">Till rumsjämförelsen</a></p></main>
+<script type="application/json" id="take">__TAKE__</script><script>
+const {pixels,travelMm}=JSON.parse(document.getElementById('take').textContent);
+const el=id=>document.getElementById(id),slider=el('frame');
+const query=new URLSearchParams(location.search);
+let frame=0,seat=['1','4','topp'].includes(query.get('stol'))?query.get('stol'):'par';
+let view=['hand','material'].includes(query.get('vy'))?query.get('vy'):'bord',size='stort',finish='foto',timer;
+function stop(){clearInterval(timer);timer=undefined;el('play').textContent='Spela utdrag'}
+function draw(){
+  for(const b of document.querySelectorAll('[data-seat]'))b.setAttribute('aria-pressed',String(b.dataset.seat===seat));
+  for(const b of document.querySelectorAll('[data-view]'))b.setAttribute('aria-pressed',String(b.dataset.view===view));
+  for(const b of document.querySelectorAll('[data-size]'))b.setAttribute('aria-pressed',String(b.dataset.size===size));
+  for(const b of document.querySelectorAll('[data-finish]'))b.setAttribute('aria-pressed',String(b.dataset.finish===finish));
+  document.querySelector('nav[aria-label="Utsnitt"]').hidden=seat==='topp';
+  document.querySelector('nav[aria-label="Jämför bord"]').hidden=seat==='topp'||view!=='bord';
+  document.querySelector('nav[aria-label="Bordets material"]').hidden=seat==='topp';
+  document.querySelector('.controls').hidden=view==='material'&&seat!=='topp';
+  for(const figure of document.querySelectorAll('figure')){
+    const id=figure.dataset.camera;
+    figure.hidden=!(seat===id || (seat==='par'&&id!=='topp'));
+    if(figure.hidden)continue;
+    const suffix=view==='bord' && size==='original'?'-original':'';
+    const materialSuffix=finish==='skiss'?'-skiss':'';
+    const previewFrame=view==='material'&&id!=='topp'?0:frame;
+    const img=figure.querySelector('img');img.src=pixels[previewFrame][id==='topp'?id:id+'-'+view+suffix+materialSuffix];
+    img.alt=figure.querySelector('figcaption').textContent+', bildruta '+(previewFrame+1);
+  }
+  slider.value=String(frame+1);
+  el('position').textContent=(frame+1)+' / '+pixels.length+' · '+(frame*travelMm/(pixels.length-1)).toLocaleString('sv-SE',{maximumFractionDigits:1})+' mm';
+}
+for(const b of document.querySelectorAll('[data-seat]'))b.onclick=()=>{seat=b.dataset.seat;draw()};
+for(const b of document.querySelectorAll('[data-view]'))b.onclick=()=>{view=b.dataset.view;if(view!=='bord')size='stort';if(view==='material')stop();draw()};
+for(const b of document.querySelectorAll('[data-size]'))b.onclick=()=>{size=b.dataset.size;draw()};
+for(const b of document.querySelectorAll('[data-finish]'))b.onclick=()=>{finish=b.dataset.finish;draw()};
+slider.oninput=()=>{stop();frame=Number(slider.value)-1;draw()};
+el('play').onclick=()=>{
+  if(timer){stop();return}
+  if(frame===pixels.length-1)frame=0;
+  draw();el('play').textContent='Pausa';
+  timer=setInterval(()=>{frame++;draw();if(frame===pixels.length-1)stop()},1000/18);
+};
+if(location.protocol==='file:')el('room').href='../../bakgrund/kasinorum-v1/referensvinkel.html';
+draw();
+</script></html>

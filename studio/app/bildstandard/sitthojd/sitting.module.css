@@ -1,0 +1,38 @@
+.page { max-width: 1180px; margin: auto; padding: 24px clamp(16px,4vw,48px) 56px; color: #1d2d22; }
+.page nav, .tools, .legend, .tools > div { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.page nav { gap: 22px; font-size: 14px; }
+.page a { color: #315b46; text-underline-offset: 3px; }
+.page header { margin: 34px 0 12px; }
+.page header p { margin: 0; color: #546759; font-size: 15px; }
+.page header h1 { font-size: clamp(30px,4vw,52px); margin: 4px 0; letter-spacing: -.045em; }
+.intro, .explanation, .note p { max-width: 80ch; line-height: 1.55; }
+.intro { font-size: 18px; }
+.tools { margin: 22px 0 8px; gap: 22px; }
+.tools > div { gap: 4px; padding: 4px; border-radius: 9px; background: #e4e9e2; }
+.tools button { border: 0; padding: 8px 12px; border-radius: 6px; color: #3d5445; background: transparent; }
+.tools button[aria-pressed=true] { background: #244234; color: #fff; }
+.tools label { display: inline-flex; gap: 6px; align-items: center; }
+.explanation, .legend, .measure { font-size: 14px; color: #425348; }
+.views { display: grid; gap: clamp(5px,1.4vw,16px); grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 20px; }
+.views figure { margin: 0; min-width: 0; }
+.views figcaption { font-weight: 650; margin-bottom: 6px; }
+.views figcaption span { font-size: .86em; color: #526557; }
+.frame { position: relative; overflow: hidden; background: #ece9f0; border-radius: 7px; }
+.frame img { display: block; width: 100%; height: 100%; object-fit: contain; transform-origin: 50% 0; }
+.line, .seatLine, .dot { position: absolute; pointer-events: none; }
+.line, .seatLine { left: 0; width: 100%; border-top: 1px solid #176d66; }
+.seatLine { border-top: 1px dashed #ad5122; }
+.dot { width: 7px; height: 7px; border: 1px solid white; border-radius: 50%; background: #ad5122; transform: translate(-50%,-50%); }
+.measure { margin: 7px 0; }
+.legend { gap: 7px; }
+.legend i, .legend b { width: 19px; border-top: 2px solid #176d66; }
+.legend b { border-top: 2px dashed #ad5122; margin-left: 9px; }
+.note { border-top: 1px solid #cbd4ca; margin-top: 22px; }
+.note h2 { margin-bottom: 5px; font-size: 22px; }
+.note p { margin: 6px 0; }
+@media (max-width: 600px) {
+  .views figcaption { font-size: 13px; }
+  .measure { font-size: 12px; }
+  .measure a { display: block; }
+  .tools { gap: 10px; }
+}

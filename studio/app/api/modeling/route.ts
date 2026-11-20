@@ -4,6 +4,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { errorResponse, folders, listAssets, LocalError, requireLocal } from "../../../lib/storage";
 import type { ModelingInventory, SamPose } from "../../../lib/modeling";
+import { currentModel, modelFile } from "../../../lib/current-model";
 
 export const dynamic = "force-dynamic";
 const execute = promisify(execFile);
@@ -58,6 +59,10 @@ async function localWeights() {
 export async function GET(req: Request) {
   try {
     requireLocal(req);
+    const query = new URL(req.url).searchParams;
+    if (query.size === 1 && query.get("current") === "1")
+      return Response.json({ activeModel: await currentModel() }, { headers: { "Cache-Control": "private, no-store" } });
+    if (query.has("model")) return await modelFile(query);
     const { root, inputs } = await folders();
     const saved = path.join(root, "saved");
     const savedStat = await fs.lstat(/* turbopackIgnore: true */ saved).catch((e: NodeJS.ErrnoException) => {
@@ -65,7 +70,6 @@ export async function GET(req: Request) {
       throw e;
     });
     if (savedStat && (!savedStat.isDirectory() || savedStat.isSymbolicLink())) throw new LocalError("Oväntad sökväg för sparade prov.");
-    const query = new URL(req.url).searchParams;
     if (query.size) {
       const run = query.get("run") || "";
       const view = query.get("view");
@@ -91,11 +95,11 @@ export async function GET(req: Request) {
     }
     const dirs = savedStat ? await fs.readdir(/* turbopackIgnore: true */ saved, { withFileTypes: true }) : [];
     const ids = dirs.filter(d => d.isDirectory() && runId.test(d.name)).map(d => d.name).sort().reverse();
-    const [assets, runs, checkpoints, gpu] = await Promise.all([
-      listAssets(), Promise.all(ids.map(id => readPoses(saved, id))), localWeights(), graphicsCard(),
+    const [assets, runs, checkpoints, gpu, activeModel] = await Promise.all([
+      listAssets(), Promise.all(ids.map(id => readPoses(saved, id))), localWeights(), graphicsCard(), currentModel(),
     ]);
     const inventory: ModelingInventory = {
-      inbox: inputs, images: assets.filter(a => a.kind === "image").map(a => a.name), poses: runs.flat(), checkpoints, gpu,
+      inbox: inputs, images: assets.filter(a => a.kind === "image").map(a => a.name), poses: runs.flat(), checkpoints, gpu, activeModel,
     };
     return Response.json(inventory, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {

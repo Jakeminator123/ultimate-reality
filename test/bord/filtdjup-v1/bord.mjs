@@ -7,7 +7,7 @@ const paint = (color, roughness, metalness = 0) =>
   new T.MeshStandardMaterial({ color, roughness, metalness });
 
 function textiles(layout) {
-  const size = 1536, span = 1.8;
+  const size = 1536, span = Math.max(1.8, layout.table.radiusX * 2 + 0.20);
   const tile = document.createElement("canvas");
   tile.width = tile.height = size;
   const ctx = tile.getContext("2d");
@@ -58,10 +58,11 @@ function textiles(layout) {
   }
   ctx.strokeStyle = "#c8e8d6";
   ctx.beginPath();
-  ctx.moveTo(-0.012, layout.table.centerZ);
-  ctx.lineTo(0.012, layout.table.centerZ);
-  ctx.moveTo(0, layout.table.centerZ - 0.012);
-  ctx.lineTo(0, layout.table.centerZ + 0.012);
+  const referenceZ = layout.table.referenceZ ?? layout.table.centerZ;
+  ctx.moveTo(-0.012, referenceZ);
+  ctx.lineTo(0.012, referenceZ);
+  ctx.moveTo(0, referenceZ - 0.012);
+  ctx.lineTo(0, referenceZ + 0.012);
   ctx.stroke();
   const tex = new T.CanvasTexture(tile);
   tex.colorSpace = T.SRGBColorSpace;

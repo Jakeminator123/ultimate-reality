@@ -43,6 +43,8 @@
 !/studio/public/fotomall/docka/handryggar.webp
 !/studio/public/fotomall/docka/kortgrepp.webp
 !/studio/public/fotomall/docka/nacke.webp
+# Egenritat referenskort för bildserien
+!/studio/public/fotomall/kort/referenskort-x-v1.png
 *.avif
 *.heic
 *.gif

@@ -6,9 +6,9 @@ Redigeringsvyn och den gemensamma 3D-scenen är genomförda i Next.js, React och
 
 ## Grundbilder för en sittande dealer
 
-Använd [fotomallen i studion](http://127.0.0.1:4317/fotomall.html). Den visar varje pose med en neutral docka och har separata exempel på handryggar ovanifrån och kortgrepp lågt från sidan.
+Använd [3D-modellering](http://127.0.0.1:4317/#modellering) för den aktiva Fas 1-serien och sittmodellen v2. [Bildstandarden](http://127.0.0.1:4317/bildstandard) anger kamera och pose för varje vy. [Övrigt](http://127.0.0.1:4317/ovrigt) innehåller den tidigare dockmallen och SAM-försöken.
 
-Som arbetsstandard använder studion fyra foton. SAM 3D Body skattar en kropp per bild. Sidobilden ger en oberoende kontroll av höft, huvud och proportioner när modellen vrids. [SAM 3D Body](https://github.com/facebookresearch/sam-3d-body)
+SAM 3D Body skattar en kropp per bild. Till Paulina v2 används sittfronten som kroppskälla, med trekvart och profil som jämförelser. Profilens utsnitt är 3,9 % mindre i höjd än frontens. Jämförelseläget likställer bildskalan. Fysisk sitthöjd behöver kalibrerat underlag. [Mätlinjer på fotona](http://127.0.0.1:4317/bildstandard/sitthojd) · [SAM 3D Body](https://github.com/facebookresearch/sam-3d-body)
 
 | Foto | Vad som ska synas |
 | --- | --- |
@@ -17,7 +17,13 @@ Som arbetsstandard använder studion fyra foton. SAM 3D Body skattar en kropp pe
 | 3. Sittande i ren sidoprofil | Flytta kameran 90° runt samma sittpose. Håll den i våg på brösthöjd. Visa stol, höft, knän och fötter med fri sikt. |
 | 4. Båda handryggarna ovanifrån | Skarpa fingertoppar, naglar och tatueringar med ett spelkort intill för skala. |
 
-För en ny dealer provar vi en serie med elva bilder. Ta stående helfigur, sittande helfigur utan bord och ansiktsporträtt framifrån, i 45° trekvart och i 90° profil. Flytta kameran åt samma håll och behåll posen inom varje serie. Ta sedan båda handryggarna ovanifrån och kortgreppet från tumsidan cirka 20° över filten. Om ryggen ska visas i slutscenen kan en tolfte bild bakifrån ge underlag för håret och kläderna.
+För en ny dealer innehåller [bildstandarden i studion](http://127.0.0.1:4317/bildstandard) elva grundbilder. Ta stående helfigur, sittande helfigur utan bord och ansiktsporträtt framifrån, i 45° trekvart och i 90° profil. Flytta kameran åt samma håll och behåll posen inom varje serie. Ta sedan båda handryggarna ovanifrån och kortgreppet från tumsidan cirka 20° över den vita ytan. Den extra rörelsebilden visar högerhanden under kortvändningen. Referensfoton för identitet, kläder, pose och korttryck styr prompterna. Hela serien kan hämtas som JSON med fält för filuppgifter, synliga egenskaper och osäkerheter. Om ryggen ska visas i slutscenen kan en bild bakifrån ge underlag för håret och kläderna.
+
+I [Paulinas Fas 1, upplaga 1](http://127.0.0.1:4317/fotomall.html/fas-1/v1/index.html) visar sittbilderna en neutral stol utan armstöd och händerna på låren. Hand- och kortbilderna har matt vit bakgrund med en svag kontaktskugga. Referenskortets mörkröda rygg har en vit punkt i ett hörn för orientering. En extra bild visar högerhandens nyp när kortet vänds i luften. För att följa en verklig snabb vändning behövs film med synliga hörn och liten rörelseoskärpa. I den egna 3D-scenen går kortets position och rotation att läsa direkt från kortobjektet.
+
+**Blandade foton av en ny person.** Runways bildbeta tar exempelvis fyra foton där personen syns från olika håll och skapar alltid en ny stående front. Personens synliga drag hämtas från hela originalurvalet. Den genererade fronten är sedan huvudreferens för kläder, proportioner och de båda stående sidovyerna. Sittande front använder samma ståfront. Sittande 45° och 90° använder sittfronten. Varje steg behåller personens egna original som stöd. [Synlig beställningsvy](http://127.0.0.1:4317/bildpipeline) · [Pipelineplan och format](../information/BILDPIPELINE.md)
+
+**Korttryck för nya handbilder.** `referenskort-x-v1` är 63 × 89 mm. Den fasta PNG-filen har 252 × 356 pixlar. I sRGB är ryggen (152, 1, 9), X:et (241, 240, 242) och hörnpunkten (222, 198, 250). Punkten är 6 mm i diameter och centrerad 10 mm in från kortets övre vänstra kanter. I en senare 3D-rendering kan kortet få en ny färgtextur. I film kräver samma byte att kortets hörn går att följa och att fingrar framför det täcker trycket. [Kortstandard och PNG](http://127.0.0.1:4317/bildstandard#referenskort) · [Färgtexturer i Three.js](https://threejs.org/manual/pages/color-management.html)
 
 För kortgivningen ger några sekunders verkligt utdrag från grepp till släpp underlag för tempo och fingerkontakt. Paulina har redan 01 för helkropp och 03 för utseende. 05 och 05b är genererade sidoprofiler. Den mest värdefulla nya bilden är en fotograferad sidoprofil i neutral sittpose. Tidigare bilder med lutning kan användas för ansikte, kläder och arbetsrörelser.
 
@@ -25,7 +31,7 @@ För kortgivningen ger några sekunders verkligt utdrag från grepp till släpp 
 
 Bygg en egen enkel sittande referensfigur. Den behöver underarm, handled, tumme och pekfinger, ett bord med kända mått, en sko och ett separat kort. Ge kortet ett greppställe, en släppruta och ett mål på bordet. När kortet ligger på bordet ska dess läge vara oberoende av kameran. Visa greppet i båda stolarna och spara referensrutorna för den valda kameran. SAM-kroppen kan ge proportioner. En fungerande fingerrigg och en snygg dealerfilm kräver egna prov.
 
-I den lokala riggen kan du nu böja armbågar, pekfingrar och långfingrar. Det första vänsterhandsutdraget använder samma kortbana för båda kamerorna. För en hel giv till plats 4 återstår överlämning, landning och släpp. Därefter kan ansikte, hår, dräkt och tatueringar jämföras mot identitetsbilderna i båda spelarvyerna. [Riggen i studion](http://127.0.0.1:4317/#modellering) · [Utdragsprovet i studion](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html)
+I Paulina v2 kan du böja armbågar, pekfingrar och långfingrar. **Fotoutseende · prov** visar samma sittande kropp med ansikte, hår och kostym från Fas 1. Den tidigare 08-riggen utför första vänsterhandsutdraget på samma kortbana från båda stolarna. Nästa rörelseprov är att passa v2:s hand mot samma kort och sko. För en hel giv till plats 4 återstår överlämning, landning och släpp. [Paulina v2](http://127.0.0.1:4317/#modellering) · [08-riggens utdrag](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html)
 
 Behåll Jakobs styrka i filmproduktionen. Redigera figurens rörelse och kortets bana innan de används som underlag till en tagning. En film genererad från en kamera behöver kontrolleras mot den kameran. En separat generering för nästa stol kan ändra ansikte, grepp och tidpunkt. Märk den därför som en egen tagning och jämför båda mot samma 3D-referens.
 

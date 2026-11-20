@@ -1,0 +1,14 @@
+{
+  "shoeCenterXZ": [0.42, -0.21],
+  "yawDegrees": -110,
+  "width": 0.08,
+  "depth": 0.15,
+  "mouthZ": 0.075,
+  "cardTopY": 0.018,
+  "cardWidth": 0.063,
+  "cardLength": 0.089,
+  "cardThickness": 0.0004,
+  "initialLeadZ": 0.104,
+  "travel": 0.077,
+  "frames": 9
+}

@@ -115,20 +115,20 @@ export const nextPhotos = [
     id: "10",
     shot: "handryggar",
     title: "Båda handryggarna i vila",
-    file: "10_handryggar_ovanifran_genererad.png",
+    file: "fas-1/v1/hander/handryggar.png",
     refs: ["03"],
     goal: "En sammanhängande bild av båda händerna. 03 ger originalets färger och synliga tatueringar.",
     prompt:
-      "Gör en enda fotorealistisk närbild av Paulinas båda händer. Bifogad bild 03 är identitetsreferensen. Fotografera lodrätt ovanifrån. Båda handflatorna vilar mot matt mörkgrön filt, med handryggarna mot kameran och fingrarna avslappnade och lätt isär. Visa båda handlederna, de svarta kavajärmarna, samtliga tio fingertoppar och naglar. Lägg ett enda rödryggat standardspelkort bredvid händerna som skala. Behåll hudton, naglarnas form och de tatueringsmotiv som faktiskt syns i 03. Låt otydliga detaljer vara diskreta. Mjukt jämnt ljus och skärpa över båda händerna. Liggande bild, utan text, smycken eller collage.",
+      "Fotografera båda handryggarna lodrätt ovanifrån på matt vit yta i mjukt ljus. Visa de svarta kavajärmarna, handlederna och alla tio fingertopparna. Låt fingrarna vila lätt isär. Använd bild 03 för hudton, naglar och synliga tatueringar. Lägg ett spelkort bredvid händerna. Kortets baksida har ett mörkrött fält, tunn vit kant och en enda vit punkt nära ett hörn. Bevara den svaga kontaktskuggan mot den vita ytan.",
   },
   {
     id: "11",
     shot: "kortgrepp",
     title: "Vänsterhandens grepp från sidan",
-    file: "11_vansterhand_kortgrepp_snett_genererad.png",
+    file: "fas-1/v1/hander/kortdrag-vanster.png",
     refs: ["03", "09"],
     goal: "Se hur de lediga fingrarna böjs. 03 styr utseendet och 09 visar vilka fingrar som ligger på kortet.",
     prompt:
-      "Gör en enda fotorealistisk närbild av Paulinas vänstra hand när hon drar ett rödryggat spelkort över mörkgrön filt. Bifogad bild 03 styr hudton, kavajärm, naglar och synliga tatueringar. Bild 09 visar samma vänsterhand och dess kontakt med kortet ovanifrån. Flytta kameran till tumsidan, cirka 20 grader över filtens plan, så att kortets kant och kontakten under pek- och långfingrets fingerblommor syns. Fingrarna ligger lätt mot kortets rygg. Låt tumme, ringfinger och lillfinger vila i en mjuk, naturlig böj. Visa handleden, alla fem fingrar och hela kortet i skarp fokus. Mjukt ljus från sidan, liggande bild. Behåll vänsterhandens riktiga orientering och de motiv som går att läsa i 03.",
+      "Visa Paulinas vänsterhand när pek- och långfingret drar ett spelkort över matt vit yta. Använd bild 03 för utseendet och 09 för kontakten med kortet. Placera kameran på tumsidan cirka 20 grader över ytan. Visa kontaktfingrarna, de lätt böjda fria fingrarna, handleden och hela kortet. Kortets baksida har ett mörkrött fält, tunn vit kant och en enda vit punkt nära ett hörn. Mjukt sidoljus och en svag kontaktskugga gör kanten läsbar.",
   },
 ] as const;

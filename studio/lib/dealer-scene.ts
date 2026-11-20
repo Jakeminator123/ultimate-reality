@@ -1,8 +1,10 @@
 import * as T from "three";
 import { SVGRenderer } from "three/addons/renderers/SVGRenderer.js";
-import { Blocking, limits } from "./blocking";
+import { Blocking, GRASP, limits } from "./blocking";
 import { CARD, dealPose } from "./deal-pose";
 import layout from "./table-layout.json";
+import shoeLayout from "./card-shoe.json";
+import { buildDrawShoe } from "./card-shoe.mjs";
 
 export const seats = [4, 1] as const;
 export type Seat = (typeof seats)[number];
@@ -114,22 +116,17 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
   solid(
     cylinder,
     trim,
-    vec(0, -0.014, 0.02),
-    vec(0.785, 0.012, 0.525),
+    vec(0, -0.014, layout.table.centerZ),
+    vec(layout.table.radiusX-0.015, 0.012, layout.table.radiusZ-0.015),
   ).renderOrder = -4;
   solid(
     cylinder,
     "#23644f",
-    vec(0, -0.005, 0.02),
-    vec(0.77, 0.01, 0.51),
+    vec(0, -0.005, layout.table.centerZ),
+    vec(layout.table.radiusX-0.03, 0.01, layout.table.radiusZ-0.03),
   ).renderOrder = -3;
-  const shoe = box(
-    "#58443b",
-    vec(layout.shoe.x, 0.016, layout.shoe.z),
-    vec(layout.shoe.width, 0.032, layout.shoe.depth),
-  );
-  box("#e7d9b5", vec(shoe.position.x, 0.03, -0.187), vec(0.063, 0.004, 0.096));
-  box("#3a3531", vec(shoe.position.x, 0.046, -0.255), vec(0.08, 0.058, 0.045));
+  const { shoe } = buildDrawShoe(shoeLayout);
+  scene.add(shoe);
   // Four corner marks keep the landing point visible under a flat card.
   const target = new T.Group();
   scene.add(target);
@@ -174,8 +171,7 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
       -7;
   }
   // The resting hand and working arm are distinct limbs on the same figure.
-  const fixedElbow = vec(0.21, 0.089, -0.28),
-    fixedHand = vec(0.12, 0.024, -0.17);
+  const fixedElbow = vec(0.21, 0.089, -0.28);
   const restingUpper = mesh(cylinder, ivory);
   for (const x of [-0.14, 0.14]) {
     bone(
@@ -187,10 +183,12 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
     );
     oval(ivory, vec(x, 0.335, -0.345), vec(0.036, 0.037, 0.036), body);
   }
-  bone(ivory, fixedElbow, fixedHand, 0.028);
-  oval(skin, fixedHand, vec(0.034, 0.016, 0.044));
+  const leftForearm = mesh(cylinder, ivory);
+  const leftHand = new T.Group();
+  scene.add(leftHand);
+  oval(skin, vec(0, 0.022, -0.049), vec(0.032, 0.016, 0.044), leftHand);
   for (let i = 0; i < 4; i++)
-    oval(skin, vec(0.102 + i * 0.012, 0.012, -0.13), vec(0.0055, 0.006, 0.022));
+    oval(skin, vec((i - 1) * 0.012, 0.006, -0.012), vec(0.0055, 0.006, 0.022), leftHand);
   const upper = mesh(cylinder, ivory),
     fore = mesh(cylinder, ivory);
   const elbowJoint = mesh(sphere, joint),
@@ -210,12 +208,16 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
     vec(CARD.width, CARD.thickness, CARD.depth),
     card,
   );
+  const face = new T.Group();
+  card.add(face);
+  const back = box("#873c3a", vec(0, CARD.thickness / 2 + 0.00009, 0),
+    vec(CARD.width - 0.004, 0.00014, CARD.depth - 0.004), card);
   const diamond = (x: number, z: number, size: number) => {
     const m = box(
       "#a32f29",
       vec(x, CARD.thickness / 2 + 0.00009, z),
       vec(size, 0.00014, size),
-      card,
+      face,
     );
     m.rotation.y = Math.PI / 4;
   };
@@ -261,7 +263,12 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
     body.position.z = p.lean;
     target.position.copy(p.target);
     card.position.copy(p.center);
-    card.rotation.x = p.tilt;
+    card.rotation.set(p.tilt, p.yaw, 0, "YXZ");
+    back.visible = s.frame < GRASP;
+    face.visible = !back.visible;
+    leftHand.position.copy(p.leftTip);
+    leftHand.rotation.set(p.leftPitch, Math.atan2(p.leftDirection.x, p.leftDirection.z), 0, "YXZ");
+    link(leftForearm, fixedElbow, leftHand.localToWorld(vec(0, 0.027, -0.08)), 0.028);
     link(restingUpper, vec(0.14, 0.335, -0.35 + p.lean), fixedElbow, 0.036);
     link(upper, p.shoulder, p.elbow, 0.038);
     link(fore, p.elbow, p.wrist, 0.028);
@@ -325,7 +332,7 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
     const ray = new T.Raycaster();
     ray.setFromCamera(new T.Vector2(x, y), cameras[seat]);
     const hit = ray.ray.intersectPlane(new T.Plane(UP, 0), new T.Vector3());
-    if (!hit || (hit.x / 0.77) ** 2 + ((hit.z - 0.02) / 0.51) ** 2 > 1)
+    if (!hit || (hit.x / (layout.table.radiusX-0.03)) ** 2 + ((hit.z-layout.table.centerZ) / (layout.table.radiusZ-0.03)) ** 2 > 1)
       return null;
     const clamp = (v: number, [min, max]: [number, number]) =>
       Math.max(min, Math.min(max, Math.round(v * 100)));
@@ -363,6 +370,17 @@ export function buildDealerScene(hosts: Record<Seat, HTMLDivElement>) {
       for (const seat of seats) hosts[seat].replaceChildren();
       for (const g of geometry) g.dispose();
       for (const m of materials.values()) m.dispose();
+      const shoeMaterials = new Set<T.Material>();
+      shoe.traverse((child: T.Object3D) => {
+        if (child instanceof T.Mesh) {
+          child.geometry.dispose();
+          for (const m of Array.isArray(child.material) ? child.material : [child.material]) shoeMaterials.add(m);
+        }
+      });
+      for (const m of shoeMaterials) {
+        if (m instanceof T.MeshStandardMaterial) m.map?.dispose();
+        m.dispose();
+      }
       gpu?.dispose();
       gpu?.forceContextLoss();
     },

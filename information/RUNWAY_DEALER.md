@@ -4,6 +4,8 @@
 
 För en redan lyckad giv är Aleph 2.0 första sidovinkelprovet. För en ny giv, välj kamera och kontrollera kortets kontakt före beslut om 1080p eller 4K.
 
+För en ny dealers grundbilder finns en egen lokal beställningsvy. Den skapar ståfronten först och använder den i följande vinklar. [Bildpipelinen i studion](http://127.0.0.1:4317/bildpipeline) · [Recept, format och pris för stillbilder](BILDPIPELINE.md)
+
 ## Modellval för agenter
 
 Runway publicerar utvecklardokumentationen som Markdown. Börja med agentöversikten. Använd indexet för att hitta den aktuella modellen, slå upp dess endpoint och referensfält i API-kontraktet och hämta kreditpriset från prissidan. Denna läsväg fungerar även i en agent utan Runway Dev-plugin. [Utvecklarportal](https://docs.dev.runwayml.com/) · [Agentöversikt](https://docs.dev.runwayml.com/ai-context.md) · [Dokumentationsindex](https://docs.dev.runwayml.com/llms.txt) · [API-kontrakt](https://docs.dev.runwayml.com/api.md) · [API-priser](https://docs.dev.runwayml.com/guides/pricing/)

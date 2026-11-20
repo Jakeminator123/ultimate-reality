@@ -21,7 +21,7 @@ const modules = {
 const out = process.argv[2] ? path.resolve(process.argv[2]) : here;
 await fs.mkdir(out, { recursive: true });
 const origin = "http://bordsprov.localhost/";
-const layoutFile = path.join(root, "studio/lib/table-layout.json");
+const layoutFile = path.join(root, "test/bord/filtdjup-v1/layout-v1.json");
 const layout = JSON.parse(await fs.readFile(layoutFile, "utf8"));
 const browser = await chromium.launch({ channel: "msedge", headless: true, args: ["--enable-unsafe-swiftshader"] });
 try {

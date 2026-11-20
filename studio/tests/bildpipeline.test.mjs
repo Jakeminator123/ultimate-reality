@@ -1,0 +1,150 @@
+import assert from "node:assert/strict";
+import { createHash, randomUUID } from "node:crypto";
+import { readFileSync, promises as fs } from "node:fs";
+import { registerHooks, stripTypeScriptTypes } from "node:module";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { fileURLToPath } from "node:url";
+import sharp from "sharp";
+
+// Exercise the same TypeScript modules Next runs, with a transport that has no network access.
+const project = path.resolve(fileURLToPath(new URL("../", import.meta.url)));
+const hooks = registerHooks({
+  resolve(specifier, context, next) {
+    if (specifier.startsWith(".") && !path.extname(specifier)) return next(specifier + ".ts", context);
+    return next(specifier, context);
+  },
+  load(url, context, next) {
+    if (url.startsWith(new URL("../", import.meta.url).href) && !url.includes("/node_modules/")) {
+      if (url.endsWith(".ts")) return { format: "module", shortCircuit: true,
+        source: stripTypeScriptTypes(readFileSync(new URL(url), "utf8"), { mode: "transform" }) };
+      if (url.endsWith(".json")) return { format: "module", shortCircuit: true,
+        source: "export default " + readFileSync(new URL(url), "utf8") };
+    }
+    return next(url, context);
+  },
+});
+const { pipelineAction, pipelineImage, pipelineRevision } = await import("../lib/bildpipeline-server.ts");
+const { bildpipelinePlan } = await import("../lib/bildpipeline.ts");
+hooks.deregister();
+
+test("en sparad revision genererar en ny ståfront, rätt barnbilder och aldrig två jobb för samma steg", async (t) => {
+  const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "ultimate-bildpipeline-"));
+  const lab = path.join(temporary, "ultimate-reality-lab");
+  const inputs = path.join(lab, "inputs");
+  await fs.mkdir(inputs, { recursive: true });
+  await fs.mkdir(path.join(lab, "orders"));
+  await fs.writeFile(path.join(lab, ".owner"), "ultimate-reality-lab/v1");
+  const previousRoot = process.env.ULTIMATE_REALITY_STORAGE;
+  const previousKey = process.env.RUNWAYML_API_SECRET;
+  process.env.ULTIMATE_REALITY_STORAGE = temporary;
+  process.env.RUNWAYML_API_SECRET = "offline-fixture";
+  t.after(async () => {
+    if (previousRoot === undefined) delete process.env.ULTIMATE_REALITY_STORAGE;
+    else process.env.ULTIMATE_REALITY_STORAGE = previousRoot;
+    if (previousKey === undefined) delete process.env.RUNWAYML_API_SECRET;
+    else process.env.RUNWAYML_API_SECRET = previousKey;
+    assert.equal(path.dirname(temporary), path.resolve(os.tmpdir()));
+    await fs.rm(temporary, { recursive: true, force: true });
+  });
+  const png = (width, height, n) => sharp({ create: { width, height, channels: 3,
+    background: { r: 17 + n, g: 185, b: 82 } } }).png().toBuffer();
+  const files = ["skor.png", "profil.png", "porträtt.png", "sittande.png"];
+  const originals = [];
+  for (const [index, name] of files.entries()) {
+    const bytes = await png(64, 96, index);
+    originals.push(bytes);
+    await fs.writeFile(path.join(inputs, name), bytes);
+  }
+  const card = await fs.readFile(path.join(project, "public/fotomall/kort/referenskort-x-v1.png"));
+  const plan = bildpipelinePlan(files);
+  assert.equal(plan.length, 12);
+  assert.equal(plan[0].credits, 18);
+  assert.equal(plan.reduce((sum, s) => sum + s.credits, 0), 225);
+  assert.ok(bildpipelinePlan(Array.from({ length: 14 }, (_, i) => i + ".png")).every((s) => s.refs.length <= 16));
+  assert.throws(() => bildpipelinePlan(Array.from({ length: 15 }, (_, i) => i + ".png")));
+  const outputs = new Map();
+  for (const [index, step] of plan.entries()) {
+    const [width, height] = step.ratio.split(":").map(Number);
+    outputs.set(step.id, await png(width, height, index + 10));
+  }
+  const requests = [];
+  const tasks = new Map();
+  let lostResponse = false;
+  let invalidDimensions = false;
+
+  async function remote(input, init = {}) {
+    const url = new URL(String(input));
+    if (url.origin === "https://api.dev.runwayml.com" && url.pathname === "/v1/text_to_image" && init.method === "POST") {
+      const body = JSON.parse(init.body);
+      const step = plan.find((s) => s.prompt === body.promptText);
+      assert.ok(step);
+      assert.equal(body.ratio, step.ratio);
+      assert.deepEqual([body.model, body.quality, body.reasoningEffort, body.outputFormat, body.outputCount],
+        ["gpt_image_2_6_sunburst", "high", "high", "png", 1]);
+      assert.deepEqual(body.referenceImages.map((ref) => ref.tag), step.refs.map((ref) => ref.tag));
+      for (const [index, ref] of step.refs.entries()) {
+        const expected = ref.source === "step" ? outputs.get(ref.step) : ref.source === "card" ? card : originals[ref.index];
+        const actual = Buffer.from(body.referenceImages[index].uri.split(",")[1], "base64");
+        assert.ok(actual.equals(expected), step.id + " / " + ref.tag);
+      }
+      const id = randomUUID();
+      tasks.set(id, step.id);
+      requests.push({ id, step: step.id });
+      if (lostResponse) throw new Error("Simulerat avbrott efter mottagen beställning");
+      return Response.json({ id });
+    }
+    if (url.origin === "https://api.dev.runwayml.com" && url.pathname.startsWith("/v1/tasks/")) {
+      const id = url.pathname.split("/").at(-1);
+      assert.ok(tasks.has(id));
+      return Response.json({ id, status: "SUCCEEDED", output: ["https://result.invalid/" + id] });
+    }
+    if (url.origin === "https://result.invalid") {
+      assert.equal(new Headers(init.headers).has("authorization"), false);
+      const step = tasks.get(url.pathname.slice(1));
+      return new Response(invalidDimensions ? originals[0] : outputs.get(step), { headers: { "Content-Type": "image/png" } });
+    }
+    throw new Error("Oväntad nätadress i simulerat API");
+  }
+
+  const draft = await pipelineAction({ action: "draft", files }, remote);
+  assert.equal(draft.mode, "draft");
+  assert.equal(requests.length, 0);
+  // A later change in the inbox must not change the paid revision.
+  await fs.writeFile(path.join(inputs, files[0]), originals[2]);
+  await Promise.all([0, 1].map(() => pipelineAction({ action: "start", id: draft.id, mode: "front" }, remote)));
+  assert.deepEqual(requests.map((r) => r.step), ["staende/front"]);
+  let state = await pipelineAction({ action: "sync", id: draft.id }, remote);
+  assert.equal(state.jobs["staende/front"].status, "succeeded");
+  assert.equal(requests.length, 1);
+  state = await pipelineAction({ action: "start", id: draft.id, mode: "series" }, remote);
+  assert.deepEqual(requests.slice(1).map((r) => r.step).sort(),
+    ["staende/trekvart", "staende/profil", "sittande/front"].sort());
+  for (let round = 0; round < 15 && Object.values(state.jobs).some((j) => j.status !== "succeeded"); round++) {
+    await Promise.all([0, 1].map(() => pipelineAction({ action: "sync", id: draft.id }, remote)));
+    state = await pipelineRevision(draft.id);
+  }
+  assert.ok(Object.values(state.jobs).every((j) => j.status === "succeeded"));
+  assert.equal(new Set(requests.map((r) => r.step)).size, 12);
+  assert.equal(requests.length, 12);
+  const result = await pipelineImage(draft.id, "sittande/front");
+  assert.ok(Buffer.from(await result.arrayBuffer()).equals(outputs.get("sittande/front")));
+
+  await fs.writeFile(path.join(inputs, files[0]), originals[0]);
+  const other = await pipelineAction({ action: "draft", files }, remote);
+  lostResponse = true;
+  state = await pipelineAction({ action: "start", id: other.id, mode: "series" }, remote);
+  assert.equal(state.jobs["staende/front"].status, "unknown");
+  await pipelineAction({ action: "sync", id: other.id }, remote);
+  assert.equal(requests.length, 13);
+  lostResponse = false;
+  invalidDimensions = true;
+  state = await pipelineAction({ action: "reconcile", id: other.id, step: "staende/front", taskId: requests.at(-1).id }, remote);
+  assert.equal(state.jobs["staende/front"].status, "failed");
+  await pipelineAction({ action: "sync", id: other.id }, remote);
+  assert.equal(requests.length, 13);
+  const archived = await pipelineImage(other.id, "staende/front");
+  const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+  assert.equal(hash(Buffer.from(await archived.arrayBuffer())), hash(originals[0]));
+});

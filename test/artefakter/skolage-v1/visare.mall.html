@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kortskons läge · SKO-03</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;color:#eee8da;background:#142720}body{max-width:1640px;margin:auto;padding:clamp(12px,2vw,32px)}h1{font-size:clamp(24px,3vw,40px);margin:0}p{margin:.6rem 0 1rem;color:#d5d7ca}header,section{display:flex;gap:1rem;flex-wrap:wrap}section{margin:1rem 0}label{display:grid;gap:.25rem}select,input{font:inherit;accent-color:#ebc979}select{background:#203b31;color:inherit;padding:.4rem;border:1px solid #768d7d;border-radius:.35rem} main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem} figure{margin:0;background:#0e1e17;border-radius:.5rem;overflow:hidden} img{width:100%;display:block} figcaption{padding:.65rem;font-weight:600} span{display:block;color:#d0d3c3;font-size:.88em;font-weight:400} @media(max-width:760px){main{grid-template-columns:1fr}}
+</style>
+<h1>Var ska kortskon stå?</h1>
+<p>SKO-03 · Paulina 08 · första rödryggade kortet · 108 mm utdrag. Bordet mäter 192 × 129,6 cm. I närbilden av arbetskanten visar den gula linjen kortaste avståndet från skons fot till kanten.</p>
+<section><label>Kamera<select id="view"></select></label><label>Visningsruta<select id="frame"><option value="1">1 · grepp</option><option value="17" selected>17 · halva utdraget</option><option value="33">33 · hela kortet på filten</option></select></label></section>
+<main id="images"></main>
+<p>Räckvidd anges från riggens fasta axelreferens till handleden i den visade rutan. Fingeravståndet är min–max över 33 lägen. Greppkraft är inte uppmätt.</p>
+<script type="application/json" id="study">__PROV__</script><script>
+const study=JSON.parse(document.getElementById("study").textContent);
+const view=document.getElementById("view"),frame=document.getElementById("frame"),host=document.getElementById("images");
+const fmt=n=>n.toLocaleString("sv-SE",{maximumFractionDigits:4});
+for(const [id,name] of Object.entries(study.views))view.add(new Option(name,id));
+function draw(){
+  host.replaceChildren();
+  for(const [id,title] of Object.entries(study.labels)){
+    const data=study.metrics[id],figure=document.createElement("figure"),img=document.createElement("img"),cap=document.createElement("figcaption"),note=document.createElement("span");
+    img.src=study.images[id][frame.value][view.value];img.alt=title+" · "+study.views[view.value]+" · ruta "+frame.value;
+    cap.textContent=title+" · "+fmt(data.shortest_shoe_to_dealer_edge_cm)+" cm till kanten";
+    note.textContent="Axel–handled "+fmt(data.shoulder_reference_to_wrist_cm[(+frame.value-1)/4])+" cm · finger–kort "+data.skin_gap_mm.map(fmt).join("–")+" mm · 0 krockar i 33 lägen";
+    cap.append(note);figure.append(img,cap);host.append(figure);
+  }
+}
+view.onchange=frame.onchange=draw;draw();
+</script></html>

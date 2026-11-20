@@ -1,0 +1,30 @@
+<!doctype html><html lang="sv"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kortet ur skon · Ultimate Reality</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f2eb;color:#20382e;font:16px/1.48 "Segoe UI",Arial,sans-serif}main{max-width:1300px;margin:auto;padding:22px clamp(14px,3vw,42px) 38px}header,nav,.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}header{justify-content:space-between;margin-bottom:13px}h1{font:normal clamp(24px,4vw,39px)/1.15 Georgia,serif;margin:0}button{font:600 14px "Segoe UI",Arial,sans-serif;background:#e2e7db;color:inherit;border:0;border-radius:5px;padding:9px 12px;cursor:pointer}button[aria-pressed=true]{background:#254738;color:white}button:focus-visible,input:focus-visible{outline:3px solid #ac783f}img{width:100%;height:auto;display:block;background:#26382c;border-radius:8px}nav{margin:10px 0}.row{margin:12px 0}.row input{width:min(330px,85vw);accent-color:#254738}a{color:#265c43}p{margin:8px 0}small{color:#506557}
+</style><main><header><h1>Kortet ur skon</h1><nav aria-label="Spelarplats"><button data-seat="4">Stol 4</button><button data-seat="1">Stol 1</button></nav></header>
+<nav aria-label="Utsnitt"><button data-view="hand">Handdetalj</button><button data-view="bord">Hela bordet</button><button id="empty">Visa utan dealer</button></nav>
+<img id="photo" width="1600" height="900" alt=""><div class="row"><button id="play">Spela kortutdrag</button><label for="frame">Bildruta</label><input id="frame" type="range" min="1" max="9" value="5"><strong id="state"></strong></div>
+<p id="measure"></p><small>Öppningen är vriden 110° från spelarplats 4 mot dealerns sida. Det enda rörliga kortet är det rödryggade kortet framför mynningen. Rumsgeometri, bord, kortmål och spelarkameror är låsta.</small>
+<p><a id="previous" href="/bordsprov/skoprov-v1.html">Öppna föregående skoprov</a></p></main>
+<script type="application/json" id="data">__DATA__</script><script>
+const {photos,report}=JSON.parse(document.getElementById("data").textContent);
+const el=id=>document.getElementById(id), fmt=x=>x.toLocaleString("sv-SE",{maximumFractionDigits:1});
+let seat=4,view="hand",empty=false,frame=5,timer;
+if(location.protocol==="file:")el("previous").href="../../kortsko-vanster-v1/skoprov.html";
+function stop(){clearInterval(timer);timer=undefined;el("play").textContent="Spela kortutdrag";}
+function draw(){
+ for(const b of document.querySelectorAll("[data-seat]"))b.setAttribute("aria-pressed",String(+b.dataset.seat===seat));
+ for(const b of document.querySelectorAll("[data-view]"))b.setAttribute("aria-pressed",String(b.dataset.view===view));
+ el("empty").setAttribute("aria-pressed",String(empty));el("empty").textContent=empty?"Visa med dealer":"Visa utan dealer";
+ const m=report.frames[frame-1];el("frame").value=frame;el("frame").disabled=empty;
+ el("state").textContent=empty?"Tomt bord":frame+" / "+report.frames.length;
+ el("photo").src=photos[empty?0:frame][seat+"-"+view];el("photo").alt="Stol "+seat+" · "+(empty?"sko utan hand":"kortutdrag, ruta "+frame);
+ el("measure").textContent=empty?"Öppningen sitter under frontplattan. Framkanten på det första kortet sticker ut.":"Utdrag "+fmt(m.travel_mm)+" mm. Pekfingret ligger "+fmt(m.pad_gaps_mm[0])+" mm och långfingret "+fmt(m.pad_gaps_mm[1])+" mm över kortytan."+(frame===report.frames.length?" Hela kortet ligger på filten.":"");
+}
+for(const b of document.querySelectorAll("[data-seat]"))b.onclick=()=>{seat=+b.dataset.seat;draw()};
+for(const b of document.querySelectorAll("[data-view]"))b.onclick=()=>{view=b.dataset.view;draw()};
+el("empty").onclick=()=>{stop();empty=!empty;draw()};el("frame").oninput=e=>{stop();frame=+e.target.value;draw()};
+el("play").onclick=()=>{if(timer){stop();return;}empty=false;frame=1;draw();el("play").textContent="Pausa";timer=setInterval(()=>{frame++;draw();if(frame===report.frames.length)stop()},200)};
+draw();
+</script></html>

@@ -1,0 +1,82 @@
+{
+  "license": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "resolution": "2k",
+  "surfaces": {
+    "felt": {
+      "id": "scuba_suede",
+      "url": "https://polyhaven.com/a/scuba_suede",
+      "sourceSizeMetres": [
+        0.28522,
+        0.2789
+      ],
+      "maps": {
+        "diff": {
+          "file": "maps/scuba_suede_diff_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/scuba_suede/scuba_suede_diff_2k.jpg",
+          "md5": "1cfa0ca16f7b3339bbe16aeef10835e7"
+        },
+        "nor_gl": {
+          "file": "maps/scuba_suede_nor_gl_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/scuba_suede/scuba_suede_nor_gl_2k.jpg",
+          "md5": "d2ba39357e70c8b6a92e2cfc99458a07"
+        },
+        "rough": {
+          "file": "maps/scuba_suede_rough_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/scuba_suede/scuba_suede_rough_2k.jpg",
+          "md5": "3ff7266b6bfd587ad918f59103a6a85f"
+        }
+      }
+    },
+    "rail": {
+      "id": "brown_leather",
+      "url": "https://polyhaven.com/a/brown_leather",
+      "sourceSizeMetres": [
+        0.4,
+        0.4
+      ],
+      "maps": {
+        "diff": {
+          "file": "maps/brown_leather_diff_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_albedo_2k.jpg",
+          "md5": "1bd381c43817743a2affdd1ce2d193c7"
+        },
+        "nor_gl": {
+          "file": "maps/brown_leather_nor_gl_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_nor_gl_2k.jpg",
+          "md5": "6e86bbaf5e995c4154b76a1e4b0f4f1c"
+        },
+        "rough": {
+          "file": "maps/brown_leather_rough_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_rough_2k.jpg",
+          "md5": "95b48a5c95b02d87dadee46c26f1cfb5"
+        }
+      }
+    },
+    "wood": {
+      "id": "walnut_veneer",
+      "url": "https://polyhaven.com/a/walnut_veneer",
+      "sourceSizeMetres": [
+        1.8,
+        1.8
+      ],
+      "maps": {
+        "diff": {
+          "file": "maps/walnut_veneer_diff_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/walnut_veneer/walnut_veneer_diff_2k.jpg",
+          "md5": "48000eac719ccbae27319f942ab5bf2c"
+        },
+        "nor_gl": {
+          "file": "maps/walnut_veneer_nor_gl_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/walnut_veneer/walnut_veneer_nor_gl_2k.jpg",
+          "md5": "987a6cf092f9ab65705416dda264b0ff"
+        },
+        "rough": {
+          "file": "maps/walnut_veneer_rough_2k.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/walnut_veneer/walnut_veneer_rough_2k.jpg",
+          "md5": "cff9cdcca482f6c71d7ecf49b3789f9e"
+        }
+      }
+    }
+  }
+}

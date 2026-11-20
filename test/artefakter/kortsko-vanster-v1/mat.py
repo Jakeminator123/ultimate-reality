@@ -12,7 +12,7 @@ here = Path(__file__).resolve().parent
 root = here.parents[2]
 source = root / "test/dealer/paulina/filtdjup-v1-sits406"
 source_pose = json.loads((source / "pose.json").read_text(encoding="utf8"))
-layout = json.loads((root / "studio/lib/table-layout.json").read_text(encoding="utf8"))
+layout = json.loads((root / "test/bord/filtdjup-v1/layout-v1.json").read_text(encoding="utf8"))
 npz_path = next(Path(k) for k in source_pose["sources_sha256"] if "sidoprofil" in k)
 assert hashlib.sha256(npz_path.read_bytes()).hexdigest() == source_pose["sources_sha256"][npz_path.as_posix()]
 source_mesh = trimesh.load(source / "paulina-sits406.glb", force="mesh", process=False)

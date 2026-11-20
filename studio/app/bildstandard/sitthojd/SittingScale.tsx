@@ -1,0 +1,58 @@
+"use client";
+import { useState } from "react";
+import styles from "./sitting.module.css";
+
+export type MeasuredPhoto = {
+  file: string; label: string; degrees: number; width: number; height: number;
+  crownY: number; soleY: number; seatX: number; seatY: number;
+};
+const photos = "/fotomall.html/fas-1/v1/";
+const span = (photo: MeasuredPhoto) => photo.soleY - photo.crownY;
+const format = (n: number, digits = 0) => n.toLocaleString("sv-SE", { maximumFractionDigits: digits });
+
+export default function SittingScale({ views }: { views: MeasuredPhoto[] }) {
+  const [aligned, setAligned] = useState(false);
+  const [lines, setLines] = useState(true);
+  const front = views[0];
+  return <main className={styles.page}>
+    <nav aria-label="Studionavigering"><a href="/#modellering">← 3D-modellering</a><a href="/bildstandard">Bildstandard</a></nav>
+    <header><p>Paulina · Fas 1 v1</p><h1>Sittande i tre vinklar</h1></header>
+    {!front ? <p>De lokala bilderna och mätningen för upplaga 1 behövs för att visa jämförelsen.</p> : <>
+      <p className={styles.intro}>Framifrån och i trekvart upptar Paulina cirka {format(span(front) + 1)} pixlar från hjässa till skosula. I profil är hon {format(span(front) - span(views[2]))} pixlar mindre i bild.</p>
+      <div className={styles.tools}>
+        <div role="group" aria-label="Bildskala">
+          <button aria-pressed={!aligned} onClick={() => setAligned(false)}>Originalens utsnitt</button>
+          <button aria-pressed={aligned} onClick={() => setAligned(true)}>Samma bildskala</button>
+        </div>
+        <label><input type="checkbox" checked={lines} onChange={e => setLines(e.target.checked)}/> Mätlinjer</label>
+      </div>
+      <p className={styles.explanation}>{aligned
+        ? "De tre fotona visas med hjässan och skosulan på frontbildens nivåer. Profilen förstoras lika mycket på höjden och bredden."
+        : "Alla tre original är 1083 × 1452 px. Bilderna visas i samma ram med hela originalets utsnitt."}</p>
+      <div className={styles.views}>{views.map(photo => {
+        const scale = aligned ? span(front) / span(photo) : 1;
+        const shift = aligned ? front.crownY - scale * photo.crownY : 0;
+        const y = (pixel: number) => (pixel * scale + shift) / photo.height * 100 + "%";
+        const seatX = (0.5 + (photo.seatX / photo.width - 0.5) * scale) * 100 + "%";
+        return <figure key={photo.file}>
+          <figcaption>{photo.label} <span>{photo.degrees}°</span></figcaption>
+          <div className={styles.frame} style={{ aspectRatio: photo.width + "/" + photo.height }}>
+            <img src={photos + photo.file} alt={"Paulina sittande " + photo.label.toLocaleLowerCase("sv")} style={{
+              transform: "translateY(" + (shift / photo.height * 100) + "%) scale(" + scale + ")",
+            }}/>
+            {lines && <div aria-hidden="true">
+              <i className={styles.line} style={{ top: y(photo.crownY) }}/><i className={styles.line} style={{ top: y(photo.soleY) }}/>
+              <i className={styles.seatLine} style={{ top: y(photo.seatY) }}/><b className={styles.dot} style={{ top: y(photo.seatY), left: seatX }}/>
+            </div>}
+          </div>
+          <div className={styles.measure}><strong>{format(span(photo) + 1)} px</strong> i originalet · <a href={photos + photo.file}>Öppna foto</a></div>
+        </figure>;
+      })}</div>
+      <p className={styles.legend}><i/> Hjässa och skosula <b/> Dynans underkant ovanför främre stolsbenet</p>
+      <section className={styles.note}><h2>Vad visar sitsen?</h2>
+        <p>Det synliga märket där den grå dynan möter träet ligger på rad {views.map(v => format(v.seatY)).join(", ")} från bildens överkant. Den streckade linjen visar hur märket förskjuts även när kropparna visas i samma skala.</p>
+        <p>ImageGen i Codex skapade de tre sparade referenserna. Kameraperspektivet påverkar var stolkanten syns och kroppen döljer den faktiska sittytan. Fysisk sitthöjd i centimeter går därför inte att fastställa från de här bilderna.</p>
+      </section>
+    </>}
+  </main>;
+}

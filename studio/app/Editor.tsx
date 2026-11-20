@@ -59,9 +59,9 @@ const SceneStudio = dynamic(() => import("./SceneStudio"), {
 
 type Slot = "first" | "last";
 const workspaces = [
-  { id: "film", name: "Filmutkast", icon: Clapperboard },
   { id: "modellering", name: "3D-modellering", icon: Box },
   { id: "scen", name: "3D-scen", icon: Layers3 },
+  { id: "film", name: "Filmutkast", icon: Clapperboard },
   { id: "modeller", name: "Modeller och pris", icon: Calculator },
   { id: "promptmallar", name: "Startprompter", icon: BookOpen },
 ] as const;
@@ -104,11 +104,11 @@ function usePicture(
   return result.key === key ? result : { key, uri: "", error: "" };
 }
 export default function Editor() {
-  const [mode, setMode] = useState<Workspace>("film");
+  const [mode, setMode] = useState<Workspace>("modellering");
   useEffect(() => {
     const select = () => {
       const hash = window.location.hash.slice(1);
-      setMode(workspaces.find(entry => entry.id === hash)?.id ?? "film");
+      setMode(workspaces.find(entry => entry.id === hash)?.id ?? "modellering");
     };
     select();
     window.addEventListener("hashchange", select);
@@ -165,11 +165,14 @@ export default function Editor() {
     setStatus("");
     setError("");
   }
+  const draftRequested = useRef(false);
   useEffect(() => {
+    if (mode === "modellering" || draftRequested.current) return;
+    draftRequested.current = true;
     Promise.all([load(), fetch("/api/assets").then(readJson).then(setAssets)])
       .then(() => setReady(true))
-      .catch((e) => setError(e.message));
-  }, []);
+      .catch((e) => { draftRequested.current = false; setError(e.message); });
+  }, [mode]);
   useEffect(() => {
     if (picker) dialog.current?.showModal();
     else dialog.current?.close();
@@ -291,6 +294,9 @@ export default function Editor() {
           {workspaces.map(({ id, name, icon: Icon }) => <a key={id} href={"#" + id} aria-current={mode === id ? "page" : undefined}>
             <Icon size={18} strokeWidth={1.7}/>{name}
           </a>)}
+          <a href="/bildstandard" target={dirty ? "_blank" : undefined} rel="noreferrer"><ImageIcon size={18} strokeWidth={1.7}/> Bildstandard</a>
+          <a href="/bildpipeline" target={dirty ? "_blank" : undefined} rel="noreferrer"><Aperture size={18} strokeWidth={1.7}/> Bildpipeline</a>
+          <a href="/ovrigt" target={dirty ? "_blank" : undefined} rel="noreferrer"><FolderOpen size={18} strokeWidth={1.7}/> Övrigt</a>
         </nav>
         <span className="workspace-local"><i/> Lokal arbetsyta</span>
       </header>
@@ -298,7 +304,7 @@ export default function Editor() {
         <section className="hero">
           <div>
             <h1>
-              {mode === "film" ? draft.clipName || "Giv till plats 4" : mode === "scen" ? "Giv till plats 4" : workspaces.find(entry => entry.id === mode)?.name}
+              {mode === "film" ? draft.clipName || "Giv till plats 4" : workspaces.find(entry => entry.id === mode)?.name}
             </h1>
           </div>
           {(mode === "film" || mode === "scen") && <div className="save-group">
@@ -334,7 +340,7 @@ export default function Editor() {
             </button>
           </div>}
         </section>
-        {(error || a.error || b.error) && (
+        {mode !== "modellering" && (error || a.error || b.error) && (
           <div className="alert" role="alert">
             {error || a.error || b.error}
           </div>
@@ -632,14 +638,14 @@ export default function Editor() {
           <span>
             <Monitor size={14} /> Ultimate Reality · Dealerstudio
           </span>
-          <span role="status">
+          {mode !== "modellering" && <span role="status">
             {status ||
               (dirty
                 ? "Osparade ändringar"
                 : draft.version
                   ? "Sparad version " + draft.version
                   : "Lokalt utkast")}
-          </span>
+          </span>}
         </footer>
       </main>
       </div>

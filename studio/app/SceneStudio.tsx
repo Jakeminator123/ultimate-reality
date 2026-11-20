@@ -153,17 +153,21 @@ export default function SceneStudio({ value, onChange, onImages }: Props) {
   }
   return (
     <section className="blocking">
+      <section className="current-scene" aria-label="Aktuellt kasinorum">
+        <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1" aria-label="Öppna det vridbara kasinorummet från Stol 4">
+          <img src="/bordsprov/rum3d/arbetsrum.jpg" alt="Det redigerbara kasinorummet med Paulina vid blackjackbordet" onError={e => { e.currentTarget.hidden = true; }}/>
+        </a>
+        <div><h2>Kasinorummet</h2>
+          <p>RUM-03 med bordet på 192 × 129,6 cm och 70/30-skon. Kortutdraget använder Paulinas 08-rigg. Stol 4 och Stol 1 visar samma tagning.</p>
+          <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1">Vrid scenen från Stol 4 ↗</a>
+          <a href="/bordsprov/paulina-utdrag.html?riktning=70-30">Visa 08-riggens kortutdrag ↗</a>
+        </div>
+      </section>
       <div className="pose-heading">
         <div>
-          <div className="overline">
-            <Camera size={14} /> 3D-SCEN
-          </div>
           <h2>Grepp och landning</h2>
         </div>
         <div className="actions">
-          <a href="/bordsprov/index.html">Öppna tomt bordsprov</a>
-          <a href="/bordsprov/ljusprov.html">Jämför ljus och bakgrund</a>
-          <a href="/bordsprov/skoprov.html">Jämför kortskons placering</a>
           <button aria-pressed={detail} onClick={() => setDetail((v) => !v)}>
             <Focus size={15} />
             {detail ? "Visa hela bordet" : "Handdetalj"}

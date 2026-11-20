@@ -1,0 +1,182 @@
+.sida {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 52px) clamp(35px, 6vw, 80px);
+  overflow-wrap: anywhere;
+}
+.sida a {
+  color: var(--pine);
+  text-underline-offset: 3px;
+}
+.sida a:focus-visible {
+  outline: 3px solid #be8841;
+  outline-offset: 3px;
+}
+.nav, .valrad, .kopiering {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.nav {
+  justify-content: space-between;
+  padding: 17px 0;
+  border-bottom: 1px solid var(--line);
+}
+.nav a, .granskning a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.nav a, .valrad a {
+  font-weight: 600;
+  font-size: .88rem;
+}
+.nav a { text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+.huvud { margin: clamp(24px, 4vw, 44px) 0 22px; }
+.huvud h1 {
+  font-size: clamp(2rem, 4.4vw, 3.45rem);
+  line-height: 1.05;
+  letter-spacing: -.055em;
+}
+.huvud p {
+  max-width: 68ch;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+.valrad {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border: 1px solid #cbd7cc;
+  border-radius: 8px;
+  background: #e8eee7;
+}
+.valrad label, .faltetikett { font-weight: 680; }
+.valrad select, .referenser select { max-width: 100%; }
+.valrad select {
+  flex: 0 1 380px;
+  min-width: 0;
+  padding: 8px 12px;
+  font-size: .93rem;
+}
+.genvagar { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; }
+.anvisningar {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  align-items: start;
+  gap: 18px;
+  margin-top: 18px;
+}
+.anvisningar section { scroll-margin-top: 12px; }
+.anvisningar p, .steg { font-size: .94rem; line-height: 1.5; margin: 10px 0; }
+.steg { padding-left: 1.35rem; }
+.steg li + li { margin-top: 10px; }
+.kortprov { display: flex; align-items: center; gap: 14px; }
+.kortprov img { display: block; width: 66px; height: auto; }
+.kortprov dl { flex: 1; }
+.jamforelse, .promptinnehall {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  gap: 18px;
+  align-items: start;
+}
+.panel, .promptpanel {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: clamp(15px, 2.5vw, 28px);
+  min-width: 0;
+}
+.panelhuvud { margin-bottom: 16px; }
+.panelhuvud > p:first-child {
+  margin: 0 0 4px;
+  color: #486355;
+  font-size: .8rem;
+  font-weight: 650;
+}
+.panelhuvud h2 {
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  letter-spacing: -.04em;
+}
+.fakta { margin: 0; }
+.fakta > div {
+  display: grid;
+  grid-template-columns: minmax(6.1em, 25%) minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  font-size: .9rem;
+}
+.fakta dt { color: var(--muted); }
+.fakta dd { margin: 0; }
+.fargprov {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 5px;
+  border: 1px solid #89968e;
+  border-radius: 3px;
+  vertical-align: -.12em;
+}
+.kontroll {
+  margin-top: 16px;
+  padding: 12px 15px;
+  border-left: 3px solid #ac7847;
+  background: #f6f3ee;
+}
+.kontroll h3, .faltetikett { font-size: .93rem; }
+.kontroll p, .tom, .granskning { font-size: .9rem; }
+.kontroll p { margin-top: 3px; }
+.bild { margin: 0 0 16px; }
+.bild a {
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #e9eae6;
+}
+.bild img {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 29vw, 340px);
+  object-fit: contain;
+}
+.bild figcaption {
+  margin: 7px 0 0;
+  font-family: var(--mono);
+  font-size: .74rem;
+  color: var(--muted);
+}
+.granskning { margin-top: 12px; }
+.exempelknapp { margin-top: 12px; }
+.promptpanel { margin-top: 18px; scroll-margin-top: 16px; }
+.promptpanel header p {
+  margin: 5px 0 0;
+  max-width: 76ch;
+  color: var(--muted);
+}
+.promptinnehall { grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); }
+.faltetikett { display: block; margin: 0 0 6px; }
+.referenser { list-style: none; margin: 12px 0 0; padding: 0; }
+.referenser li { border-top: 1px solid var(--line); padding: 8px 0; }
+.referenser label { display: block; margin: 0 0 4px; font-size: .84rem; }
+.referenser li div { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.prompttext { background: #f9faf7; }
+.kopiering { margin: 10px 0 0; font-size: .86rem; }
+.kopiering .kopiera {
+  background: var(--pine);
+  border-color: var(--pine);
+  color: white;
+}
+.kopiering .kopiera:hover { background: #193e2c; }
+@media (max-width: 720px) {
+  .jamforelse, .promptinnehall, .anvisningar { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .valrad select { flex: 1 1 65%; }
+  .promptpanel { margin-top: 14px; }
+}
+@media (max-width: 430px) {
+  .nav { gap: 5px; }
+  .fakta > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .valrad { gap: 6px 10px; padding: 10px; }
+}

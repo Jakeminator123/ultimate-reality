@@ -735,7 +735,8 @@
         <nav aria-label="Fotomallens avsnitt">
           <a href="#vinklar">Fotovinklar</a
           ><a href="#paulina">Paulinas modell</a
-          ><a href="#nya-bilder">Nya bilder</a
+          ><a href="#nya-bilder">Handbilder</a
+          ><a id="bildstandard" href="/bildstandard">Bildstandard i studion</a
           ><a
             class="save"
             id="save-page"
@@ -832,11 +833,11 @@
         </p>
       </section>
       <section id="nya-bilder" class="lower" aria-labelledby="next-heading">
-        <h2 id="next-heading">Nya bilder av Paulina</h2>
+        <h2 id="next-heading">Handbilder för Fas 1</h2>
         <p class="sub">
-          05b visar redan en sittprofil och 09 visar vänsterhanden ovanifrån. De
-          här två närbilderna kompletterar underlaget för nästa prov av
-          fingrarna.
+          Vit bakgrund och en punkt på kortets baksida gör det lättare att följa
+          fingrarnas kontakt och kortets riktning.
+          <a id="phase-one" href="/fotomall.html/fas-1/v1/index.html" hidden>Visa Paulinas grundbilder och kortvändning</a>
         </p>
         <div class="orders" id="orders"></div>
         <p class="optional">
@@ -890,7 +891,9 @@
       };
       document.querySelector("[data-studio]").href =
         data.origin + "/#modellering";
+      el("bildstandard").href = data.origin + "/bildstandard";
       if (data.portable) el("save-page").hidden = true;
+      el("phase-one").hidden = data.portable || !data.phaseOneAvailable;
       const dialog = el("lightbox");
       let visibleShots = [],
         slideList = [],

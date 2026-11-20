@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import * as T from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { resultUrl, type SamPose, type PoseVersion as Version } from "../lib/modeling";
+import { resultUrl, type ActiveDealerModel, type SamPose, type PoseVersion as Version } from "../lib/modeling";
 
 const poseJoints = [["l_lowarm", "Vänster armbåge"], ["r_lowarm", "Höger armbåge"],
   ["l_index1", "Vänster pekfinger"], ["l_middle1", "Vänster långfinger"],
@@ -11,30 +11,47 @@ const poseJoints = [["l_lowarm", "Vänster armbåge"], ["r_lowarm", "Höger armb
 type Viewport = {
   changePose: (version: Version) => void;
   showGrid: (visible: boolean) => void;
-  face: (side: boolean) => void;
+  face: (degrees: number) => void;
   detail: (part: "ansikte" | "händer") => void;
   bend: (joint: string, degrees: number) => void;
   resetJoints: () => void;
 };
 
-export default function PoseReview({ pose, initialVersion }: { pose: SamPose; initialVersion: Version }) {
+type ReviewProps =
+  | { model: ActiveDealerModel; cameraAngle?: number; pose?: never; initialVersion?: never }
+  | { model?: never; cameraAngle?: never; pose: SamPose; initialVersion: Version };
+
+export default function PoseReview(props: ReviewProps) {
+  const { model, pose } = props;
+  const initialVersion = props.initialVersion ?? "front";
   const surface = useRef<HTMLDivElement>(null);
   const viewport = useRef<Viewport | null>(null);
+  const selectedAngle = useRef(0);
   const [version, selectVersion] = useState<Version>(initialVersion);
+  const selectedVersion = useRef(initialVersion);
   const [grid, setGrid] = useState(true);
   const [ready, setReady] = useState(false);
+  const [unavailable, setUnavailable] = useState<Version[]>([]);
   const [error, setError] = useState("");
   const [joint, setJoint] = useState<string>("l_lowarm");
   const [angles, setAngles] = useState<Record<string, number>>({});
   const [canPose, setCanPose] = useState(false);
-  const frontUrl = resultUrl(pose, "front");
-  const tableUrl = pose.hasTablePose ? resultUrl(pose, "bordsvila") : "";
-  const lookUrl = pose.hasAppearance ? resultUrl(pose, "utseende") : "";
-  const uprightUrl = pose.hasUpright ? resultUrl(pose, "rak") : "";
+  const frontUrl = pose ? resultUrl(pose, "front") : model.url;
+  const tableUrl = pose?.hasTablePose ? resultUrl(pose, "bordsvila") : "";
+  const lookUrl = pose?.hasAppearance ? resultUrl(pose, "utseende") : model?.appearanceUrl ?? "";
+  const uprightUrl = pose?.hasUpright ? resultUrl(pose, "rak") : "";
+  const activeRig = Boolean(model);
+  useEffect(() => {
+    if (props.cameraAngle === undefined) return;
+    selectedAngle.current = props.cameraAngle;
+    viewport.current?.face(props.cameraAngle);
+  }, [props.cameraAngle]);
 
   useEffect(() => {
     const host = surface.current;
     if (!host) return;
+    setReady(false);
+    setError("");
     let renderer: T.WebGLRenderer;
     try {
       renderer = new T.WebGLRenderer({ antialias: true });
@@ -90,10 +107,11 @@ export default function PoseReview({ pose, initialVersion }: { pose: SamPose; in
       renderer.setSize(w, h, false);
       draw();
     }
-    function face(side: boolean) {
+    function face(degrees: number) {
       controls.target.copy(wholeBodyTarget);
       camera.up.set(0, 1, 0);
-      camera.position.copy(controls.target).add(side ? new T.Vector3(3, 0, 0) : new T.Vector3(0, 0, 3));
+      const radians = T.MathUtils.degToRad(degrees);
+      camera.position.copy(controls.target).add(new T.Vector3(3 * Math.sin(radians), 0, 3 * Math.cos(radians)));
       camera.zoom = 1;
       camera.updateProjectionMatrix();
       controls.update();
@@ -185,20 +203,23 @@ export default function PoseReview({ pose, initialVersion }: { pose: SamPose; in
     controls.addEventListener("change", draw);
     const observer = new ResizeObserver(resize);
     observer.observe(host);
-    const assets = [load("front", frontUrl)];
-    if (tableUrl) assets.push(load("bordsvila", tableUrl));
-    if (lookUrl) assets.push(load("utseende", lookUrl));
-    if (uprightUrl) assets.push(load("rak", uprightUrl));
-    Promise.all(assets).then(() => {
+    const sources: [Version, string][] = [["front", frontUrl]];
+    if (tableUrl) sources.push(["bordsvila", tableUrl]);
+    if (lookUrl) sources.push(["utseende", lookUrl]);
+    if (uprightUrl) sources.push(["rak", uprightUrl]);
+    Promise.allSettled(sources.map(([key, url]) => load(key, url))).then(results => {
       if (abort.signal.aborted) return;
+      if (results[0].status === "rejected") throw results[0].reason;
+      setUnavailable(sources.filter(([key]) => !bodies.has(key)).map(([key]) => key));
       const box = new T.Box3();
       for (const body of bodies.values()) box.expandByObject(body);
       const size = box.getSize(new T.Vector3());
-      height = size.y * 1.16;
+      height = size.y * (activeRig ? 1.08 : 1.16);
       width = Math.max(size.x, size.z) * 1.25;
-      wholeBodyTarget.set(0, (box.max.y + box.min.y) / 2, 0);
+      box.getCenter(wholeBodyTarget);
+      if (!activeRig) wholeBodyTarget.set(0, (box.max.y + box.min.y) / 2, 0);
       controls.target.copy(wholeBodyTarget);
-      for (const [key, body] of bodies) if (key !== "front") prepareJoints(body);
+      for (const [key, body] of bodies) if (activeRig || key !== "front") prepareJoints(body);
       setCanPose(joints.size === poseJoints.length);
       viewport.current = {
         changePose, showGrid: on => { guides.visible = on; draw(); }, face, detail,
@@ -208,9 +229,12 @@ export default function PoseReview({ pose, initialVersion }: { pose: SamPose; in
         },
         resetJoints: () => { for (const group of joints.values()) for (const j of group) j.bone.quaternion.copy(j.rest); draw(); },
       };
-      changePose(bodies.has(initialVersion) ? initialVersion : "front");
+      const visible = bodies.has(selectedVersion.current) ? selectedVersion.current : "front";
+      selectedVersion.current = visible;
+      selectVersion(visible);
+      changePose(visible);
       resize();
-      face(false);
+      face(selectedAngle.current);
       setReady(true);
     }).catch((e: Error) => { if (!abort.signal.aborted) setError(e.message); });
     return () => {
@@ -231,26 +255,27 @@ export default function PoseReview({ pose, initialVersion }: { pose: SamPose; in
       renderer.forceContextLoss();
       renderer.domElement.remove();
     };
-  }, [frontUrl, tableUrl, lookUrl, uprightUrl, initialVersion]);
+  }, [frontUrl, tableUrl, lookUrl, uprightUrl, initialVersion, activeRig]);
 
-  function choose(v: Version) { selectVersion(v); viewport.current?.changePose(v); }
+  function choose(v: Version) { selectedVersion.current = v; selectVersion(v); viewport.current?.changePose(v); }
   return <div className="pose-review">
     <div className="pose-tools" aria-label="Kontroller för kroppsprov">
       {(tableUrl || lookUrl || uprightUrl) && <span className="view-switch" role="group" aria-label="Pose">
-        <button disabled={!ready} aria-pressed={version === "front"} onClick={() => choose("front")}>SAM-pose</button>
-        {tableUrl && <button disabled={!ready} aria-pressed={version === "bordsvila"} onClick={() => choose("bordsvila")}>Bordsvila</button>}
-        {lookUrl && <button disabled={!ready} aria-pressed={version === "utseende"} onClick={() => choose("utseende")}>Med utseende</button>}
-        {uprightUrl && <button disabled={!ready} aria-pressed={version === "rak"} onClick={() => choose("rak")}>Helt upprätad</button>}
+        <button disabled={!ready} aria-pressed={version === "front"} onClick={() => choose("front")}>{activeRig ? "Kroppsform" : "SAM-pose"}</button>
+        {tableUrl && <button disabled={!ready || unavailable.includes("bordsvila")} aria-pressed={version === "bordsvila"} onClick={() => choose("bordsvila")}>Bordsvila</button>}
+        {lookUrl && <button disabled={!ready || unavailable.includes("utseende")} aria-pressed={version === "utseende"} onClick={() => choose("utseende")}>{activeRig ? "Fotoutseende · prov" : "Med utseende"}</button>}
+        {uprightUrl && <button disabled={!ready || unavailable.includes("rak")} aria-pressed={version === "rak"} onClick={() => choose("rak")}>Helt upprätad</button>}
       </span>}
       <span className="view-switch" role="group" aria-label="Kamera">
-        <button disabled={!ready} onClick={() => viewport.current?.face(false)}>Framifrån</button>
-        <button disabled={!ready} onClick={() => viewport.current?.face(true)}>Från sidan</button>
-        {(version === "utseende" || version === "rak") && <><button disabled={!ready} onClick={() => viewport.current?.detail("ansikte")}>Ansikte</button>
+        <button disabled={!ready} onClick={() => viewport.current?.face(0)}>Framifrån</button>
+        <button disabled={!ready} onClick={() => viewport.current?.face(45)}>Trekvart</button>
+        <button disabled={!ready} onClick={() => viewport.current?.face(90)}>Från sidan</button>
+        {(activeRig || version === "utseende" || version === "rak") && <><button disabled={!ready} onClick={() => viewport.current?.detail("ansikte")}>Ansikte</button>
           <button disabled={!ready} onClick={() => viewport.current?.detail("händer")}>Handryggar</button></>}
       </span>
       <button disabled={!ready} aria-pressed={grid} onClick={() => { setGrid(!grid); viewport.current?.showGrid(!grid); }}>Rutnät · 10 cm</button>
     </div>
-    {canPose && version !== "front" && <details className="pose-joints">
+    {canPose && (activeRig || version !== "front") && <details className="pose-joints">
       <summary>Prova armar och fingrar</summary>
       <div>
         <select aria-label="Led att prova" value={joint} onChange={e => setJoint(e.target.value)}>
@@ -263,6 +288,7 @@ export default function PoseReview({ pose, initialVersion }: { pose: SamPose; in
       </div>
     </details>}
     <div className="pose-canvas" ref={surface}/>
-    {!ready && <p role="status" className="pose-message">{error || "Läser kroppsmodellen…"} {error && pose.hasSheet && <a href={resultUrl(pose, "sheet")}>Öppna bildarket</a>}</p>}
+    {ready && unavailable.length > 0 && <p role="status">En alternativ modellfil kunde inte läsas på den här datorn.</p>}
+    {!ready && <p role="status" className="pose-message">{error || "Läser kroppsmodellen…"} {error && pose?.hasSheet && <a href={resultUrl(pose, "sheet")}>Öppna bildarket</a>}</p>}
   </div>;
 }

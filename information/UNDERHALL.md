@@ -5,13 +5,17 @@
 | `studio/` i Git | Appens källkod, plan och generella recept. | Versionshistorik i Git. |
 | `information/` i Git | Beslut, verifierade slutsatser, handoff och tidigare skriftliga projektöversikter. | En aktuell handoff. Äldre versioner finns i Git. |
 | `tools/`, `tests/` i Git | Lokala modellverktyg och isolerade tester. | Versionshistorik i Git. |
+| `avatars/paulina/fas-1/v1/` och `avatars/paulina/3d/fas1-v2/` lokalt | Aktiva grundbilder med källregister, bildmått, rigg och texturerad variant. `studio.json` identifierar de två granskade GLB-filerna med SHA-256. | Bevarade avatarversioner på labbdatorn. |
 | `inputs/` på labbdisken | Egna källfoton, filmer och ljud som Jakob lägger in. | Original bevaras. |
 | `orders/` på labbdisken | Versionssparade lokala utkast med exakt JSON, beskurna referensbilder och filmgranskning, under `giv-plats-4`. | Sparade revisioner bevaras. Verkliga leverantörsjobb är en senare etapp. |
+| `orders/bildpipeline/<revision>/` på labbdisken | Runways stillbildsserie, källkopior, låsta prompter, skickade referenser, jobb-ID och mottagna resultat. | Bevarade beställningsrevisioner. Filnamn och referensbytes omfattas av den lokala backupen. |
 | `runs/` på labbdisken | Märkta tillfälliga SAM-prov. | Sju dygn, gallring vid nästa SAM-körning eller via clean. |
 | `saved/` på labbdisken | Prov som bevarats med keep. Teknisk referens och visuellt godkännande dokumenteras var för sig. | Bevaras tills ägaren uttryckligen väljer bort dem. |
 | `saved/promptmallar/` på labbdisken | Jakobs egna namngivna mallar. Varje sparning skapar en separat JSON-fil med text, modell och längd. | Bevaras vid gallring och ingår i lokal backup. |
 
 På Jakobs dator är labbdisken `D:\ultimate-reality-lab`. Kör `.\lab.ps1 list` från projektroten för att skapa och se grundstrukturen. Tömning av arbetsytan ska aldrig påverka källmaterial, beställningar eller sparade referenser. För ett låst försök, identifiera processen som använder just den filen, avsluta den när arbetet är klart och kör gallringen igen.
+
+För Fas 1 jämför `tools/seated_photo_scale.py` de tre PNG-filerna med bildregistret och skriver `sittande-bildskala.json` i samma utgåva. `tools/mhr_seated_rig.py` skapar sittmodellen från den sparade SAM-körningen och `tools/paulina_utseende.py` lägger de granskade fotografiska källorna på riggen. [Köranvisning och material-ID](../test/dealer/paulina/fas1-sittande-v2/README.md)
 
 ## Vad ska till GitHub?
 

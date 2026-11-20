@@ -27,7 +27,7 @@ for (const [name, hash] of Object.entries(assetHashes)) {
   assert.equal(createHash("sha256").update(await fs.readFile(file)).digest("hex"),hash,filename);
   files.set("/asset/" + filename,file);
 }
-const config = JSON.parse(await fs.readFile(path.join(root,"studio/lib/table-layout.json"),"utf8"));
+const config = JSON.parse(await fs.readFile(path.join(root,"test/bord/filtdjup-v1/layout-v1.json"),"utf8"));
 const cal = JSON.parse(await fs.readFile(path.join(root,"test/bord/filtdjup-v1/matt.json"),"utf8"));
 const variants = ["salong","studioljus","studiofond","lounge"];
 const images = {};

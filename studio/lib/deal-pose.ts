@@ -1,10 +1,16 @@
 import { Vector3 } from "three";
 import type { Blocking } from "./blocking.ts";
 import { CONTACT, GRASP, RELEASE, SETTLED } from "./blocking.ts";
+import shoe from "./card-shoe.json" with { type: "json" };
 
 export const CARD = { width: 0.063, depth: 0.089, thickness: 0.0004 };
-const start = new Vector3(-0.237, 0, -0.175);
 const X = new Vector3(1, 0, 0);
+const Y = new Vector3(0, 1, 0);
+const shoeYaw = shoe.yawDegrees * Math.PI / 180;
+const feedAngle = shoe.feedAngleDegrees * Math.PI / 180;
+const drawAxis = new Vector3(Math.sin(shoeYaw), 0, Math.cos(shoeYaw));
+const shoeCenter = new Vector3(shoe.shoeCenterXZ[0], 0, shoe.shoeCenterXZ[1]);
+const handoff = new Vector3(0.06, 0, -0.16);
 const v = (x: number, y: number, z: number) => new Vector3(x, y, z);
 function smooth(frame: number, from: number, to: number) {
   const t = Math.max(0, Math.min(1, (frame - from) / (to - from)));
@@ -17,21 +23,28 @@ export function dealPose(s: Blocking) {
   const f = s.frame,
     carry = smooth(f, GRASP, CONTACT),
     settle = smooth(f, RELEASE, SETTLED);
-  const tilt = ((s.tiltDeg * Math.PI) / 180) * (1 - settle);
+  const extraction = smooth(f, 5, 15);
+  const transfer = smooth(f, 15, GRASP);
+  const yaw = shoeYaw * (1 - transfer);
+  const tilt = feedAngle * (1-transfer) + ((s.tiltDeg * Math.PI) / 180) * transfer * (1 - settle);
   const target = v(s.landingXcm / 100, 0, s.landingZcm / 100);
-  const center = start.clone().lerp(target, carry);
+  const leadingZ = shoe.initialLeadZ + shoe.travel * extraction;
+  const leadingY = Math.max(CARD.thickness, shoe.cardTopY - (leadingZ - shoe.mouthZ) * Math.tan(feedAngle));
+  const center = shoeCenter.clone()
+    .addScaledVector(drawAxis, leadingZ - CARD.depth * Math.cos(feedAngle) / 2)
+    .lerp(handoff, transfer).lerp(target, carry);
   center.z += (carry * CARD.depth * (1 - Math.cos(tilt))) / 2;
   center.y =
-    0.032 * (1 - carry) +
+    ((leadingY - CARD.thickness) * (1 - transfer) + 0.032 * transfer) * (1 - carry) +
     0.09 * Math.sin(carry * Math.PI) +
     (CARD.depth * Math.sin(tilt)) / 2 +
     (CARD.thickness * Math.cos(tilt)) / 2;
-  const normal = v(0, 1, 0).applyAxisAngle(X, tilt);
+  const normal = v(0, 1, 0).applyAxisAngle(X, tilt).applyAxisAngle(Y, yaw);
   const onCard = (x: number, y: number, z: number) =>
-    v(x, y, z).applyAxisAngle(X, tilt).add(center);
+    v(x, y, z).applyAxisAngle(X, tilt).applyAxisAngle(Y, yaw).add(center);
   const contact = onCard(s.edgeMm / 1000, 0, -CARD.depth / 2 + 0.006);
   const returning = smooth(f, RELEASE, 113);
-  const waiting = 1 - smooth(f, 3, GRASP);
+  const waiting = 1 - transfer;
   const hold = contact
     .clone()
     .lerp(v(-0.16, 0.107, -0.28), Math.max(waiting, returning));
@@ -62,9 +75,17 @@ export function dealPose(s: Blocking) {
     .clone()
     .addScaledVector(axis, along)
     .addScaledVector(pole, Math.sqrt(Math.max(0, 0.31 ** 2 - along ** 2)));
+  const leftReach = smooth(f, 0, 5) * (1 - smooth(f, GRASP, GRASP + 12));
+  const leftRest = v(0.12, 0.018, -0.145);
+  const leftTip = leftRest.clone().lerp(onCard(0.005, CARD.thickness / 2, CARD.depth / 2 - 0.009), leftReach);
+  const leftDirection = v(0, 0, 1).lerp(drawAxis.clone().negate(), leftReach).normalize();
   return {
     center,
     tilt,
+    yaw,
+    leftTip,
+    leftDirection,
+    leftPitch: -tilt * leftReach,
     target,
     thumb,
     index,

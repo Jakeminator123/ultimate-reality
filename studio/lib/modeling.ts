@@ -17,6 +17,14 @@ export type ModelingInventory = {
   gpu: string | null;
   checkpoints: string[];
   poses: SamPose[];
+  activeModel: ActiveDealerModel | null;
+};
+
+export type ActiveDealerModel = {
+  id: string;
+  name: string;
+  url: string;
+  appearanceUrl?: string;
 };
 
 export type PoseVersion = "front" | "bordsvila" | "utseende" | "rak";

@@ -10,9 +10,30 @@ import {
   validBlocking,
 } from "../lib/blocking.ts";
 import { CARD, dealPose } from "../lib/deal-pose.ts";
+import shoe from "../lib/card-shoe.json" with { type: "json" };
+import { Euler, Vector3 } from "three";
 
 const near = (actual, expected) =>
   assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} ≠ ${expected}`);
+test("kortet lämnar den lutande skon in mot bordets mitt och går fritt från filt och sidokanter", () => {
+  const yaw = shoe.yawDegrees * Math.PI / 180;
+  const feed = shoe.feedAngleDegrees * Math.PI / 180;
+  const axis = new Vector3(Math.sin(yaw),0,Math.cos(yaw));
+  const origin = new Vector3(shoe.shoeCenterXZ[0],0,shoe.shoeCenterXZ[1]);
+  assert.ok(axis.x < 0 && axis.z < 0);
+  for (let frame=0; frame<=15; frame++) {
+    const p = dealPose({...defaultBlocking,frame});
+    const rotation = new Euler(p.tilt,p.yaw,0,"YXZ");
+    for (const x of [-CARD.width/2,CARD.width/2]) for (const z of [-CARD.depth/2,CARD.depth/2]) {
+      const corner = new Vector3(x,-CARD.thickness/2,z).applyEuler(rotation).add(p.center);
+      const local = corner.clone().sub(origin).applyAxisAngle(new Vector3(0,1,0),-yaw);
+      assert.ok(corner.y >= -1e-8 && Math.abs(local.x) < .034);
+      if (local.z <= shoe.mouthZ)
+        assert.ok(local.y >= shoe.cardTopY+(shoe.mouthZ-local.z)*Math.tan(feed)-.001);
+      if (frame===15) assert.ok(local.z>shoe.mouthZ);
+    }
+  }
+});
 test("fingerytorna följer kortet under greppet, även med ändrade mått", () => {
   for (const edgeMm of [-20, 20])
     for (const gapMm of [0, 18])

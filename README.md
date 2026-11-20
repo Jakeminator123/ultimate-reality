@@ -32,15 +32,21 @@ npm run dev
 
 ## 3D-modellering på labbdatorn
 
-[Steg 1 · Fotomall för en dealer](http://127.0.0.1:4317/fotomall.html) visar en neutral docka i fyra grundbilder och fem extravinklar. Där finns också Paulinas 08-modell i båda spelarvyerna, bildreferenser och färdiga prompter till hennes två handbilder. **Spara HTML** tar med mallbilderna och de två referensoriginalen så att guiden fungerar offline.
+I [Runways bildpipeline](http://127.0.0.1:4317/bildpipeline) kan du lägga in exempelvis fyra blandade foton och skapa en ny stående helfigur av personen. Spara ett lokalt utkast och välj ståfronten eller hela serien i den synliga beställningsvyn. Där finns exakt prompt, bildordning, referenser, upplösning och beräknat pris för varje steg. [Pipelineplan med bildberoenden](information/BILDPIPELINE.md)
 
-I [3D-modellering](http://127.0.0.1:4317/#modellering) visas bildinkorgen, datorns NVIDIA-grafikkort och de SAM-vikter som finns på disk. Välj ett foto eller ett sparat kroppsprov. **Överlägg** visar original, kroppsskattning och sidovy. Under **3D** kan du vrida modellen. Fliken läser resultaten från labbets `saved` och uppdateras med knappen vid **Bildinkorg**. Egna grundbilder och resultat kan användas direkt i den lokala studion.
+[Bildstandarden för en dealer](http://127.0.0.1:4317/bildstandard) visar elva grundvyer och en extra kortvändning. Varje vy har en kopierbar prompt för egna foton och ett granskat exempel från Paulina. Hämta Paulinas ifyllda mall eller en tom mall för nästa avatars bildmått, observationer och osäkerheter. Båda använder samma JSON-format.
 
-**Framifrån** och **Från sidan** använder en lodrät kamera och ett 10 cm-rutnät. Lodlinjen går genom bäckenets mitt i frontvyn. För sparade prov med riggad **Bordsvila** kan du växla mellan två poser med samma kamera och prova att böja armbågar, pekfingrar och långfingrar.
+Studion öppnar Paulinas elva grundbilder och extra kortvändning bredvid den poserbara sittmodellen v2. Välj **Fotoutseende · prov** för att visa Paulinas hår, ansikte och kostym på kroppen. Valet mellan sittfront, trekvart och profil ställer också 3D-kameran. ImageGen i Codex skapade de tre sittbilderna. Hjässa till skosula upptar cirka 1 340, 1 340 och 1 288 px. [3D-modellering](http://127.0.0.1:4317/#modellering) · [Jämför originalen och bildskalan](http://127.0.0.1:4317/bildstandard/sitthojd)
+
+[Övrigt](http://127.0.0.1:4317/ovrigt) innehåller sittbasen v1, tidigare 08-riggar, labbets bildinkorg och parkerade rums- och ljusprov. Välj **Foto**, **Överlägg** eller **3D** för ett sparat prov. [Den äldre dockmallen](http://127.0.0.1:4317/ovrigt/fotomall) kan fortfarande sparas som fristående HTML.
 
 ## Gemensam 3D-scen
 
-I [det tomma bordsprovet](http://127.0.0.1:4317/bordsprov/index.html) kan du växla mellan stol 4 och stol 1 samt mellan 108 och 96 cm ytterdjup med samma sko, kortmål och rum. [Bordsprovets renderingsanvisningar](test/bord/filtdjup-v1/README.md) skapar en lokal visare som fungerar även med studion stängd. [Materialmapparna](test/README.md) skiljer dealer, bord, bakgrund och artefakter. Lägg egna dokument eller referenser för chattarna i [jakob-random](jakob-random/).
+Den aktuella scenen använder Jakobs redigerbara RUM-03, BORD-02 på 192 × 129,6 cm och SKO-03. Den tidigare 08-riggen visar samma kort från stol 4 och stol 1 i tagningen `skoriktning-70-30-v1`. [Öppna den aktuella scenen](http://127.0.0.1:4317/bordsprov/rum3d?rum=mesh&stol=4&glas=1)
+
+[Se Paulinas vänsterhandsutdrag på det större bordet](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html). I Kasinorum kan du jämföra 192 × 129,6 cm med 160 × 108 cm på samma bildruta. [Materialdetaljen](http://127.0.0.1:4317/bordsprov/paulina-utdrag.html?vy=material) visar Poly Havens gröntonade mikromocka, bruna läder och valnötsfaner.
+
+I [det tomma bordsprovet](http://127.0.0.1:4317/bordsprov/rumsprov.html?dealer=0) kan du växla mellan stol 4 och stol 1 samt mellan 108 och 96 cm ytterdjup med samma sko, kortmål och rum. [Rumsprovets renderingsanvisningar](test/bakgrund/kasinorum-v1/README.md) skapar en lokal visare som fungerar även med studion stängd. [Materialmapparna](test/README.md) skiljer dealer, bord, bakgrund och artefakter. Lägg egna dokument eller referenser för chattarna i [jakob-random](jakob-random/).
 
 Öppna [Grepp och landning](http://127.0.0.1:4317/?vy=webview#scen). **Stol 4** och **Stol 1** visar samma pose och kort vid samma bildruta. Justera högerhandens grepp längs kortkanten, extra glapp och lutning. Flytta målet med **Sidled** och **Djup**, eller välj **Placera direkt i bild** och dra på filten. **Handdetalj** förstorar kontakten från båda stolarnas kamerapositioner. Tumme visas i orange och pekfinger i blått.
 
