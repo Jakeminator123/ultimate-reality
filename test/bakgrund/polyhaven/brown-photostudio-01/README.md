@@ -1,5 +1,7 @@
 # Brown Photostudio 01 · Poly Haven
 
+**Ljusspåret är pausat på Jakobs begäran.** De granskade jämförelserna och kortdraget finns kvar för återbesök. [Senaste handljusprovet](handljus-v2/README.md)
+
 **Jakobs val för bordet är 50 % miljöljus.** I [LJUS-05 med Paulina v2](http://127.0.0.1:4317/bordsprov/handljus?stol=4) styr panoramat rumsreflexer och det indirekta ljuset. Ett separat reglage styr det mjuka ljuset vid vänsterhanden. [Jämför stol 4 och stol 1](http://127.0.0.1:4317/bordsprov/ljusstudier#handljus)
 
 Ett 360°-foto med uppmätta ljusintensiteter från en fotostudio. Originalet är ett equirektangulärt HDR-panorama taget från en plats. Fönstrens ljus kan ge mjuka skuggövergångar på handen och tydligare reflexer i glaset. [Poly Havens original](https://polyhaven.com/a/brown_photostudio_01) · [CC0-licens](https://polyhaven.com/license)

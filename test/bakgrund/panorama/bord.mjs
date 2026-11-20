@@ -1,0 +1,32 @@
+import * as T from "three";
+import { buildTable, textiles } from "/bordsprov/rum3d/test/bord/filtdjup-v1/bord.mjs";
+import { buildDrawShoe } from "/bordsprov/rum3d/sko.mjs";
+import { applyTableMaterials } from "/bordsprov/rum3d/material.mjs";
+
+async function loadSceneData(file) {
+  const response = await fetch("/bordsprov/rum3d/" + file);
+  if (!response.ok) throw Error("Kunde inte läsa " + file);
+  return response.json();
+}
+
+export async function placeTable(scene, renderer, seatId) {
+  const [layout, calibration, take] = await Promise.all([
+    loadSceneData("layout.json"), loadSceneData("kameror.json"), loadSceneData("bana.json"),
+  ]);
+  // Sample the oriented photo before adding furniture so its reflections match the visible room.
+  const cube = new T.WebGLCubeRenderTarget(256, { type: T.HalfFloatType });
+  const filter = new T.PMREMGenerator(renderer);
+  try {
+    new T.CubeCamera(.1, 20, cube).update(renderer, scene);
+    scene.environment = filter.fromCubemap(cube.texture).texture;
+  } finally {
+    cube.dispose();
+    filter.dispose();
+  }
+  const table = buildTable(layout, false, textiles(layout));
+  await applyTableMaterials(table, layout, "/bordsprov/rum3d/");
+  const { shoe, draw } = buildDrawShoe(take.shoe);
+  draw(take.frames[0].card_curve_zy_m);
+  scene.add(table, shoe);
+  return calibration.cameras[seatId];
+}

@@ -1,5 +1,7 @@
 # World Labs · kasinorum
 
+Jakob parkerade kasinorummet den 20 november och valde [fotostudions 360°-panorama](../panorama/README.md) för det fortsatta bordsprovet. För att återuppta kasinorummet, öppna [RUM-07 från Stol 4](http://127.0.0.1:4317/bordsprov/rum3d?rum=atlas-full&stol=4&glas=1).
+
 - [Kasinorum v1, RUM-07](kasinorum-v1/README.md) är den parkerade fullversionen. Öppna rummet med bordet i studion eller jämför kamerorna offline.
 - [Lampblink v1](lampblink-v1/README.md) provar en lokal animation i samma rum.
 - [Pendelljus under kortdraget, LJUS-03](pendelljus-kortutdrag-v1/README.md) prövar lampans ljus på handen, glaset och filten från samma två stolar. [Se filmen och jämför med fotostudioljuset](http://127.0.0.1:4317/bordsprov/ljusstudier)

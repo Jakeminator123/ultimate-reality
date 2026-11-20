@@ -15,6 +15,18 @@ async function start() {
   const geometry = new T.SphereGeometry(6, 96, 64).scale(-1, 1, 1);
   const globe = new T.Mesh(geometry, new T.MeshBasicMaterial({ map: photo }));
   scene.add(globe);
+  const home = new T.Vector3().fromArray(canvas.dataset.eye ? canvas.dataset.eye.split(",").map(Number) : [1, .13, -1.05]);
+  if (canvas.dataset.seat) {
+    status.textContent = "Läser bordet och kortskon…";
+    const { placeTable } = await import("./bord.mjs");
+    // Align the centre seat with the studio view Jakob chose.
+    globe.rotation.y = -Math.atan2(home.x, home.z);
+    const seat = await placeTable(scene, renderer, canvas.dataset.seat);
+    camera.position.fromArray(seat.eye);
+    globe.position.copy(camera.position);
+    home.copy(camera.position).sub(new T.Vector3().fromArray(seat.aim));
+    camera.fov = seat.fovVertical;
+  }
   const orbitEye = new T.PerspectiveCamera();
   const controls = new OrbitControls(orbitEye, canvas);
   controls.enableZoom = controls.enablePan = false;
@@ -24,7 +36,7 @@ async function start() {
   };
   controls.addEventListener("change", render);
   function reset() {
-    orbitEye.position.set(1, .13, -1.05);
+    orbitEye.position.copy(home);
     controls.update();
   }
   function turn(yaw, pitch = 0) {
