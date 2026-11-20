@@ -20,6 +20,9 @@ export type FilmRecord = {
   marks: { frame: number; label: string; seconds?: number }[];
   motion?: string;
   poses?: { start: "A1" | "A2.3"; end: "A1" | "A2.3" };
+  deal?: { targetSeat: number; landingFrame: number; releaseFrame: number };
+  photoLayer?: { sourceFilm: string; sourceMotion: string; parts: string[] };
+  appearanceStudy?: string;
 };
 export type MotionRecord = ModelRecord & { motion: {
   geometry: string; appearance: string | null; take: string; card: string | null; pathSha256: string;
@@ -36,7 +39,7 @@ export type Edition = {
   schema: 1; id: string; name: string; edition: string; geometry: string; appearance: string | null;
   photoRegister: string; geometryRecord: string; appearanceRecord: string | null;
 };
-export type TrialFilmSummary = Pick<FilmRecord, "take" | "sha256" | "poses"> & { url: string };
+export type TrialFilmSummary = Pick<FilmRecord, "take" | "sha256" | "poses" | "photoLayer" | "appearanceStudy"> & { url: string };
 export type DealerMaterial = {
   dealer: string; edition: string; revision: string | null; stamp: string; versions: { key: string; name: string }[];
   photos: Photo[]; issues: string[]; activeModel: ActiveDealerModel | null;

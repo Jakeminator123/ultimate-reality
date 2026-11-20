@@ -144,6 +144,33 @@ class MaterialTests(unittest.TestCase):
                 self.assertEqual(versions.read_json(self.store / "filmer" / (pose_key + ".json"))["poses"], poses)
                 pose_receipts.append(pose_key)
             self.assertEqual(len({key, *pose_receipts}), 3)
+            contacts = dict(targetSeat=4, landingFrame=1, releaseFrame=2)
+            with self.assertRaisesRegex(ValueError, "målplats"):
+                versions.register_film(self.store, file, dict(capture, deal=contacts))
+            motion_capture = dict(capture, motion="a" * 64, card="KORT-02", deal=contacts)
+            with patch.object(versions, "registered_motion", return_value=motion_capture):
+                motion_key = versions.register_film(self.store, file, motion_capture)
+                saved = versions.read_json(self.store / "filmer" / (motion_key + ".json"))
+                self.assertEqual(saved["deal"], contacts)
+                layer = dict(sourceFilm=motion_key, sourceMotion=motion_capture["motion"], parts=["Hår"])
+                look_capture = dict(capture, motion="b" * 64, card="KORT-02", photoLayer=layer)
+                look_key = versions.register_film(self.store, file, look_capture)
+                self.assertEqual(versions.read_json(self.store / "filmer" / (look_key + ".json"))["photoLayer"], layer)
+                for wrong in (dict(layer, sourceFilm="f" * 64), dict(layer, sourceMotion="f" * 64), dict(layer, parts=["", "Hår"])):
+                    with self.assertRaisesRegex(ValueError, "Fotoytans"):
+                        versions.register_film(self.store, file, dict(look_capture, photoLayer=wrong))
+                applied = dict(motion_capture, appearanceStudy=look_key)
+                with patch.object(versions, "photographic_atlases", return_value={"body": ["c" * 64], "hair": ["d" * 64]}):
+                    applied_key = versions.register_film(self.store, file, applied)
+                self.assertEqual(versions.read_json(self.store / "filmer" / (applied_key + ".json"))["appearanceStudy"], look_key)
+                with patch.object(versions, "photographic_atlases", side_effect=[{"body": ["c" * 64]}, {"body": ["e" * 64]}]):
+                    with self.assertRaisesRegex(ValueError, "fototexturer avviker"):
+                        versions.register_film(self.store, file, applied)
+                with self.assertRaisesRegex(ValueError, "fotoyteprov"):
+                    versions.register_film(self.store, file, dict(applied, appearanceStudy=motion_key))
+                for invalid in (dict(contacts, targetSeat=False), dict(contacts, releaseFrame=3), dict(contacts, landingFrame=2)):
+                    with self.assertRaisesRegex(ValueError, "målplats"):
+                        versions.register_film(self.store, file, dict(motion_capture, deal=invalid))
             with self.assertRaisesRegex(ValueError, "slutpose"):
                 versions.register_film(self.store, file, dict(capture, poses={"start": "A2.3"}))
             versions.register_review(self.store, key, "Modellkameran", [2], "Hela skon syns.")

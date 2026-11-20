@@ -91,9 +91,8 @@ def glb(file):
         return document, atlas
 
 
-def body_atlas_sha(file, document):
-    body, = [mesh for mesh in document["meshes"] if mesh.get("extras", {}).get("appearancePart") == "body"]
-    material = document["materials"][body["primitives"][0]["material"]]
+def material_atlas_sha(file, document, material_id):
+    material = document["materials"][material_id]
     texture = document["textures"][material["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
     image = document["images"][texture["source"]]
     view = document["bufferViews"][image["bufferView"]]
@@ -102,8 +101,24 @@ def body_atlas_sha(file, document):
         json_length, = struct.unpack("<I", stream.read(4))
         stream.seek(28 + json_length + view.get("byteOffset", 0))
         data = stream.read(view["byteLength"])
-    check(len(data) == view["byteLength"], "Ofullständig inbäddad kroppstextur.")
+    check(len(data) == view["byteLength"], "Ofullständig inbäddad fototextur.")
     return hashlib.sha256(data).hexdigest()
+
+
+def body_atlas_sha(file, document):
+    body, = [mesh for mesh in document["meshes"] if mesh.get("extras", {}).get("appearancePart") == "body"]
+    return material_atlas_sha(file, document, body["primitives"][0]["material"])
+
+
+def photographic_atlases(file):
+    document, _ = glb(file)
+    result = {}
+    for mesh in document.get("meshes", []):
+        part = mesh.get("extras", {}).get("appearancePart")
+        if part in ("body", "hair"):
+            result.setdefault(part, []).extend(material_atlas_sha(file, document, prim["material"]) for prim in mesh["primitives"])
+    check(result.get("body"), "Fotoyteprovet saknar kroppens fototextur.")
+    return result
 
 
 def animation_times(document, file):
@@ -358,6 +373,14 @@ def register_film(store, movie, capture):
         return [row["frame"] for row in rows]
     def valid(numbers):
         return all(type(n) is int and 0 <= n < count for n in numbers)
+    if "deal" in capture:
+        deal = capture["deal"]
+        check(motion and capture.get("card") and isinstance(deal, dict) and
+              set(deal) == {"targetSeat", "landingFrame", "releaseFrame"} and
+              type(deal["targetSeat"]) is int and deal["targetSeat"] > 0 and
+              valid([deal["landingFrame"], deal["releaseFrame"]]) and
+              deal["landingFrame"] < deal["releaseFrame"],
+              "Givens målplats, landning eller släpp avviker från tagningen.")
     check(valid(frames(capture.get("marks", []))), "Granskningsrutan finns inte i filmen.")
     for camera in capture["cameras"]:
         samples = camera["samples"]
@@ -379,6 +402,35 @@ def register_film(store, movie, capture):
         record["motion"] = motion
     if "poses" in capture:
         record["poses"] = capture["poses"]
+    if "deal" in capture:
+        record["deal"] = capture["deal"]
+    if "photoLayer" in capture:
+        layer = capture["photoLayer"]
+        check(isinstance(layer, dict) and set(layer) == {"sourceFilm", "sourceMotion", "parts"} and
+              all(isinstance(layer[k], str) and SHA.fullmatch(layer[k]) for k in ("sourceFilm", "sourceMotion")) and
+              isinstance(layer["parts"], list) and layer["parts"] and
+              all(isinstance(part, str) and part.strip() and part == part.strip() for part in layer["parts"]) and
+              len(set(layer["parts"])) == len(layer["parts"]), "Fotoytans källversioner eller delar är ogiltiga.")
+        source = store / "filmer" / (layer["sourceFilm"] + ".json")
+        check(source.is_file() and sha(source) == layer["sourceFilm"], "Fotoytans källfilm saknas eller har ändrats.")
+        original = read_json(source)
+        check(motion and original.get("motion") == layer["sourceMotion"] and
+              all(record[k] == original.get(k) for k in ("geometry", "card", "frames")) and
+              Fraction(record["fps"]) == Fraction(original["fps"]),
+              "Fotoytans källrörelse, kropp, kort eller bildtider avviker.")
+        record["photoLayer"] = layer
+    if "appearanceStudy" in capture:
+        study = capture["appearanceStudy"]
+        check(motion and isinstance(study, str) and SHA.fullmatch(study), "Givens fotoyteprov är ogiltigt.")
+        source = store / "filmer" / (study + ".json")
+        check(source.is_file() and sha(source) == study, "Givens fotoyteprov saknas eller har ändrats.")
+        film = read_json(source)
+        check(film.get("photoLayer") and all(record[k] == film.get(k) for k in ("geometry", "appearance")),
+              "Givens fotoyteprov hör till en annan kropp eller grundyta.")
+        registered_motion(store, film["motion"])
+        check(photographic_atlases(store / "filer" / (film["motion"] + ".glb")) ==
+              photographic_atlases(store / "filer" / (motion + ".glb")), "Givens fototexturer avviker från fotoyteprovet.")
+        record["appearanceStudy"] = study
     data = json_bytes(record)
     key = hashlib.sha256(data).hexdigest()
     put(store / "filer" / (record["sha256"] + ".mp4"), movie, record["sha256"])

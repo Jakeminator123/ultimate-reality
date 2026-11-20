@@ -183,7 +183,7 @@ async function modelRecord(store: string, key: string, kind: ModelRecord["kind"]
   return model;
 }
 
-type ReviewedTrialTake = { film: DealerMaterial["films"][number]; animation: MotionRecord; receipt: string };
+type ReviewedTrialTake = { film: DealerMaterial["films"][number]; animation: DealerMaterial["motions"][number]; receipt: string };
 type SeatedTrial = ActiveDealerModel & Partial<ReviewedTrialTake> & {
   run: string | null; appearanceError?: string; reviewedTakes?: ReviewedTrialTake[];
 };
@@ -222,7 +222,7 @@ export async function seatedTrialModel(material: DealerMaterial, trial: Photo, i
 }
 
 export async function currentSeatedTrial(project: DealerMaterial): Promise<Awaited<ReturnType<typeof seatedTrialModel>> | null> {
-  if (project.dealer !== "paulina" || project.edition !== "fas-1/v1" || !project.revision) return null;
+  if (!project.revision) return null;
   try {
     const trial = await readSeatedProfileTrial(project.dealer, project.edition);
     if (trial?.revision === project.revision && project.photos.some(p => p.id === "sittande/front" && p.sha256 === trial.frontSha256 && p.seated))
@@ -234,7 +234,7 @@ export async function currentSeatedTrial(project: DealerMaterial): Promise<Await
   return null;
 }
 
-export async function reviewedTrialFilm(dealer: string, geometry: string, appearance: string, motion: string, receipt: string) {
+export async function reviewedTrialFilm(dealer: string, geometry: string, appearance: string | null, motion: string, receipt: string) {
   if (!hex.test(motion) || !hex.test(receipt)) return;
   const takes = await reviewedTrialTakes(dealer, geometry, appearance, [], receipt);
   return takes.find(take => take.animation.sha256 === motion);
@@ -257,11 +257,11 @@ export async function reviewedTakeForLink(dealer: string, geometry: string, take
   return match;
 }
 
-async function reviewedTrialTakes(dealer: string, geometry: string, appearance: string, issues: string[], receipt?: string): Promise<ReviewedTrialTake[]> {
+async function reviewedTrialTakes(dealer: string, geometry: string, appearance: string | null, issues: string[], receipt?: string): Promise<ReviewedTrialTake[]> {
   const store = path.join(avatarDir(dealer), "3d", "versioner");
   try {
     const motions = await motionsFor(dealer, store, geometry, appearance, issues);
-    const byMotion = new Map(motions.filter(m => m.parent === appearance && m.motion.appearance === appearance)
+    const byMotion = new Map(motions.filter(m => m.parent === (appearance ?? geometry) && m.motion.appearance === appearance)
       .map(m => [m.sha256, m]));
     const films = await filmsFor(dealer, store, geometry, appearance, motions, issues, receipt);
     return films.flatMap(film => {

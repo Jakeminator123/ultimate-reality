@@ -112,6 +112,8 @@ function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; ini
       {inventory?.seatedTrial && <div className={styles.modelFilm}>
         <a className={styles.inlineLink} href="/bildstandard/sittprofil?modell=prov#jamforelse">
           Öppna {bodyLabel(inventory.seatedTrial.name)} <ArrowRight size={15}/></a>
+        {inventory.seatedTrial.films?.some(item => item.photoLayer) &&
+          <a className={styles.inlineLink} href="/bildstandard/sittprofil?modell=prov#fotoyta">Jämför fotoytan i rörelse <ArrowRight size={15}/></a>}
       </div>}
       {inventory?.seatedTrial?.film && <div className={styles.modelFilm}>
         <a className={styles.inlineLink} href={inventory.seatedTrial.film.url}>Spela {dealLabel(inventory.seatedTrial.name, inventory.seatedTrial.film.take, inventory.seatedTrial.film.poses?.end)} <ArrowRight size={15}/></a>

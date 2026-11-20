@@ -8,7 +8,8 @@ import styles from "./modeling.module.css";
 type Catalog = { actions: BlackjackAction[]; sequences: SequenceSummary[] };
 type Saved = { id: string; sequence: BlackjackSequence };
 type DraftStep = { action: BlackjackAction; face?: string };
-const modelKey = (item: Pick<BlackjackAction, "geometry" | "appearance">) => item.geometry + "/" + (item.appearance ?? "");
+type SequenceAppearance = Pick<BlackjackAction, "geometry" | "appearance" | "appearanceStudy">;
+const modelKey = (item: SequenceAppearance) => [item.geometry, item.appearance, item.appearanceStudy].join("/");
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { cache: "no-store", ...init });
@@ -59,10 +60,12 @@ export default function BlackjackSequenceEditor({ project }: { project: DealerMa
       project.geometry?.sha256 === action.geometry ? project.activeModel?.name : undefined;
     return body ? bodyLabel(body) : "Sparad kroppsmodell";
   }
-  function modelName(action: Pick<BlackjackAction, "geometry" | "appearance">) {
+  function modelName(action: SequenceAppearance) {
     const surfaces = [...models.values()].filter(item => item.geometry === action.geometry && item.appearance);
-    const detail = action.appearance && surfaces.length > 1 ? " (" + action.appearance.slice(0, 8) + ")" : "";
-    return bodyName(action) + " · " + (action.appearance ? "fotoyta" + detail : "neutral yta");
+    const fingerprint = action.appearanceStudy ?? action.appearance;
+    const detail = fingerprint && surfaces.length > 1 ? " (" + fingerprint.slice(0, 8) + ")" : "";
+    const name = action.appearanceStudy ? "korrigerad fotoyta" : action.appearance ? "fotoyta" : "neutral yta";
+    return bodyName(action) + " · " + name + detail;
   }
 
   function addStep() {
@@ -100,7 +103,7 @@ export default function BlackjackSequenceEditor({ project }: { project: DealerMa
       {catalog && <fieldset disabled={busy}>
         <legend>{saved ? "Sparad sekvens · " + saved.sequence.name : "Skapa en givsekvens"}</legend>
         {saved ? <>
-          <p>{modelName(saved.sequence)} · {saved.sequence.steps.length} givningar</p>
+          <p>{modelName(saved.sequence.steps[0])} · {saved.sequence.steps.length} givningar</p>
           <ol>{saved.sequence.steps.map(step => <li key={step.cardInstance}>
             Kort {step.cardInstance}{step.face && " · " + step.face} · plats {step.targetSeat} · {poseNames[step.startPose]} → {poseNames[step.endPose]}
             {" · "}<a href={step.filmUrl}>{dealLabel(bodyName(step), step.take)}</a>

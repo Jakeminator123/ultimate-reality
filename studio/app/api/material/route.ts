@@ -4,8 +4,8 @@ import { reviewedDealChoices } from "../../../lib/reviewed-deal-versions";
 import { errorResponse, requireLocal } from "../../../lib/storage";
 
 export const dynamic = "force-dynamic";
-function filmSummary({ take, sha256, url, poses }: TrialFilmSummary): TrialFilmSummary {
-  return { take, sha256, url, ...(poses && { poses }) };
+function filmSummary({ take, sha256, url, poses, photoLayer, appearanceStudy }: TrialFilmSummary): TrialFilmSummary {
+  return { take, sha256, url, ...(poses && { poses }), ...(photoLayer && { photoLayer }), ...(appearanceStudy && { appearanceStudy }) };
 }
 
 export async function GET(request: Request) {

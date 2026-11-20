@@ -2,7 +2,7 @@ import type { FilmRecord } from "./material-types";
 
 export type DealPose = NonNullable<FilmRecord["poses"]>["end"];
 export const poseNames: Record<DealPose, string> = { A1: "VILA A1", "A2.3": "REDO A2.3" };
-export const versionRule = "Aktuell är den högsta granskade versionen i samma givserie för samma kropp, fotoyta, kort, målplats och övergång mellan poser.";
+export const versionRule = "Aktuell är den högsta granskade versionen i samma givserie för samma kropp, grundfotoyta, kort, målplats och övergång mellan poser.";
 
 export function bodyLabel(name: string) {
   const match = /^(.+?) · sittmodell v(\d+)(?: \(prov\))?$/i.exec(name);
