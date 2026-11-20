@@ -4,6 +4,8 @@
 
 Redigeringsvyn och den gemensamma 3D-scenen finns i Next.js, React och TypeScript. Studion har verktyg för att granska bildoriginal, se kortet från två kameror och förhandsvisa en beställning. [Bildstandard](http://127.0.0.1:4317/bildstandard) · [Scenmiljö](http://127.0.0.1:4317/scenmiljo)
 
+Giv V4 delar en skinnad kropp mellan 120 virtuella kamerapositioner. Provspelarna visar en befintlig Runway-films rörelse på kroppen och vrider Paulinas ögon och huvud från sittande vila. [Metod från stillbilder till rörelse](../information/PAULINA_METOD.md) · [Film och V4 bredvid varandra](http://127.0.0.1:4317/giv-plats-4/filmrorelse?ruta=0) · [Blick](http://127.0.0.1:4317/giv-plats-4/blick)
+
 ## Grundbilder för en sittande dealer
 
 ### Vilka bilder bygger Paulina och vilken rörelse ska vi skapa?

@@ -94,7 +94,8 @@ export async function createOrbitScene(canvas, sceneUrl, signal) {
       if (!joint) throw Error("Givens fingerled " + name + " saknas.");
       return joint;
     }));
-    const card = asset.scene.getObjectByName(T.PropertyBinding.sanitizeNodeName("Utdelat gult kort"));
+    const card = asset.scene.getObjectByName(T.PropertyBinding.sanitizeNodeName("Rött spelkort"))
+      ?? asset.scene.getObjectByName(T.PropertyBinding.sanitizeNodeName("Utdelat gult kort"));
     const eyes = ["l_eye", "r_eye"].map(name => asset.scene.getObjectByName(name));
     if (eyes.some(eye => !eye)) throw Error("Paulinas ögonleder saknas.");
     if (!card) throw Error("Det utdelade kortet saknas.");
@@ -122,10 +123,13 @@ export async function createOrbitScene(canvas, sceneUrl, signal) {
     action.play();
     const camera = new T.PerspectiveCamera(40, aspect, .015, 30);
     const at = new T.Vector3(), fingertip = joints.map(() => new T.Vector3()), liveCorners = corners.map(() => new T.Vector3());
+    // The gaze trial has a baked neutral pose. Its comparison camera stays at
+    // that pose while the head turns in front of it.
+    const restingEyeCenter = eyes[0].getWorldPosition(new T.Vector3()).lerp(eyes[1].getWorldPosition(vertex), .5);
     const highFov = sideFieldOfView(asset.parser.json.asset.extras);
     let gaze = new T.Vector3(), sampledSeconds = 0;
     let idMaterials;
-    /** @param {number} frame @param {number} fps @param {number} index @param {boolean | "helbild" | "hander" | "ansikte"} cut */
+    /** @param {number} frame @param {number} fps @param {number} index @param {boolean | "helbild" | "hander" | "ansikte" | "fast-ansikte"} cut */
     function draw(frame, fps, index, cut = "helbild") {
       const rate = Number.isFinite(fps) && fps > 0 ? fps : 24;
       sampledSeconds = Math.min(clip.duration, Math.max(0, Math.round(frame) || 0) / rate);
@@ -136,9 +140,10 @@ export async function createOrbitScene(canvas, sceneUrl, signal) {
       card.localToWorld(at.copy(cardCenter));
       corners.forEach((corner, i) => card.localToWorld(liveCorners[i].copy(corner)));
       const view = tableView(index, highFov);
-      if (cut === "ansikte") {
+      if (cut === "ansikte" || cut === "fast-ansikte") {
         const radians = view.azimuthDeg * Math.PI / 180;
-        gaze.copy(eyes[0].getWorldPosition(vertex)).add(eyes[1].getWorldPosition(vertex)).multiplyScalar(.5);
+        if (cut === "fast-ansikte") gaze.copy(restingEyeCenter);
+        else gaze.copy(eyes[0].getWorldPosition(vertex)).add(eyes[1].getWorldPosition(vertex)).multiplyScalar(.5);
         gaze.y -= .022;
         camera.position.set(gaze.x + .96 * Math.sin(radians), gaze.y + .10, gaze.z + .96 * Math.cos(radians));
         camera.fov = 22;

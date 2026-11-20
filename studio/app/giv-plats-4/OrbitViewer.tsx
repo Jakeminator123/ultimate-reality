@@ -12,7 +12,7 @@ export type OrbitViewerProps = {
   fps: number;
   initialAngle?: number;
   onAngleChange?: (index: number) => void;
-  cut: OrbitCut;
+  cut: OrbitCut | "fast-ansikte";
   onCutChange?: (cut: OrbitCut) => void;
   onReadyChange?: (ready: boolean) => void;
   label?: string;

@@ -211,6 +211,7 @@ export default function DealPlayer({ version }: { version: DealVersion }) {
     <nav className={styles.navigation} aria-label="Dealerversion">
       <a href="/" className={styles.back}><ArrowLeft size={16} aria-hidden /> Till dealerstudion</a>
       {(version === "v3" || version === "v4") && <a className={styles.back} href={root + "minspel"}>Prova Paulinas minspel</a>}
+      {version === "v4" && <a className={styles.back} href={root + "filmrorelse?ruta=0"}>Prova rörelse från film</a>}
       {otherVersions.map(([id, label]) => <a key={id} className={styles.back}
         href={root + id + selection(camera, frame, angle, cut)}>{label}</a>)}
     </nav>
