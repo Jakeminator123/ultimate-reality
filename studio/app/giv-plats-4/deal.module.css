@@ -16,6 +16,9 @@
   text-decoration-thickness: 1px;
   text-underline-offset: .22em;
 }
+.navigation { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: space-between; }
+.references { display: flex; flex-wrap: wrap; gap: .4rem 1.3rem; }
+.references a { color: var(--pine); text-underline-offset: .2em; }
 .header, .cameras, .moments, .scrub {
   display: flex;
   align-items: center;

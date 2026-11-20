@@ -25,6 +25,7 @@ const paulinaTrials = [
   { field: "motionTrialUrl", url: "/prov-70/v1", receipt: "prov-70/v1/visning/matning.json" },
   { field: "anchorTrialUrl", url: "/prov-ankare/v1", receipt: "prov-ankare/v1/visning/jämförelse.json" },
   { field: "seat4DealUrl", url: "/giv-plats-4/v1", receipt: "giv-plats-4/v1/visning/rendering.json" },
+  { field: "seat4DealUrl", url: "/giv-plats-4/v2", receipt: "giv-plats-4/v2/visning/rendering.json" },
 ] as const;
 function bad(message: string): never { throw new LocalError(message, 409); }
 function avatarDir(dealer: string) {
@@ -329,9 +330,10 @@ export async function dealerMaterial(dealer = "paulina", requested: string | nul
     geometry: null, appearance: null, versions: [], motions: [], films: [] };
   if (dealer === "paulina" && !requested) {
     const avatar = avatarDir(dealer);
-    await Promise.all(paulinaTrials.map(async trial => {
-      if (await checkedPath(path.join(avatar, trial.receipt))) result[trial.field] = trial.url;
-    }));
+    const available = await Promise.all(paulinaTrials.map(trial => checkedPath(path.join(avatar, trial.receipt))));
+    paulinaTrials.forEach((trial, i) => {
+      if (available[i]) result[trial.field] = trial.url;
+    });
   }
   if (!release) {
     if (dealer === "paulina") result.activeModel = await legacyModel();
