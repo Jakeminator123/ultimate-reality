@@ -1,5 +1,6 @@
 import { kortMedVitRam, referenskort } from "../../fotomall/kortstandard";
-import type { SceneView } from "./navigation";
+import { panoramaRooms } from "../../lib/panorama-rooms";
+import { panoramaCatalog, type SceneView } from "./navigation";
 
 type Destination = { label: string; href: string };
 export type Study = {
@@ -22,12 +23,16 @@ const seatLinks = (path: string, query = ""): Destination[] => [4, 1].map(seat =
 export const sceneMaterial: Record<SceneView, SceneMaterial> = {
   bakgrund: {
     featured: {
-      title: "Brown Photostudio 01", version: "RUM-02 · panorama-v1",
-      description: "Jakobs valda bakgrund är ett fotograferat 360°-panorama. Öppna fotostudion tom eller se bordet i samma rum från en av spelarstolarna.",
-      links: [{ label: "Öppna tomt panorama", href: "/bordsprov/panorama" }, ...seatLinks(panorama)],
+      title: panoramaCatalog.name, version: panoramaRooms.length + " fotograferade rum",
+      description: "Välj en bakgrund bland rummens förhandsbilder. Öppna rummet i 360° och jämför samma bord från båda spelarstolarna.",
+      links: [{ label: "Välj rum", href: panoramaCatalog.href }],
     },
-    preview: { src: "/scenmiljo/bilder/fotostudio-v1.jpg", alt: "Den tomma fotostudion med soffa, fönster och trägolv", caption: "Brown Photostudio 01 · tomt rum" },
-    related: [],
+    preview: { src: panorama + "/forhandsvisning.jpg", alt: "Den tomma fotostudion med soffa, fönster och trägolv", caption: "Brown Photostudio 01 · tomt rum" },
+    related: [
+      { title: "Vald fotostudio · Brown Photostudio 01", version: "RUM-02 · panorama-v1",
+        description: "Öppna Jakobs valda fotostudio tom eller se blackjackbordet och kortskon från en av spelarstolarna.",
+        links: [{ label: "Öppna tomt panorama", href: "/bordsprov/panorama" }, ...seatLinks(panorama)] },
+    ],
     archive: [
       { title: "Ljus vid blackjackbordet", version: "LJUS-03 till LJUS-05",
         description: "Tidigare ljusstudier jämför bland annat pendellampan, panoramats miljöljus och avskärmat ljus på vänsterhanden.",

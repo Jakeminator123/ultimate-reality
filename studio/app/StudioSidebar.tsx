@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Aperture, BookOpen, Box, Calculator, Clapperboard, FolderOpen, Hand, LayoutGrid, Layers3 } from "lucide-react";
-import { sceneViews, type SceneView } from "./scenmiljo/navigation";
+import { panoramaCatalog, sceneViews, type SceneView } from "./scenmiljo/navigation";
 
 export const secondaryWorkspaces = [
   { id: "scen", name: "Grepp och landning", icon: Hand },
@@ -10,7 +10,7 @@ export const secondaryWorkspaces = [
 ] as const;
 
 export type Workspace = "oversikt" | "modellering" | (typeof secondaryWorkspaces)[number]["id"];
-type SubpageArea = "bilder" | "ovrigt" | "scenmiljo" | SceneView;
+type SubpageArea = "bilder" | "ovrigt" | "scenmiljo" | SceneView | typeof panoramaCatalog.id;
 type StudioArea = Workspace | SubpageArea;
 
 export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; editor?: boolean; dirty?: boolean }) {
@@ -33,8 +33,14 @@ export function StudioSidebar({ area, editor, dirty }: { area: StudioArea; edito
         <a className="nav-environment-title" href="/scenmiljo" aria-current={current("scenmiljo")} {...external}>
           <Layers3 size={18} aria-hidden/> Scenmiljö
         </a>
-        {sceneViews.map(({ id, name }) => <a key={id} className="nav-environment-view" href={"/scenmiljo/" + id}
-          aria-current={current(id)} {...external}>{name}</a>)}
+        {sceneViews.map(({ id, name }) => {
+          const viewLink = <a key={id} className="nav-environment-view" href={"/scenmiljo/" + id} aria-current={current(id)} {...external}>{name}</a>;
+          if (id === "bakgrund") return <div key={id} className="nav-environment-branch" role="group" aria-label={name}>
+            {viewLink}
+            <a className="nav-environment-child" href={panoramaCatalog.href} aria-current={current(panoramaCatalog.id)} {...external}>{panoramaCatalog.name}</a>
+          </div>;
+          return viewLink;
+        })}
       </div>
       <div className="nav-secondary" role="group" aria-label="Övriga verktyg">
         <p>Övriga verktyg</p>

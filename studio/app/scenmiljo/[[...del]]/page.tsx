@@ -39,7 +39,7 @@ function StudyCard({ study }: { study: Study }) {
 export default async function Page({ params }: Props) {
   const view = selectedPage((await params).del);
   if (!view) return <StudioSubpage area="scenmiljo"><main className={styles.page}>
-    <header className={styles.heading}><h1>Scenmiljö</h1><p>Brown Photostudio 01, blackjackbordet och Paulinas scenprov.</p></header>
+    <header className={styles.heading}><h1>Scenmiljö</h1><p>Fotograferade rum, blackjackbordet och Paulinas scenprov.</p></header>
     <div className={styles.overview}>{sceneViews.map(item => {
       const { featured, preview } = sceneMaterial[item.id];
       return <a key={item.id} className={styles.card} href={"/scenmiljo/" + item.id}>

@@ -88,7 +88,7 @@ test(
         assert.equal(await page.locator("main a").count(), 4);
         await page.setViewportSize({ width: 320, height: 800 });
         for (const [label, target] of [
-          ["Bakgrund och ljus", "/bordsprov/panorama"],
+          ["Bakgrund och ljus", "/scenmiljo/bakgrund/fotopanorama"],
           ["Bord och kortsko", "/bordsprov/panorama/fotostudio?stol=4"],
           ["Kort och markeringar", "/bildstandard#referenskort"],
           ["Scenprov", "/bordsprov/panorama/fotostudio?stol=4&vy=paulina"],
@@ -100,6 +100,53 @@ test(
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         }
         assert.equal((await page.request.get(origin + "/scenmiljo/fel-vy")).status(), 404);
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await nav.getByRole("link", { name: "Översikt", exact: true }).click();
+      });
+      await t.test("fotopanoramats rum nås från bakgrundsmenyn och behåller stol, pose och matta vid rumsbyte", async () => {
+        const { panoramaRooms } = await import("../lib/panorama-rooms.ts");
+        const catalogue = "/scenmiljo/bakgrund/fotopanorama";
+        const title = "Fotopanorama (360°)";
+        const nav = page.getByRole("navigation", { name: "Arbetsyta" });
+        const group = nav.getByRole("group", { name: "Bakgrund och ljus", exact: true });
+        await group.getByRole("link", { name: "Bakgrund och ljus", exact: true }).click();
+        await page.locator(`main a[href="${catalogue}"]`).first().click();
+        await page.getByRole("heading", { level: 1, name: title }).waitFor();
+        assert.equal(await group.getByRole("link", { name: title, exact: true }).getAttribute("aria-current"), "page");
+        assert.equal(await nav.locator('[aria-current="page"]').count(), 1);
+        const visibleRooms = page.locator('main a[href^="/bordsprov/panorama/"]');
+        const roomHrefs = await visibleRooms.evaluateAll(links => links.map(link => link.getAttribute("href")).sort());
+        assert.deepEqual(roomHrefs, panoramaRooms.map(room => "/bordsprov/panorama/" + room.id).sort());
+        for (const room of panoramaRooms) {
+          const route = "/bordsprov/panorama/" + room.id;
+          const card = page.locator(`main a[href="${route}"]`);
+          assert.ok((await card.innerText()).includes(room.name));
+          for (const seat of ["4", "1"]) {
+            const query = new URLSearchParams({ stol: seat, vy: "paulina", matta: "gras" });
+            const response = await page.request.get(origin + route + "?" + query);
+            assert.equal(response.status(), 200);
+            const state = await page.evaluate(html => {
+              const doc = new DOMParser().parseFromString(html, "text/html");
+              const canvas = doc.querySelector("canvas[data-seat]");
+              return {
+                seat: canvas?.dataset.seat, view: canvas?.dataset.view, mat: canvas?.dataset.mat,
+                rooms: [...doc.querySelectorAll("a[data-room]")].map(link => link.getAttribute("href")),
+                back: !!doc.querySelector('a[href="/scenmiljo/bakgrund/fotopanorama"]'),
+              };
+            }, await response.text());
+            assert.deepEqual([state.seat, state.view, state.mat, state.back], [seat, "paulina", "gras", true], room.name);
+            const destinations = state.rooms.map(href => new URL(href, origin + route));
+            assert.deepEqual(destinations.map(link => link.pathname).sort(), roomHrefs);
+            for (const destination of destinations) {
+              for (const [key, value] of query) assert.equal(destination.searchParams.get(key), value, destination.href);
+            }
+          }
+        }
+        await page.setViewportSize({ width: 320, height: 800 });
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        for (const invalid of [catalogue + "/okand", "/scenmiljo/bord/fotopanorama"]) {
+          assert.equal((await page.request.get(origin + invalid)).status(), 404);
+        }
         await page.setViewportSize({ width: 1280, height: 900 });
         await nav.getByRole("link", { name: "Översikt", exact: true }).click();
       });
@@ -134,6 +181,13 @@ test(
         for (const photo of material.photos) {
           assert.ok(markdown.includes(photo.sha256));
           assert.ok(markdown.includes(photo.width + " × " + photo.height));
+        }
+        const quarter = material.photos.find(photo => photo.id === "sittande/trekvart");
+        if (quarter?.review) {
+          await page.getByRole("region", { name: "Paulinas bildserie" }).getByRole("button", { name: quarter.name, exact: true }).click();
+          const reference = page.getByRole("region", { name: quarter.name, exact: true });
+          await reference.getByText(quarter.review.note, { exact: false }).waitFor();
+          await reference.getByText(quarter.review.decision === "usable" ? "Granskad · användbar som referens" : "Granskad · användbar med förbehåll").waitFor();
         }
         if (material.photos.length) {
           const wrong = new URL(material.photos[0].url, origin);
@@ -358,6 +412,7 @@ test(
       await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: /Fas 2.*3D-modell/ }).click();
       const sceneEntry = page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Scenmiljö", exact: true });
       assert.equal(await sceneEntry.getAttribute("target"), "_blank");
+      assert.equal(await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Fotopanorama (360°)" }).getAttribute("target"), "_blank");
       const archiveOpened = page.waitForEvent("popup");
       await page.getByRole("navigation", { name: "Arbetsyta" }).getByRole("link", { name: "Övrigt", exact: true }).click();
       const archive = await archiveOpened;

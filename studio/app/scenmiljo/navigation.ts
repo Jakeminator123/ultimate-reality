@@ -6,3 +6,9 @@ export const sceneViews = [
 ] as const;
 
 export type SceneView = (typeof sceneViews)[number]["id"];
+
+export const panoramaCatalog = {
+  id: "fotopanorama",
+  name: "Fotopanorama (360°)",
+  href: "/scenmiljo/bakgrund/fotopanorama",
+} as const;

@@ -6,6 +6,8 @@ Redigeringsvyn och den gemensamma 3D-scenen är genomförda i Next.js, React och
 
 [Scenmiljö](http://127.0.0.1:4317/scenmiljo) samlar **Bakgrund och ljus**, **Bord och kortsko**, **Kort och markeringar** samt **Scenprov**. Skons placering och riktning hör till bordets geometri. Det utbytbara trycket hör till kortet. I Scenprov kan samma frysta grepp visas från stol 4 och stol 1 i fotostudion RUM-02. Filmen LJUS-05 visar utdraget i kasinorummet RUM-03. [Jämför poser och rörelse](http://127.0.0.1:4317/scenmiljo/scenprov)
 
+Under **Bakgrund och ljus** visar [Fotopanorama (360°)](http://127.0.0.1:4317/scenmiljo/bakgrund/fotopanorama) en förhandsbild per rum. Sidan och visaren använder samma [rumsregister](lib/panorama-rooms.ts). Öppna det tomma rummet eller välj stol 4 eller stol 1 i visaren. Vid ett direkt rumsbyte följer stol, bordsmatta och vald pose med. Brown Photostudio 01 är den valda fotostudion för Paulinas placeringsprov.
+
 ## Grundbilder för en sittande dealer
 
 Använd [3D-modellering](http://127.0.0.1:4317/#modellering) för den aktiva Fas 1-serien och sittmodellen v2. [Bildstandarden](http://127.0.0.1:4317/bildstandard) anger kamera och pose för varje vy. [Övrigt](http://127.0.0.1:4317/ovrigt) innehåller den tidigare dockmallen och SAM-försöken.

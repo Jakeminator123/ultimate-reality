@@ -12,6 +12,7 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   if (project.revision) edition.set("revision", project.revision);
   const measured = "/bildstandard/sitthojd?" + edition;
   return <div className={styles.sourceNote}>
+    {photo.review && <p><strong>{photo.review.decision === "usable" ? "Granskad · användbar som referens" : "Granskad · användbar med förbehåll"}</strong> · {photo.review.note}</p>}
     <p><strong>{photo.format} · {dimensions([photo.width, photo.height])}</strong>{photo.targetAngle !== undefined &&
       (photo.group === "Sittande" ? " · receptets sidovinkel " : " · målvinkel ") + photo.targetAngle + "°"}</p>
     <p>{roles.length ? roles.map(s => roleName[s]).join(" och ") : "Referens i bildserien"}</p>
@@ -69,7 +70,7 @@ export default function MaterialEvidence({ project }: { project: DealerMaterial 
       <h3>Hur används vinklarna?</h3>
       <p><strong>{geometryPhotos.map(p => p.name).join(", ")}</strong> ger kroppsgeometrin.
         {posePhotos.length > 0 && " " + posePhotos.map(p => p.name).join(" och ") + " används för att jämföra hållningen från sidan."}</p>
-      {surfacePhotos.length > 0 && <p><strong>{surfacePhotos.length} foton ger modellens yta.</strong> De synliga delarna projiceras på kroppen och blandas i en gemensam textur. Underlaget är {surfacePhotos.map(p => p.name.toLocaleLowerCase("sv")).join(", ")}.</p>}
+      {surfacePhotos.length > 0 && <p><strong>{surfacePhotos.length} foton ger modellens yta.</strong> Bilderna passas mot samma 3D-kropp. För varje del av huden eller kläderna väger foton där den syns tydligt tyngre. Färgerna blandas i en gemensam textur. På ytor som saknar fototäckning skattas utseendet. Underlaget är {surfacePhotos.map(p => p.name.toLocaleLowerCase("sv")).join(", ")}.</p>}
       <p>Rörelsen skapas i riggens leder. Greppbilderna visar var fingrarna ska möta kortet. När kortbanan och lederna följer samma tidslinje kan samma giv renderas från båda stolarna.</p>
     </div>}
     {project.issues.length > 0 && <ul>{project.issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul>}

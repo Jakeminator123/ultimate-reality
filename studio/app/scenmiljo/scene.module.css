@@ -10,6 +10,7 @@
 .back:hover { text-decoration: underline; }
 .page a:focus-visible, .archive summary:focus-visible { outline: 3px solid #a97831; outline-offset: 3px; }
 .overview, .studies { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .card, .featured, .study {
   min-width: 0;
   border: 1px solid var(--line);
@@ -52,6 +53,12 @@
 .study > p:not(.version) { font-size: 14px; }
 .archive { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--line); }
 .archive summary { width: fit-content; color: #4a5a4d; font-size: 15px; font-weight: 650; }
+@media (max-width: 880px) {
+  .rooms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .rooms { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}
 @media (max-width: 720px) {
   .page { padding: 19px 13px 30px; }
   .heading { margin-bottom: 13px; }
