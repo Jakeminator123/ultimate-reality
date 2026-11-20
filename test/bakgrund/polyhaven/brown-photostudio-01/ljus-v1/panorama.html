@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brown Photostudio 01 · 360°</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root{font:16px "DM Sans",system-ui,sans-serif;color:#f3eee5;background:#18201d;color-scheme:dark}
+    body{max-width:1440px;margin:auto;padding:clamp(.75rem,2vw,1.6rem)}
+    header,nav{display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    h1{font:normal clamp(1.6rem,3vw,2.5rem) Georgia,serif;margin:0}a{color:#ead5ae}
+    canvas{background:#272923;display:block;width:100%;height:min(72svh,70vw);margin:.85rem 0;touch-action:none;cursor:grab;border-radius:.5rem}
+    canvas:active{cursor:grabbing}button{font:inherit;padding:.45rem .75rem;background:#233029;color:inherit;border:1px solid #697b70;border-radius:.4rem;cursor:pointer}
+    nav{justify-content:flex-start}p{color:#c4ccc5;line-height:1.45}
+  </style>
+  <script type="importmap">{"imports":{"three":"/bordsprov/rum3d/three.module.js","three/addons/":"/bordsprov/rum3d/addons/"}}</script>
+</head>
+<body>
+  <header><h1>Brown Photostudio 01 · 360°</h1><a href="/bordsprov/brown-studio?stol=4">Till kasinorummets ljusprov</a></header>
+  <p>Fotot är taget från en fast punkt. Dra i bilden eller använd piltangenterna för att se dig omkring.</p>
+  <canvas id="panorama" tabindex="0" aria-label="Fotostudion sedd från fotograferingspunkten"></canvas>
+  <nav aria-label="Blickriktning"><button id="left">Vrid åt vänster</button><button id="right">Vrid åt höger</button><button id="reset">Till utgångsvyn</button></nav>
+  <p id="status" role="status">Läser panoramat…</p>
+  <script type="module" src="panorama.mjs"></script>
+</body>
+</html>

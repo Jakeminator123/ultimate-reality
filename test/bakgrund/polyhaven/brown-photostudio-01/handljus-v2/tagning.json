@@ -1,0 +1,71 @@
+{
+  "title": "Vänsterhandens kortdrag · Brown Photostudio 50 % med handljus",
+  "take": "skoriktning-70-30-v1",
+  "geometry": "e8e45003a9bc8add5b25839601039782f368e0fffcf176da1da6cf861683dff8",
+  "appearance": "0f389edf5c50a09ebf9ce9159fe67f2d9b154915cf5ea1be7fc05762ed467a8d",
+  "motion": "c05b66757319c3742c8700c637dd6f32939714960b9479c37736c3b48be5577b",
+  "card": "KORT-02",
+  "videoSha256": "94a9dca486ef3778857b09f1fc10a3d04c9a84265bc89a971a4671ab507dc0ee",
+  "cameras": [
+    {
+      "id": "Stol 4",
+      "projection": "perspektiv",
+      "samples": [
+        {
+          "frame": 0,
+          "position": [
+            0,
+            0.49,
+            1.5276000000000003
+          ],
+          "target": [
+            0,
+            0.095,
+            -0.035
+          ],
+          "fov": 48,
+          "azimuth": 0.0,
+          "elevation": 14.186263675176335,
+          "distance": 1.6117517674877855
+        }
+      ]
+    },
+    {
+      "id": "Stol 1",
+      "projection": "perspektiv",
+      "samples": [
+        {
+          "frame": 0,
+          "position": [
+            -1.3935999999999997,
+            0.4099999999999998,
+            0.6164
+          ],
+          "target": [
+            0,
+            0.095,
+            -0.035
+          ],
+          "fov": 48,
+          "azimuth": -64.94755514307482,
+          "elevation": 11.572380744989626,
+          "distance": 1.5702445414647996
+        }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "frame": 12,
+      "label": "Kortdragets ruta 1/33"
+    },
+    {
+      "frame": 28,
+      "label": "Kortdragets ruta 17/33"
+    },
+    {
+      "frame": 44,
+      "label": "Kortdragets ruta 33/33"
+    }
+  ]
+}

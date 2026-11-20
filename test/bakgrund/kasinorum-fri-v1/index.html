@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kasinorummet · Ultimate Reality</title>
+  <link rel="icon" href="data:,">
+  <base href="/bordsprov/rum3d/">
+  <style>
+    :root{color-scheme:dark;font:16px "DM Sans",system-ui,sans-serif;color:#f3eee5;background:#18201d}
+    *{box-sizing:border-box}body{max-width:1600px;margin:auto;padding:clamp(.7rem,2.5vw,2.2rem)}
+    header,.toolbar,fieldset{display:flex;align-items:center;flex-wrap:wrap;gap:.55rem}header{justify-content:space-between;margin-bottom:.7rem}
+    h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(1.6rem,3vw,2.7rem);margin:0}
+    label,button,select{font:inherit}button,select{border:1px solid #6b7970;color:inherit;background:#233029;border-radius:.4rem;padding:.45rem .7rem}
+    button{cursor:pointer}button[aria-pressed=true]{background:#e3cda5;color:#17241d;border-color:#e3cda5}
+    .stage{position:relative;background:#252822;border-radius:.5rem;overflow:hidden;aspect-ratio:16/9;isolation:isolate}
+    canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}
+    #status{position:absolute;bottom:.75rem;left:.75rem;color:white;background:#17221eee;padding:.4rem .65rem;border-radius:.25rem;pointer-events:none}#status:empty{display:none}
+    .toolbar{margin:.85rem 0;justify-content:space-between}fieldset{padding:0;border:0;margin:0}fieldset label{display:flex;align-items:center;gap:.25rem;cursor:pointer}
+    input{accent-color:#c4a36c;width:1.1em;height:1.1em}p{color:#c4ccc5;font-size:.9rem}a{color:#ead5ae}a:focus,button:focus-visible,input:focus-visible,select:focus{outline:2px solid #ebd39c;outline-offset:2px}
+    @media(min-width:760px){body{max-width:min(100%,calc(177.778svh - 275px));padding:.65rem 1rem}.toolbar{margin:.55rem 0}p{margin:.45rem 0}}
+    [hidden]{display:none!important}@media(max-width:700px){.toolbar{gap:.9rem}}
+  </style>
+  <script type="importmap">{"imports":{"three":"./three.module.js","three/addons/":"./addons/"}}</script>
+</head>
+<body>
+  <header><h1>Kasinorummet</h1><label>Bakgrund <select id="background"><option value="mesh">Originalrum · GLB</option><option value="atlas" data-src="rum.spz" data-floor="-0.4509">Atlas · snabbförhandsvisning</option><!-- atlas-full --></select></label><label>Ljus <select id="lighting" disabled><option value="studio">Tidigare studioljus</option><option value="lamps">Rummets armaturer</option></select></label></header>
+  <div class="stage"><canvas id="stage" aria-label="Vridbar 3D-vy av kasinorummet"></canvas><span id="status" role="status">Läser rum och bord…</span></div>
+  <div class="toolbar">
+    <nav aria-label="Kamera"><button data-camera="overview" aria-pressed="true">Överblick</button> <button data-camera="4" aria-pressed="false">Stol 4</button> <button data-camera="1" aria-pressed="false">Stol 1</button></nav>
+    <fieldset aria-label="Scenobjekt"><label><input id="table" type="checkbox" checked>Bord och sko</label><label><input id="dealer" type="checkbox" checked>Paulina</label><label><input id="chips" type="checkbox">Marker</label><label><input id="glass" type="checkbox">Dricksglas</label></fieldset>
+  </div>
+  <div id="pendant-controls" hidden><label>Pendellampan <select id="pendant"><option value="steady">Fast sken</option><option value="blink">Blinka var tredje sekund</option><option value="dim">Dämpat sken</option></select></label> <button id="record-view" type="button" hidden>Spela in vyn</button> <a id="recorded-view" hidden>Hämta din inspelning</a> · <a href="lampblink.mp4" download>Hämta film med den blinkande lampan</a></div>
+  <fieldset id="draw-controls" hidden style="margin-top:.6rem" aria-label="Kortutdrag"><label><input id="pendant-table" type="checkbox">Pendelns ljus på bordet</label><button type="button" id="play-draw" aria-pressed="false">Spela kortdraget</button><label>Ruta <input style="width:8rem" id="draw-frame" type="range" min="1" max="33" value="1"><output id="frame-label">1/33</output></label><a href="pendelljus-kortutdrag.mp4">Se filmen med kortdraget</a></fieldset>
+  <p>Dra för att vrida. Rulla eller nyp för att zooma. Högerdra eller dra med två fingrar för att flytta blickpunkten. <!-- atlas-comparison --><a href="lampor.html">Jämför lamporna före och efter</a> · <a href="/bordsprov/skolage.html">Bordet ovanifrån</a> · <a href="/bordsprov/paulina-utdrag.html">Spela kortutdraget</a></p>
+  <script type="module" src="scen.mjs"></script>
+</body></html>

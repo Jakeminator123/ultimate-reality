@@ -22,6 +22,9 @@
 # Självbärande HTML-prov kan innehålla både foton och kompletta modeller.
 /test/**/*.html
 !/test/**/*.mall.html
+# Handkodade 3D-visare hämtar alla bilder och modeller separat från labbdisken.
+!/test/bakgrund/kasinorum-fri-v1/index.html
+!/test/bakgrund/polyhaven/brown-photostudio-01/ljus-v1/panorama.html
 /test/**/matt*.json
 /test/**/rackvidd*.json
 /test/**/pose*.json

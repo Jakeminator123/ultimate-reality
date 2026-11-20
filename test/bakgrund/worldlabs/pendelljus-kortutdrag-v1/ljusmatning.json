@@ -1,0 +1,114 @@
+{
+  "4": {
+    "hand": {
+      "pixelruta": [
+        560,
+        242,
+        575,
+        250
+      ],
+      "bakgrund": {
+        "fast": 0.36646,
+        "dampat": 0.36646,
+        "minskning_procent": 0.0
+      },
+      "bord": {
+        "fast": 0.36836,
+        "dampat": 0.36666,
+        "minskning_procent": 0.46
+      }
+    },
+    "glas": {
+      "pixelruta": [
+        228,
+        258,
+        258,
+        299
+      ],
+      "bakgrund": {
+        "fast": 0.0417,
+        "dampat": 0.0417,
+        "minskning_procent": 0.0
+      },
+      "bord": {
+        "fast": 0.04337,
+        "dampat": 0.04187,
+        "minskning_procent": 3.46
+      }
+    },
+    "filt": {
+      "pixelruta": [
+        531,
+        327,
+        544,
+        335
+      ],
+      "bakgrund": {
+        "fast": 0.05178,
+        "dampat": 0.05178,
+        "minskning_procent": 0.0
+      },
+      "bord": {
+        "fast": 0.05335,
+        "dampat": 0.05197,
+        "minskning_procent": 2.59
+      }
+    }
+  },
+  "1": {
+    "hand": {
+      "pixelruta": [
+        429,
+        242,
+        444,
+        249
+      ],
+      "bakgrund": {
+        "fast": 0.34083,
+        "dampat": 0.34083,
+        "minskning_procent": 0.0
+      },
+      "bord": {
+        "fast": 0.34083,
+        "dampat": 0.34083,
+        "minskning_procent": 0.0
+      }
+    },
+    "glas": {
+      "pixelruta": [
+        253,
+        335,
+        301,
+        387
+      ],
+      "bakgrund": {
+        "fast": 0.0515,
+        "dampat": 0.0515,
+        "minskning_procent": 0.0
+      },
+      "bord": {
+        "fast": 0.08481,
+        "dampat": 0.05521,
+        "minskning_procent": 34.9
+      }
+    },
+    "filt": {
+      "pixelruta": [
+        565,
+        303,
+        578,
+        310
+      ],
+      "bakgrund": {
+        "fast": 0.06285,
+        "dampat": 0.06285,
+        "minskning_procent": 0.0
+      },
+      "bord": {
+        "fast": 0.06423,
+        "dampat": 0.06303,
+        "minskning_procent": 1.87
+      }
+    }
+  }
+}

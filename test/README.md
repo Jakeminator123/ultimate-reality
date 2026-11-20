@@ -2,7 +2,7 @@
 
 [Metodregistret](../information/METODER.md) ger varje försök en referens och visar vilka versioner som har provats och valts för rum, bord, material, dealer, kortsko och kort.
 
-[World Labs](bakgrund/worldlabs/README.md) samlar kasinorummets fullversion och lampanimationen. [Poly Haven · Brown Photostudio 01](bakgrund/polyhaven/brown-photostudio-01/README.md) innehåller 4K-panoramat för nästa lokala ljusprov.
+[Jämför ljusproven i studion](http://127.0.0.1:4317/bordsprov/ljusstudier). [World Labs](bakgrund/worldlabs/README.md) samlar Atlas-rummet, pendellampan och kortdraget med rigg 08. [Poly Haven · Brown Photostudio 01](bakgrund/polyhaven/brown-photostudio-01/README.md) innehåller det fotograferade 4K-panoramat, jämförelsen av tre ljuslägen och provet där Paulina v2 drar ett kort med mjukt vänsterhandsljus.
 
 [Vrid kasinorummet](bakgrund/kasinorum-fri-v1/README.md) för att möblera samma bord med marker och glas och växla mellan Jakobs GLB och Atlas-punktmolnet. [Aktuellt kortutdrag, 70/30](artefakter/skoriktning-70-30/README.md) använder samma bord och den nya skovinkeln. [Tidigare tagning vid 100°](artefakter/kasinorum-utdrag-100/README.md) · [Bordsmaterial och skala](bord/polyhaven-material-v1/README.md)
 

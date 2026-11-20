@@ -6,6 +6,7 @@ const room = "test/bakgrund/kasinorum-fri-v1";
 const lighting = "test/bakgrund/kasinorum-lampljus-v1";
 const splatStudy = "test/bakgrund/atlas-splat-v1";
 const lampStudy = "test/bakgrund/worldlabs/lampblink-v1";
+const drawStudy = "test/bakgrund/worldlabs/pendelljus-kortutdrag-v1";
 const fullSplat = "test/bakgrund/atlas-chisel-v1/full-splat-v1.spz";
 const study = "test/artefakter/skoriktning-70-30";
 const surfaces = "test/bord/polyhaven-material-v1";
@@ -17,6 +18,9 @@ const files = new Map<string, string>([
   ["armaturer.mjs", lighting + "/armaturer.mjs"],
   ["pendel.mjs", lampStudy + "/pendel.mjs"],
   ["lampblink.mp4", lampStudy + "/lampblink.mp4"],
+  ["utdrag.mjs", drawStudy + "/utdrag.mjs"],
+  ["pendelljus-kortutdrag.mp4", drawStudy + "/pendelljus-kortutdrag.mp4"],
+  ["pendelljus-ruta17.jpg", drawStudy + "/pendelljus-ruta17.jpg"],
   ["lampor.html", lighting + "/lampor.html"],
   ["foremal.mjs", "test/artefakter/glas-marker-v1/foremal.mjs"],
   ["rum.glb", "test/bakgrund/kasinorum-v1/Kasinorum.glb"],
@@ -35,6 +39,10 @@ const files = new Map<string, string>([
   ["material.mjs", surfaces + "/material.mjs"],
   ["spark.js", modules + "/@sparkjsdev/spark/dist/spark.module.min.js"],
 ]);
+for (let pose = 1; pose <= 8; pose++) {
+  const name = "drag-" + String(pose).padStart(2, "0") + ".glb";
+  files.set(name, study + "/" + name);
+}
 for (const name of ["three.module.js", "three.core.js"]) {
   files.set(name, modules + "/three/build/" + name);
 }

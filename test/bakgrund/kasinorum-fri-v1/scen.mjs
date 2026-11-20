@@ -7,6 +7,7 @@ import { buildDrawShoe } from "./sko.mjs";
 import { prepareAppearance } from "./utseende.mjs";
 import { buildChips, buildGlass } from "./foremal.mjs";
 import { attachPendant, enableRecording, isDim } from "./pendel.mjs";
+import { addPendantLight, frameAt, loadDraw, motionFrame, pendantCandela } from "./utdrag.mjs";
 
 const canvas = document.querySelector("#stage");
 const status = document.querySelector("#status");
@@ -142,12 +143,48 @@ async function start() {
 
   let spark, activeCloud;
   const pendant = input("pendant");
+  const drawFrame = input("draw-frame"), playDraw = input("play-draw"), pendantTable = input("pendant-table");
+  const lightOnTable = addPendantLight(scene);
+  const drawRequested = query.get("drag") === "1";
+  if (drawRequested) pendantTable.checked = true;
+  let bodyParts, firstPose, appearance, drawLoading, moveHand, playing = false;
+  function setPlaying(value) {
+    playing = value;
+    playDraw.textContent = value ? "Pausa kortdraget" : "Spela kortdraget";
+    playDraw.setAttribute("aria-pressed", String(value));
+  }
+  async function prepareDraw() {
+    if (moveHand) return true;
+    if (!bodyParts) return false;
+    try {
+      drawLoading ??= loadDraw(loader, url, appearance, bodyParts, firstPose, take, draw);
+      moveHand = await drawLoading;
+      canvas.dataset.drawReady = "true";
+      return true;
+    } catch (error) {
+      drawLoading = undefined;
+      setPlaying(false);
+      status.textContent = "Kortdraget kunde inte öppnas. " + error.message;
+      return false;
+    }
+  }
   const stopRecording = enableRecording(canvas, input("record-view"), input("recorded-view"), message => {
     status.textContent = "Inspelningen kunde inte slutföras. " + message;
   });
   if (query.get("blink") === "1") pendant.value = "blink";
   let blinkStart = performance.now(), updatePendant;
   pendant.addEventListener("change", () => { blinkStart = performance.now(); });
+  playDraw.addEventListener("click", async () => {
+    if (playing) { setPlaying(false); return; }
+    if (await prepareDraw() && select.value === "atlas-full") {
+      blinkStart = performance.now();
+      setPlaying(true);
+    }
+  });
+  drawFrame.addEventListener("input", async () => {
+    setPlaying(false);
+    await prepareDraw();
+  });
   const cloudLoads = new Map();
   const shadow = new T.Mesh(new T.PlaneGeometry(4, 4), new T.ShadowMaterial({ opacity:.28, depthWrite:false }));
   shadow.rotation.x = -Math.PI / 2;
@@ -264,6 +301,14 @@ async function start() {
     room.scene.visible = !nextCloud;
     shadow.visible = Boolean(nextCloud);
     input("pendant-controls").hidden = select.value !== "atlas-full";
+    input("draw-controls").hidden = select.value !== "atlas-full";
+    lightOnTable.visible = false;
+    if (select.value !== "atlas-full") {
+      setPlaying(false);
+      drawFrame.value = "1";
+      input("frame-label").textContent = "1/33";
+      moveHand?.(0);
+    }
     blinkStart = performance.now();
     status.textContent = errorMessage;
     await updateLighting();
@@ -272,11 +317,26 @@ async function start() {
   select.addEventListener("change", background);
 
   const viewDirection = new T.Vector3();
+  let updateStudy;
   function render() {
+    updateStudy?.();
     if (updatePendant && canvas.dataset.background === "atlas-full") {
-      const dimmed = pendant.value === "dim" || (pendant.value === "blink" && isDim((performance.now() - blinkStart) / 1000));
+      const seconds = (performance.now() - blinkStart) / 1000;
+      const dimmed = pendant.value === "dim" || (pendant.value === "blink" && isDim(seconds));
       updatePendant(dimmed);
       canvas.dataset.pendant = dimmed ? "dim" : "steady";
+      lightOnTable.visible = pendantTable.checked;
+      lightOnTable.intensity = pendantCandela * (dimmed ? .12 : 1);
+      if (moveHand) {
+        const frame = playing ? frameAt(seconds) : Number(drawFrame.value) - 1;
+        moveHand(frame);
+        if (playing) drawFrame.value = String(frame + 1);
+        const value = String(frame + 1);
+        if (canvas.dataset.drawFrame !== value) {
+          canvas.dataset.drawFrame = value;
+          input("frame-label").textContent = value + "/33";
+        }
+      }
     }
     renderer.render(scene, camera);
     if (!activeCloud) return;
@@ -294,18 +354,17 @@ async function start() {
   const results = await Promise.allSettled([
     applyTableMaterials(table, layout, document.baseURI),
     (async () => {
+      if (canvas.dataset.dealerSource === "study") return;
       const [pose, avatar] = await Promise.all([loader.loadAsync(url("hand.glb")), loader.loadAsync(url("utseende.glb"))]);
-      pose.scene.updateMatrixWorld(true);
       const source = pose.scene.getObjectByProperty("isMesh", true);
-      const baked = source.geometry.clone().applyMatrix4(source.matrixWorld);
-      const look = prepareAppearance(avatar);
-      const pieces = look.pieces(baked);
-      baked.dispose();
-      for (let i = 0; i < pieces.length; i++) {
-        const body = new T.Mesh(pieces[i], look.materials[i]);
+      appearance = prepareAppearance(avatar);
+      firstPose = motionFrame(source, appearance);
+      bodyParts = firstPose.map((piece, i) => {
+        const body = new T.Mesh(piece.clone(), appearance.materials[i]);
         body.castShadow = body.receiveShadow = true;
         dealer.add(body);
-      }
+        return body;
+      });
     })(),
   ]);
   if (results[0].status === "rejected") messages.push("Grundmaterial visas för bordet.");
@@ -317,7 +376,15 @@ async function start() {
   const requested = query.get("rum");
   if (Array.from(select.options).some(option => option.value === requested)) select.value = requested;
   await background();
+  if (drawRequested && select.value === "atlas-full" && await prepareDraw()) {
+    blinkStart = performance.now();
+    setPlaying(true);
+  }
   if (messages.length) status.textContent += " " + messages.join(" ");
+  canvas.dispatchEvent(new CustomEvent("roomready", { detail: {
+    scene, renderer, camera, controls, glass, dealer, draw, take,
+    setStudyFrame(callback) { updateStudy = callback; },
+  } }));
   canvas.dataset.ready = "true";
 }
 start().catch(err => { console.error(err); status.textContent = "3D-vyn kunde inte öppnas. " + err.message; });

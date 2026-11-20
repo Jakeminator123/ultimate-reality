@@ -1,0 +1,198 @@
+[
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Hud nära handleden",
+    "xywh": [
+      935,
+      419,
+      18,
+      12
+    ],
+    "utan": 0.42293998741290545,
+    "mjukt": 0.49829053455211175,
+    "skillnad_pct": 17.816
+  },
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Hud nära kontaktfingret",
+    "xywh": [
+      976,
+      457,
+      6,
+      5
+    ],
+    "utan": 0.23319798630166647,
+    "mjukt": 0.3061414349231535,
+    "skillnad_pct": 31.28
+  },
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Hand och kort",
+    "xywh": [
+      943,
+      409,
+      96,
+      60
+    ],
+    "utan": 0.14426366405588306,
+    "mjukt": 0.18592396846378317,
+    "skillnad_pct": 28.878
+  },
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Filt närmast under greppet",
+    "xywh": [
+      985,
+      482,
+      28,
+      16
+    ],
+    "utan": 0.06486629472109944,
+    "mjukt": 0.06486629472109944,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Filt vid mittfält",
+    "xywh": [
+      780,
+      533,
+      40,
+      24
+    ],
+    "utan": 0.06608074045347395,
+    "mjukt": 0.06608074045347395,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Filt framför andra bordshalvan",
+    "xywh": [
+      456,
+      572,
+      40,
+      24
+    ],
+    "utan": 0.06203378065357385,
+    "mjukt": 0.06203378065357385,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 4,
+    "ruta": 17,
+    "omrade": "Bakvägg",
+    "xywh": [
+      220,
+      150,
+      100,
+      45
+    ],
+    "utan": 0.1588124291606311,
+    "mjukt": 0.1588124291606311,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Hud nära handleden",
+    "xywh": [
+      733,
+      418,
+      14,
+      9
+    ],
+    "utan": 0.22991006559515104,
+    "mjukt": 0.2301895095555768,
+    "skillnad_pct": 0.122
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Hud nära kontaktfingret",
+    "xywh": [
+      767,
+      434,
+      6,
+      5
+    ],
+    "utan": 0.28426011031364334,
+    "mjukt": 0.4549404523330286,
+    "skillnad_pct": 60.044
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Hand och kort",
+    "xywh": [
+      717,
+      397,
+      96,
+      60
+    ],
+    "utan": 0.12647914476782215,
+    "mjukt": 0.14090674381419746,
+    "skillnad_pct": 11.407
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Filt närmast under greppet",
+    "xywh": [
+      816,
+      454,
+      28,
+      16
+    ],
+    "utan": 0.0778544628174249,
+    "mjukt": 0.0778544628174249,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Filt vid mittfält",
+    "xywh": [
+      892,
+      511,
+      40,
+      24
+    ],
+    "utan": 0.0824104136512684,
+    "mjukt": 0.0824104136512684,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Filt framför andra bordshalvan",
+    "xywh": [
+      898,
+      624,
+      40,
+      24
+    ],
+    "utan": 0.07182707822010381,
+    "mjukt": 0.07182707822010381,
+    "skillnad_pct": 0.0
+  },
+  {
+    "stol": 1,
+    "ruta": 17,
+    "omrade": "Bakvägg",
+    "xywh": [
+      220,
+      150,
+      100,
+      45
+    ],
+    "utan": 0.048923633418645536,
+    "mjukt": 0.048923633418645536,
+    "skillnad_pct": 0.0
+  }
+]

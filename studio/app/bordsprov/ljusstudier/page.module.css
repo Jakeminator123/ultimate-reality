@@ -1,0 +1,45 @@
+.studies {
+  width: min(100% - 2rem, 75rem);
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+  color: var(--ink);
+}
+
+.studies nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .55rem 1.2rem;
+}
+
+.studies a {
+  color: var(--pine);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.studies a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: .25rem;
+}
+
+.intro { padding: 1.6rem 0 1rem; }
+.studies h1, .studies h2 { margin: 0; color: inherit; letter-spacing: -.035em; }
+.studies h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+.studies h2 { font-size: clamp(1.45rem, 3vw, 2.2rem); }
+.studies p { max-width: 68ch; margin: .55rem 0 1rem; line-height: 1.55; }
+
+.studies section {
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.studies video, .photo, .photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .6rem;
+}
+
+.studies video, .photo { margin: .9rem 0; background: #15201c; }

@@ -18,7 +18,11 @@ Det aktuella utdragsprovet kombinerar Jakobs rum **RUM-03**, det större bordet 
 
 **LJUS-02 · Blinkande pendellampa.** Ljuset i en av RUM-07:s nischer dämpas lokalt en gång var tredje sekund. [Animation och inspelning från båda stolarna](../test/bakgrund/worldlabs/lampblink-v1/README.md)
 
-**RUM-02 · Brown Photostudio 01.** Ett ytterligare 4K-panorama från Poly Haven finns lokalt för att jämföra miljöljus på hand, glas och filt i RUM-03. Bilderna med just detta panorama återstår. [Original och provupplägg](../test/bakgrund/polyhaven/brown-photostudio-01/README.md)
+**LJUS-03 · Pendelljus under kortdraget.** En varm ljuskälla placerades vid den uppmätta pendeln i RUM-07. Ljuset dämpas i takt med nischen under tagningen `skoriktning-70-30-v1`. Glaset reagerar tydligast från Stol 1. Handen skuggar kortet och ljusskillnaden på handen är svag. [Stol 4 och Stol 1 på samma tidslinje](../test/bakgrund/worldlabs/pendelljus-kortutdrag-v1/README.md)
+
+**LJUS-04 · Brown Photostudio 01.** Poly Havens 4K-panorama enligt RUM-02 ger miljöljus och reflexer i Jakobs RUM-03. De båda kamerorna jämför det befintliga ljuset med 50 % och 100 % HDR-styrka vid fast exponering. Vid 50 % blir glaset tydligt samtidigt som Paulinas ansikte behåller mer teckning. [Sex bilder och vridbar vy](../test/bakgrund/polyhaven/brown-photostudio-01/README.md) · [Utforska den fotograferade studion i 360°](http://127.0.0.1:4317/bordsprov/brown-studio/panorama.html)
+
+**LJUS-05 · Handljus på Paulina v2.** Jakobs val av Brown Photostudio på 50 % kombineras med en avskärmad mjuk ljuskälla vid vänsterhanden. Samma perspektivkameror, fotoyta och böjda KORT-02 visar den nya riggens kortdrag. Frys en ruta och växla handljuset för att bedöma fingrarnas kontakt och ljusets spill på filten. [Stol 4, ruta 17](http://127.0.0.1:4317/bordsprov/handljus?stol=4&ruta=17) · [Stol 1, samma ruta](http://127.0.0.1:4317/bordsprov/handljus?stol=1&ruta=17) · [Kollisionsmätning](../test/bakgrund/polyhaven/brown-photostudio-01/handljus-v2/granskning/README.md)
 
 ## Bord, dealer och flyttbara föremål
 

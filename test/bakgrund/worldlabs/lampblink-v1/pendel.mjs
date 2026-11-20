@@ -1,5 +1,5 @@
 // Triangulated from the centre of the same bulb in the two calibrated views.
-const centre = [2.147, .289, -3.302];
+export const pendantCentre = [2.147, .289, -3.302];
 
 export function isDim(seconds) {
   const phase = seconds % 3;
@@ -15,7 +15,7 @@ export function attachPendant(cloud, { SplatEdit, SplatEditSdf }) {
     const edit = new SplatEdit({ name, softEdge: edge });
     const volume = new SplatEditSdf({ type: "ellipsoid" });
     volume.scale.fromArray(radii);
-    volume.position.fromArray(centre);
+    volume.position.fromArray(pendantCentre);
     volume.position.y -= cloud.position.y;
     edit.add(volume);
     cloud.add(edit);
