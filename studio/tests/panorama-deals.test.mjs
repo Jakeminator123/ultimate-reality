@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { panoramaDeals, samPanoramaDeals, samPanoramaTake } from "../lib/panorama-deals.ts";
+import { panoramaDeals, pinnedSamTakes, samPanoramaDeals, samPanoramaTake } from "../lib/panorama-deals.ts";
 
 function reviewedSam({ take, geometry, appearance, motion, receipt }) {
   const seats = ["Stol 4", "Stol 1"];
@@ -18,26 +18,42 @@ function reviewedSam({ take, geometry, appearance, motion, receipt }) {
   return { film, animation, receipt };
 }
 
-test("ett nytt registrerat SAM-prov kan jämföras med det frysta prov 3", () => {
-  const pinned = reviewedSam(samPanoramaTake);
-  const next = reviewedSam({ ...samPanoramaTake, take: "giv-sam-v4-v4",
-    appearance: "a".repeat(64), motion: "b".repeat(64), receipt: "c".repeat(64) });
-  const [current, frozen] = samPanoramaDeals(pinned, next);
-  assert.deepEqual([current.take, current.motion, frozen.take, frozen.motion],
-    [next.film.take, next.animation.sha256, samPanoramaTake.take, samPanoramaTake.motion]);
-  assert.deepEqual(frozen.jumps.map(j => j.frame), [4, 9, 16, 22, 46]);
-  assert.deepEqual(samPanoramaDeals(pinned, pinned), [frozen]);
-  assert.deepEqual(samPanoramaDeals(), []);
+test("aktiv SAM-giv väljs först och alla verifierade slutmål behåller sin tagning", () => {
+  const [four, three] = pinnedSamTakes.map(reviewedSam);
+  const history = [four, three];
+  const five = reviewedSam({ ...samPanoramaTake, take: "giv-sam-v4-v5", motion: "5".repeat(64), receipt: "a".repeat(64) });
+  five.film.poses = { start: "A2.3", end: "A1" };
+  const six = reviewedSam({ ...samPanoramaTake, take: "giv-sam-v4-v6", motion: "6".repeat(64), receipt: "b".repeat(64) });
+  six.film.poses = { start: "A2.3", end: "A2.3" };
+  const alternatives = [three, five, four, six];
+  const choices = samPanoramaDeals(five, alternatives, history);
+  assert.deepEqual(choices.map(d => d.take), [five, six, four, three].map(r => r.film.take));
+  assert.deepEqual(choices.map(d => d.motion), [five, six, four, three].map(r => r.animation.sha256));
+  assert.deepEqual(choices.map(d => d.label), ["SAM-sittmodell v4 · givprov 5 · REDO → VILA",
+    "SAM-sittmodell v4 · givprov 6 · REDO → REDO", "SAM-sittmodell v4 · givprov 4", "SAM-sittmodell v4 · givprov 3"]);
+  assert.deepEqual(choices[0].jumps.map(j => j.frame), [4, 9, 16, 22, 46]);
+  assert.equal(samPanoramaDeals(six, alternatives, history)[0].take, six.film.take);
+  assert.equal(samPanoramaDeals(undefined, alternatives, history)[0].take, six.film.take);
+  assert.deepEqual(samPanoramaDeals(undefined, [], history).map(d => d.take), [four.film.take, three.film.take]);
+  assert.deepEqual(samPanoramaDeals(undefined, [], [undefined, three]).map(d => d.take), [three.film.take]);
 
+  const alteredEnd = { ...five, film: { ...five.film, poses: { start: "A2.3", end: "A2.3" } } };
+  assert.match(samPanoramaDeals(alteredEnd, [], [])[0].label, /REDO → REDO$/);
   for (const change of [
-    { take: pinned.film.take }, { take: "giv-sam-v4-v2" }, { geometry: "annan kropp" },
-    { appearance: "tidigare fotoyta" }, { motion: "annan rörelse" }, { frames: 55 },
-    { cameras: next.film.cameras.slice(0, 1) }, { reviews: next.film.reviews.slice(1) },
-    { reviews: pinned.film.reviews }, { reviews: next.film.reviews.map(review => ({ ...review, frames: [] })) },
-  ]) assert.deepEqual(samPanoramaDeals(pinned, { ...next, film: { ...next.film, ...change } }), [frozen]);
-  assert.deepEqual(samPanoramaDeals(pinned, { ...next, animation: { ...next.animation, parent: "fel fotoyta" } }), [frozen]);
-  assert.deepEqual(samPanoramaDeals({ ...pinned, receipt: next.receipt }), []);
-  assert.deepEqual(samPanoramaDeals(next, next), [current]);
+    { take: three.film.take }, { take: four.film.take }, { take: "giv-sam-v4-v2" }, { geometry: "annan kropp" },
+    { appearance: "tidigare fotoyta" }, { motion: "annan rörelse" }, { frames: 55 }, { poses: undefined },
+    { poses: { start: "A2.3", end: "saknas" } }, { cameras: five.film.cameras.slice(0, 1) },
+    { reviews: five.film.reviews.slice(1) }, { reviews: six.film.reviews },
+    { reviews: five.film.reviews.map(review => ({ ...review, frames: [] })) },
+  ]) {
+    const invalid = { ...five, film: { ...five.film, ...change } };
+    assert.deepEqual(samPanoramaDeals(invalid, [invalid, six], history).map(d => d.take), [six.film.take, four.film.take, three.film.take]);
+  }
+  for (const pinned of history) {
+    assert.deepEqual(samPanoramaDeals({ ...pinned, receipt: six.receipt }, [], []), []);
+    const wrong = { ...pinned, film: { ...pinned.film, motion: six.film.motion }, animation: { ...pinned.animation, sha256: six.film.motion } };
+    assert.deepEqual(samPanoramaDeals(wrong, [], []), []);
+  }
 });
 
 test("panoramat föredrar en styrkt ny giv och behåller den tidigare tagningen", () => {

@@ -78,9 +78,28 @@ async function start() {
     setFov();
   }
   controls.addEventListener("change", render);
+  const dealingView = canvas.dataset.view === "giv";
+  const takeLinks = document.querySelectorAll('#givkontroll nav[aria-label="Tagning"] a');
+  function saveTakeDirection() {
+    if (!dealingView) return;
+    const direction = new T.Spherical().setFromVector3(orbitEye.position);
+    const angles = orbitEye.position.distanceToSquared(home) < 1e-12 ? "" :
+      [direction.theta, direction.phi].map(angle => angle.toFixed(7)).join(",");
+    function withDirection(href) {
+      const url = new URL(href);
+      if (angles) url.searchParams.set("blick", angles);
+      else url.searchParams.delete("blick");
+      return url.href;
+    }
+    for (const link of takeLinks) link.href = withDirection(link.href);
+    const address = withDirection(location.href);
+    if (address !== location.href) history.replaceState(history.state, "", address);
+  }
+  controls.addEventListener("end", saveTakeDirection);
   function reset() {
     orbitEye.position.copy(home);
     controls.update();
+    saveTakeDirection();
   }
   function turn(yaw, pitch = 0) {
     const direction = new T.Spherical().setFromVector3(orbitEye.position);
@@ -88,6 +107,7 @@ async function start() {
     direction.phi += pitch;
     orbitEye.position.setFromSpherical(direction.makeSafe());
     controls.update();
+    saveTakeDirection();
   }
   document.querySelector("#left").onclick = () => turn(Math.PI / 4);
   document.querySelector("#right").onclick = () => turn(-Math.PI / 4);
@@ -102,7 +122,16 @@ async function start() {
     camera.updateProjectionMatrix();
     render();
   };
-  reset();
+  orbitEye.position.copy(home);
+  const saved = dealingView && new URL(location.href).searchParams.get("blick");
+  if (saved) {
+    const angles = saved.split(",").map(Number);
+    const [theta, phi] = angles;
+    if (angles.length === 2 && Number.isFinite(theta) && Math.abs(theta) <= Math.PI + 1e-7 && phi > 0 && phi < Math.PI)
+      orbitEye.position.setFromSpherical(new T.Spherical(home.length(), phi, theta));
+  }
+  controls.update();
+  saveTakeDirection();
   new ResizeObserver(size).observe(canvas);
   size();
   canvas.dataset.ready = "true";

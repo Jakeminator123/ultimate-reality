@@ -1,0 +1,241 @@
+{
+  "defaultTake": "giv-sam-v4-v5",
+  "records": [
+    {
+      "take": "giv-sam-v4-v5",
+      "seat": 4,
+      "land": 22,
+      "last": 53,
+      "sha": "4ad4120cb746338ccafe618c7192328e60d8fc454b1765afeda89fff96f8e6e8",
+      "receipt": "a27485f8dc01e7044e864f913cdae082c5b21a7c6216cb586637b9d4fcbdf430",
+      "poses": {
+        "start": "A2.3",
+        "end": "A1"
+      },
+      "start": {
+        "r_wrist": [
+          0.21200659343099817,
+          0.038533211404324,
+          -0.22797911059482195
+        ],
+        "l_wrist": [
+          0.39475091616756447,
+          0.1535265255947924,
+          -0.3780079563412035
+        ]
+      },
+      "end": {
+        "r_wrist": [
+          -0.10500001490079211,
+          0.03723969424678582,
+          -0.16499999339272456
+        ],
+        "l_wrist": [
+          0.10500000407247653,
+          0.037106293458926624,
+          -0.1649999796679893
+        ]
+      },
+      "eyelids": [
+        {
+          "frame": 43,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 2.8610176112766294e-7,
+            "Seated_body_2.Bilateral fitted eyelid closure": 2.8610176112766294e-7
+          }
+        },
+        {
+          "frame": 46,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 1,
+            "Seated_body_2.Bilateral fitted eyelid closure": 1
+          }
+        },
+        {
+          "frame": 51,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 0,
+            "Seated_body_2.Bilateral fitted eyelid closure": 0
+          }
+        }
+      ]
+    },
+    {
+      "take": "giv-sam-v4-v6",
+      "seat": 4,
+      "land": 22,
+      "last": 53,
+      "sha": "62ebe3984fbf3fcec751aedb65aec04163b3b94e95abe1fdb90fdc2d0bdf7e96",
+      "receipt": "466e308d58325fc1671bee3f4066092d00717f9b03a6df4afe5bd74089e58685",
+      "poses": {
+        "start": "A2.3",
+        "end": "A2.3"
+      },
+      "start": {
+        "r_wrist": [
+          0.21200659343099817,
+          0.038533211404324,
+          -0.22797911059482195
+        ],
+        "l_wrist": [
+          0.39475091616756447,
+          0.1535265255947924,
+          -0.3780079563412035
+        ]
+      },
+      "end": {
+        "r_wrist": [
+          0.2120065811401824,
+          0.03853320712729206,
+          -0.22797910066283328
+        ],
+        "l_wrist": [
+          0.3947509175983791,
+          0.15352652285518573,
+          -0.37800794363681633
+        ]
+      },
+      "eyelids": [
+        {
+          "frame": 43,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 2.8610176112766294e-7,
+            "Seated_body_2.Bilateral fitted eyelid closure": 2.8610176112766294e-7
+          }
+        },
+        {
+          "frame": 46,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 1,
+            "Seated_body_2.Bilateral fitted eyelid closure": 1
+          }
+        },
+        {
+          "frame": 51,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 0,
+            "Seated_body_2.Bilateral fitted eyelid closure": 0
+          }
+        }
+      ]
+    },
+    {
+      "take": "giv-sam-v4-v5",
+      "seat": 1,
+      "land": 22,
+      "last": 53,
+      "sha": "4ad4120cb746338ccafe618c7192328e60d8fc454b1765afeda89fff96f8e6e8",
+      "receipt": "a27485f8dc01e7044e864f913cdae082c5b21a7c6216cb586637b9d4fcbdf430",
+      "poses": {
+        "start": "A2.3",
+        "end": "A1"
+      },
+      "start": {
+        "r_wrist": [
+          0.21200659343099817,
+          0.038533211404324,
+          -0.22797911059482195
+        ],
+        "l_wrist": [
+          0.39475091616756447,
+          0.1535265255947924,
+          -0.3780079563412035
+        ]
+      },
+      "end": {
+        "r_wrist": [
+          -0.10500001490079211,
+          0.03723969424678582,
+          -0.16499999339272456
+        ],
+        "l_wrist": [
+          0.10500000407247653,
+          0.037106293458926624,
+          -0.1649999796679893
+        ]
+      },
+      "eyelids": [
+        {
+          "frame": 43,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 2.8610176112766294e-7,
+            "Seated_body_2.Bilateral fitted eyelid closure": 2.8610176112766294e-7
+          }
+        },
+        {
+          "frame": 46,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 1,
+            "Seated_body_2.Bilateral fitted eyelid closure": 1
+          }
+        },
+        {
+          "frame": 51,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 0,
+            "Seated_body_2.Bilateral fitted eyelid closure": 0
+          }
+        }
+      ]
+    },
+    {
+      "take": "giv-sam-v4-v6",
+      "seat": 1,
+      "land": 22,
+      "last": 53,
+      "sha": "62ebe3984fbf3fcec751aedb65aec04163b3b94e95abe1fdb90fdc2d0bdf7e96",
+      "receipt": "466e308d58325fc1671bee3f4066092d00717f9b03a6df4afe5bd74089e58685",
+      "poses": {
+        "start": "A2.3",
+        "end": "A2.3"
+      },
+      "start": {
+        "r_wrist": [
+          0.21200659343099817,
+          0.038533211404324,
+          -0.22797911059482195
+        ],
+        "l_wrist": [
+          0.39475091616756447,
+          0.1535265255947924,
+          -0.3780079563412035
+        ]
+      },
+      "end": {
+        "r_wrist": [
+          0.2120065811401824,
+          0.03853320712729206,
+          -0.22797910066283328
+        ],
+        "l_wrist": [
+          0.3947509175983791,
+          0.15352652285518573,
+          -0.37800794363681633
+        ]
+      },
+      "eyelids": [
+        {
+          "frame": 43,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 2.8610176112766294e-7,
+            "Seated_body_2.Bilateral fitted eyelid closure": 2.8610176112766294e-7
+          }
+        },
+        {
+          "frame": 46,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 1,
+            "Seated_body_2.Bilateral fitted eyelid closure": 1
+          }
+        },
+        {
+          "frame": 51,
+          "morphs": {
+            "Seated_body_1.Bilateral fitted eyelid closure": 0,
+            "Seated_body_2.Bilateral fitted eyelid closure": 0
+          }
+        }
+      ]
+    }
+  ]
+}

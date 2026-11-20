@@ -189,11 +189,18 @@ test(
           assert.equal(await view.locator("#giv-ruta").inputValue(), frame);
           const frozen = view.getByRole("link", { name: "SAM-sittmodell v4 · givprov 3", exact: true });
           if (await frozen.count()) {
+            await view.locator("#synfalt").selectOption("75");
+            await view.locator("#panorama").press("ArrowLeft");
+            const direction = new URL(view.url()).searchParams.get("blick");
+            assert.ok(direction);
             await frozen.click();
             await view.locator('#panorama[data-ready="true"]').waitFor({ timeout: 30000 });
             assert.equal(await view.locator("#givkontroll").getAttribute("data-take"), "giv-sam-v4-v3");
             assert.equal(await view.locator("#givkontroll").getAttribute("data-motion"), samPanoramaTake.motion);
             assert.equal(await view.locator("#giv-ruta").inputValue(), frame);
+            assert.equal(await view.locator("#synfalt").inputValue(), "75");
+            assert.equal(new URL(view.url()).searchParams.get("blick"), direction);
+            assert.equal(new URL(view.url()).searchParams.get("stol"), "4");
           }
         } finally {
           await view.close();
