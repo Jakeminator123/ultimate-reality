@@ -12,6 +12,8 @@ Studion visar den valda bildutgåvan, kroppsmodellen, fotoytan och filmerna som 
 
 ## Automatisk registrering
 
+En blinkning sparar rörelsens tidslinje och sin kropp och fotoyta. Vid en sammansatt giv anger GLB-filen SHA-256 för varje ingående rörelse. Registret kontrollerar källtagningarnas filer och matchar deras kropp och fotoyta innan den gemensamma tagningen sparas. `samspel-v2-v1` kombinerar `tvahandsgiv-v2-v1` med `ansiktsrigg-v2-v2`. I studion visas den spelbara GLB-filen, komponenternas namn, den renderade filmen och anteckningar för respektive kamera och bildruta. [Rörelseprov](http://127.0.0.1:4317/modellering/rorelseprov#samspel)
+
 Kropps- och fotoyteverktygen registrerar färdiga avatarfiler automatiskt. Modellens inbäddade fingeravtryck bestämmer källrelationerna. Vid ny export till ett upptaget arbetsnamn får den ändrade filen ett eget versionsnamn. Återkörning av samma innehåll återanvänder det sparade objektet. En öppen studio hämtar nya uppgifter när en modellutgåva, animation, film eller granskning registreras.
 
 När en modell och en bildserie hör ihop väljer man den kombination som studion ska visa. Då kontrolleras fotoytans grundrigg och varje källbild. Valet sparar också bildoriginalen och bildregistret för senare granskning. Tidigare val finns kvar i versionsväljaren. Original, modeller, tagningar och granskningar ligger lokalt under `avatars/<dealer>/3d/versioner/`. [Verktyget](../tools/material_versions.py)
@@ -31,9 +33,9 @@ För en annan registrerad dealer öppnas `/?dealer=<namn>#modellering`. Kamerapr
 
 ## Nästa prov för att få Paulina naturlig
 
-V2 har ett inspelat kameravridningsprov i vila och ett animerat utdrag av KORT-02 med Brown Photostudio på 50 %. I modellen följer två fingertoppar kortet genom 33 lägen. I tvåkamerafilmen syns kontakten tydligast från stol 1. Studions filmrutor 12, 28 och 44 motsvarar rörelsens lägen 1, 17 och 33. [Se den versionsbundna filmen](http://127.0.0.1:4317/api/material?dealer=paulina&film=b96eec10025c9434908172dfb319051ae1a580815e96302af5a71ab89cce99a0)
+V2:s gemensamma tagning visar ett kort till plats 4 och en blinkning vid återgången i 54 rutor från två stolar. Handbytet syns tydligast från stol 1. Vid ruta 26 ligger kortet plant och stilla. Armbågens höjd, handledens stelhet och den stilla blicken syns i spelarens utsnitt. [Se tagningen och bildgranskarens rutor](http://127.0.0.1:4317/modellering/rorelseprov#samspel)
 
 1. Filma **ett verkligt kortdrag samtidigt framifrån och från sidan**. Låt tummen, pekfingret, skons öppning och kortkanten synas. Spara synkpunkten och markera grepp, kort på kant och släpp.
-2. Jämför den animerade v2-handleden och de fria fingrarna med verkliga greppet. Lägg till släpp och kortets landning. Rendera samma tagning och samma 3D-kort från stol 4 och stol 1.
+2. Sänk armbågen vid handbytet, mjuka upp handleden och rikta blicken mot kortet. Kontrollera grepp, släpp och landning i samma rutor från båda stolarna.
 3. Granska glidning, skuggor och timing i spelarens utsnitt. Där stolen syns behövs också kontakt mellan säte, sits och golv. I viloposens profilprov syns bakgrunden under sätet.
 4. Bedöm hud, hår och kavaj i de två färdiga vyerna. Ta en skarp närbild där ytdetalj saknas, till exempel bakre trekvart för håret. Om rörelsen stämmer men fotoytan brister, prova filmprojektion från en känd kamera på samma rigg.

@@ -12,6 +12,7 @@ import RigCamera, { eyeRows, frontCamera, type CameraAdjustment, type CameraValu
 const poseJoints = [["l_lowarm", "Vänster armbåge"], ["r_lowarm", "Höger armbåge"],
   ["l_index1", "Vänster pekfinger"], ["l_middle1", "Vänster långfinger"],
   ["r_index1", "Höger pekfinger"], ["r_middle1", "Höger långfinger"]] as const;
+type CameraDetail = "ansikte" | "händer";
 type Viewport = {
   changePose: (version: Version) => void;
   showGrid: (visible: boolean) => void;
@@ -19,21 +20,26 @@ type Viewport = {
   adjustCamera: (values: CameraAdjustment) => void;
   measureJoint: () => void;
   face: (degrees: number) => void;
-  detail: (part: "ansikte" | "händer") => void;
+  detail: (part: CameraDetail, degrees?: number) => void;
   bend: (joint: string, degrees: number) => void;
   resetJoints: () => void;
 };
 
 type ReviewProps =
-  | { model: ActiveDealerModel; cameraAngle?: number; reference?: Photo; guides: boolean; onGuides: (value: boolean) => void; pose?: never; initialVersion?: "front" | "utseende" }
-  | { model?: never; cameraAngle?: never; reference?: never; guides?: never; onGuides?: never; pose: SamPose; initialVersion: Version };
+  | { model: ActiveDealerModel; cameraAngle?: number; cameraDetail?: CameraDetail; reference?: Photo; guides: boolean; onGuides: (value: boolean) => void; pose?: never; initialVersion?: "front" | "utseende" }
+  | { model?: never; cameraAngle?: never; cameraDetail?: never; reference?: never; guides?: never; onGuides?: never; pose: SamPose; initialVersion: Version };
+
+function framePhoto(viewport: Viewport, angle = 0, detail?: CameraDetail) {
+  if (detail) viewport.detail(detail, angle);
+  else viewport.face(angle);
+}
 
 export default function PoseReview(props: ReviewProps) {
   const { model, pose } = props;
   const initialVersion = props.initialVersion ?? "front";
   const surface = useRef<HTMLDivElement>(null);
   const viewport = useRef<Viewport | null>(null);
-  const selectedAngle = useRef(0);
+  const photoView = useRef({ angle: props.cameraAngle, detail: props.cameraDetail });
   const [version, selectVersion] = useState<Version>(initialVersion);
   const selectedVersion = useRef(initialVersion);
   const [grid, setGrid] = useState(true);
@@ -55,10 +61,9 @@ export default function PoseReview(props: ReviewProps) {
   const uprightUrl = pose?.hasUpright ? resultUrl(pose, "rak") : "";
   const activeRig = Boolean(model);
   useEffect(() => {
-    if (props.cameraAngle === undefined) return;
-    selectedAngle.current = props.cameraAngle;
-    viewport.current?.face(props.cameraAngle);
-  }, [props.cameraAngle]);
+    photoView.current = { angle: props.cameraAngle, detail: props.cameraDetail };
+    if (viewport.current) framePhoto(viewport.current, props.cameraAngle, props.cameraDetail);
+  }, [props.cameraAngle, props.cameraDetail]);
   useEffect(() => {
     if (ready) viewport.current?.showLayers(layers);
   }, [layers, ready]);
@@ -176,7 +181,7 @@ export default function PoseReview(props: ReviewProps) {
     }
     const loader = new GLTFLoader();
     const bodies = new Map<Version, T.Group>();
-    function detail(part: "ansikte" | "händer") {
+    function detail(part: CameraDetail, degrees = 0) {
       const body = [...bodies.values()].find(model => model.visible);
       if (!body) return;
       const joint = (name: string) => body.getObjectByName(name)?.getWorldPosition(new T.Vector3());
@@ -185,7 +190,8 @@ export default function PoseReview(props: ReviewProps) {
       if (!left || !right) return;
       controls.target.copy(left).lerp(right, 0.5);
       if (part === "ansikte") controls.target.y -= 0.043;
-      const direction = part === "ansikte" ? new T.Vector3(0, 0, 3) : new T.Vector3(0, 2.7, 1.25);
+      const yaw = T.MathUtils.degToRad(degrees);
+      const direction = part === "ansikte" ? new T.Vector3(3 * Math.sin(yaw), 0, 3 * Math.cos(yaw)) : new T.Vector3(0, 2.7, 1.25);
       camera.position.copy(controls.target).add(direction);
       const span = part === "ansikte" ? 0.42 : Math.max(0.30, left.distanceTo(right) + 0.14);
       camera.zoom = Math.min(controls.maxZoom, 2 * Math.min(camera.top, camera.right) / span);
@@ -322,7 +328,7 @@ export default function PoseReview(props: ReviewProps) {
       selectVersion(visible);
       changePose(visible);
       resize();
-      face(selectedAngle.current);
+      framePhoto(viewport.current, photoView.current.angle, photoView.current.detail);
       setReady(true);
     }).catch((e: Error) => { if (!abort.signal.aborted) setError(e.message); });
     return () => {

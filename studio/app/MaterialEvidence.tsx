@@ -1,4 +1,5 @@
-import { useRef } from "react";
+"use client";
+import { useRef, type ReactNode } from "react";
 import { cropSource, dimensions, roleName, type DealerMaterial, type Photo } from "../lib/material-types";
 import { checkSeatedFrame, floorSpread, seatedStandard } from "../lib/seated-review";
 import { modelPhotoRoles } from "../lib/photo-review";
@@ -34,10 +35,10 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
       "Kroppens bildskala avviker " + Math.abs(check.scaleDelta).toLocaleString("sv-SE", { maximumFractionDigits: 1 }) +
       " % från sittfronten (gräns " + seatedStandard.scalePercent + " %). "}
       {check.centreDiffers && "Kroppens mitt ligger på en annan bildhöjd. "}{check.formatDiffers && "Originalens pixelmått skiljer sig."}</p>}
-    {roles.includes("surface") && photo.group === "Ansikte" && <p>Porträttet ger hud, drag och tatueringar till huvudets fotoyta. Blick, blinkning och tal behöver egna rörelser.</p>}
-    {roles.includes("surface") && photo.id === "hander/handryggar" && <p>Handryggarna ger hud, naglar och tatueringar. Fingerlederna styr rörelsen i ett grepp.</p>}
-    {(photo.id === "hander/kortdrag-vanster" || photo.id === "rorelsereferens/kortvandning-hoger") &&
-      <p>Greppbilden visar hur fingrarna möter kortet. En synkad front- och sidofilm ger rörelsens tempo och visar fingrar som skyms från den andra kameran.</p>}
+    {roles.includes("surface") && photo.group === "Ansikte" && <p>De tre porträtten ger hud, drag och tatueringar till samma huvud. Vyn bredvid följer porträttets målvinkel. Käkleden öppnar munnen. En blinkning kräver att själva ögonlocken rör sig över ögat.</p>}
+    {roles.includes("surface") && photo.id === "hander/handryggar" && <p>Handryggarna ger hud, naglar och tatueringar till modellens händer. Vyn bredvid visar händerna i den sittande grundposen.</p>}
+    {photo.id === "hander/kortdrag-vanster" && <p>Bilden ger ett referensläge för vänsterhandens grepp vid skon. I rörelseprovet styrs handled och fingerleder så att fingertopparna följer kortets kant under utdraget.</p>}
+    {photo.id === "rorelsereferens/kortvandning-hoger" && <p>Bilden ger ett referensläge för högerhandens grepp när kortet är på kant. Filmen ger ordningen för handbyte, vändning och släpp. Här visas riggens händer i vila.</p>}
     {photo.observed && <><p>{photo.observed.kalla}</p><details>
       <summary>Fotots riktning och ljus</summary><p>{photo.observed.observation.riktning} {photo.observed.observation.ljus}</p>
       <p>{photo.observed.osakerhet}</p></details></>}
@@ -47,9 +48,9 @@ export function PhotoEvidence({ photo, project }: { photo: Photo; project: Deale
   </div>;
 }
 
-function FilmEvidence({ film }: { film: DealerMaterial["films"][number] }) {
+export function FilmEvidence({ film, expanded, children }: { film: DealerMaterial["films"][number]; expanded?: boolean; children?: ReactNode }) {
   const player = useRef<HTMLVideoElement>(null);
-  return <details>
+  return <details open={expanded}>
     <summary>{film.title}</summary>
     <p>{dimensions([film.width, film.height])} · {film.fps} fps · {film.frames} rutor · {film.appearance ? "Fotoyta" : "Kroppsform"} · {film.cameras.map(c => c.id).join(", ")}</p>
     <video controls preload="metadata" ref={player} aria-label={film.title} src={film.url}/>
@@ -61,6 +62,7 @@ function FilmEvidence({ film }: { film: DealerMaterial["films"][number] }) {
       }}>{m.label} · ruta {m.frame}</button>)}</div>
     <p>Rutorna räknas från 0.</p>
     {film.reviews.map(review => <p key={review.camera + review.note}><b>{review.camera} · ruta {review.frames.join(", ")}</b> · {review.note}</p>)}
+      {children}
   </details>;
 }
 
@@ -89,8 +91,8 @@ export default function MaterialEvidence({ project }: { project: DealerMaterial 
       <p>Rörelsen skapas i riggens leder. Greppbilderna visar var fingrarna ska möta kortet. När kortbanan och lederna följer samma tidslinje kan samma giv renderas från båda stolarna.</p>
     </div>}
     {project.issues.length > 0 && <ul>{project.issues.map((issue, index) => <li key={index}>{issue}</li>)}</ul>}
-    {project.motions.map(({ sha256, motion, url }) => <details key={sha256}><summary>Kortprov · {motion.take}</summary>
-      <p>{motion.card} · {motion.keyframes} samplade lägen · {(motion.end - motion.start).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} s</p>
+    {project.motions.map(({ sha256, motion, url }) => <details key={sha256}><summary>{motion.card ? "Kortprov" : "Rörelseprov"} · {motion.take}</summary>
+      <p>{motion.card && motion.card + " · "}{motion.keyframes} samplade lägen · {(motion.end - motion.start).toLocaleString("sv-SE", { maximumFractionDigits: 2 })} s</p>
       <a href={url} download={motion.take + ".glb"}>Hämta den animerade GLB-filen</a></details>)}
     {model && <details><summary>Bildmått genom SAM-körningen</summary>
       <p>{model.run ?? "Körnings-ID saknas"}</p>

@@ -85,26 +85,39 @@ class MaterialTests(unittest.TestCase):
         self.assertEqual(results[0].read_bytes(), b"second")
 
     def test_animation_timeline_is_read_from_glb(self):
-        extras = dict(motionBaseSHA256=self.look, geometrySHA256=self.body, take="kortdrag", card="KORT-02",
-                      cardPathSHA256="a" * 64)
+        extras = dict(motionBaseSHA256=self.look, geometrySHA256=self.body)
         document = dict(asset=dict(version="2.0", extras=extras), nodes=[{}], buffers=[dict(byteLength=48)],
                         bufferViews=[dict(buffer=0, byteLength=12), dict(buffer=0, byteOffset=12, byteLength=36)],
                         accessors=[dict(bufferView=0, componentType=5126, type="SCALAR", count=3),
                                    dict(bufferView=1, componentType=5126, type="VEC3", count=3)],
                         animations=[dict(samplers=[dict(input=0, output=1)],
                                          channels=[dict(sampler=0, target=dict(node=0, path="translation"))])])
-        chunk = json.dumps(document).encode()
-        chunk += b" " * (-len(chunk) % 4)
         keys = struct.pack("<12f", 0, .25, .5, 0, 0, 0, 1, 0, 0, 2, 0, 0)
-        file = self.root / "kortdrag.glb"
-        file.write_bytes(struct.pack("<4sIIII", b"glTF", 2, 28+len(chunk)+len(keys), len(chunk), 0x4e4f534a) +
-                         chunk + struct.pack("<I4s", len(keys), b"BIN\0") + keys)
-        fingerprint = versions.register_model(self.store, file)
-        receipt = versions.read_json(self.store / "modeller" / (fingerprint + ".json"))
-        self.assertEqual(receipt["kind"], "motion")
-        self.assertEqual((receipt["motion"]["keyframes"], receipt["motion"]["end"]), (3, .5))
-        self.assertEqual(receipt["motion"]["appearance"], self.look)
-        self.assertEqual(len(list((self.store / "rorelser").glob("*.json"))), 1)
+
+        def animated_file(take, card, path_key, **sources):
+            document["asset"]["extras"] = dict(extras, take=take, card=card, **{path_key: "a" * 64}, **sources)
+            chunk = json.dumps(document).encode()
+            chunk += b" " * (-len(chunk) % 4)
+            file = self.root / (take + ".glb")
+            file.write_bytes(struct.pack("<4sIIII", b"glTF", 2, 28+len(chunk)+len(keys), len(chunk), 0x4e4f534a) +
+                             chunk + struct.pack("<I4s", len(keys), b"BIN\0") + keys)
+            return file
+
+        sources = []
+        for take, card, path_key in (("kortdrag", "KORT-02", "cardPathSHA256"), ("blink", None, "motionPathSHA256")):
+            with self.subTest(take=take):
+                fingerprint = versions.register_model(self.store, animated_file(take, card, path_key))
+                sources.append(fingerprint)
+                receipt = versions.read_json(self.store / "modeller" / (fingerprint + ".json"))
+                self.assertEqual(receipt["kind"], "motion")
+                self.assertEqual((receipt["motion"]["keyframes"], receipt["motion"]["end"]), (3, .5))
+                self.assertEqual(receipt["motion"]["appearance"], self.look)
+                self.assertEqual((receipt["motion"]["card"], receipt["motion"]["pathSha256"]), (card, "a" * 64))
+        combined = animated_file("samspel", "KORT-02", "cardPathSHA256", componentMotionsSHA256=sources)
+        self.assertEqual(versions.registered_motion(self.store, versions.register_model(self.store, combined))["components"], sources)
+        with self.assertRaisesRegex(ValueError, "underlag saknas"):
+            versions.register_model(self.store, animated_file("annan", "KORT-02", "cardPathSHA256", componentMotionsSHA256=["f" * 64]))
+        self.assertEqual(len(list((self.store / "rorelser").glob("*.json"))), 3)
 
     def test_film_frame_times_and_review_belong_to_one_take(self):
         file = self.root / "test.mp4"

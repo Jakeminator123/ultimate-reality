@@ -23,6 +23,7 @@ const shortNames: Record<string, string> = {
 export default function ModelingStudio() {
   const [checkedRoute, setCheckedRoute] = useState(false);
   const [dealer, setDealer] = useState("paulina");
+  const [initialEdition, setInitialEdition] = useState("");
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.has("pose")) {
@@ -32,13 +33,14 @@ export default function ModelingStudio() {
       return;
     }
     setDealer(query.get("dealer") || "paulina");
+    setInitialEdition(query.get("revision") || "");
     setCheckedRoute(true);
   }, []);
-  return checkedRoute ? <CurrentModelingStudio dealer={dealer}/> : <p role="status">Öppnar modelleringsunderlaget…</p>;
+  return checkedRoute ? <CurrentModelingStudio dealer={dealer} initialEdition={initialEdition}/> : <p role="status">Öppnar modelleringsunderlaget…</p>;
 }
 
-function CurrentModelingStudio({ dealer }: { dealer: string }) {
-  const [edition, setEdition] = useState("");
+function CurrentModelingStudio({ dealer, initialEdition }: { dealer: string; initialEdition: string }) {
+  const [edition, setEdition] = useState(initialEdition);
   const { inventory, loading, error, refresh } = useCurrentModel(edition, dealer);
   const name = dealer.charAt(0).toUpperCase() + dealer.slice(1);
   const paulinaFirst = dealer === "paulina" && inventory?.edition === "fas-1/v1";
@@ -49,9 +51,13 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
   const groups = Array.from(new Set(photos.map(photo => photo.group)));
   const selectedIndex = Math.max(0, photos.findIndex(photo => photo.id === photoId));
   const selected = photos[selectedIndex];
+  const cameraDetail = selected?.group === "Ansikte" ? "ansikte" :
+    selected?.group === "Händer" || selected?.group === "Rörelsereferens" ? "händer" : undefined;
   const source = selected?.url;
   const model = inventory?.activeModel;
-  const cardFilm = inventory?.films.find(f => f.motion && f.card);
+  const proofQuery = new URLSearchParams({ dealer });
+  if (inventory?.revision) proofQuery.set("revision", inventory.revision);
+  const proofPage = "/modellering/rorelseprov?" + proofQuery;
   const markMissing = (id: string) => setMissing(ids => ids.includes(id) ? ids : [...ids, id]);
 
   function stepPhoto(direction: number) {
@@ -89,7 +95,7 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
         <Box size={23} strokeWidth={1.5} aria-hidden/>
       </header>
       <div className={styles.modelSurface}>
-        {model ? <PoseReview key={model.url} model={model} cameraAngle={selected?.group === "Sittande" ? selected.targetAngle : undefined}
+        {model ? <PoseReview key={model.url} model={model} cameraDetail={cameraDetail} cameraAngle={cameraDetail === "händer" ? undefined : selected?.targetAngle}
           reference={selected?.group === "Sittande" ? selected : undefined} guides={cameraGuides} onGuides={setCameraGuides}/> : <div className={styles.empty} role="status">
           <Box size={28} strokeWidth={1.4}/>
           <p>{error || (loading ? "Läser den lokala modellen…" : "Modellfilen saknas på den här datorn.")}</p>
@@ -120,6 +126,8 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
             </button>
           )}</div>
           {group === "Sittande" && paulinaFirst && <a className={styles.heightLink} href="/bildstandard/sitthojd">Jämför sitthöjd och bildskala <ArrowRight size={13}/></a>}
+          {group === "Ansikte" && <a className={styles.heightLink} href={proofPage + "#ansikte"}>Granska blinkningen <ArrowRight size={13}/></a>}
+          {group === "Händer" && <a className={styles.heightLink} href={proofPage + "#hander"}>Följ kortet genom given <ArrowRight size={13}/></a>}
         </section>
       )}</div>
     </section>
@@ -128,12 +136,10 @@ function CurrentModelingStudio({ dealer }: { dealer: string }) {
     <details className={styles.roadmap}>
       <summary>Från rigg till dealerfilm</summary>
       <ol>
-        <li><strong>Placera riggen vid bordet.</strong> Jämför kroppens skala och handens läge vid kortskon från stol 4 och stol 1. <a href="/scenmiljo/scenprov">Se Paulinas frysta grepp i fotostudion</a></li>
-        <li><strong>Filma ett kortdrag framifrån och från sidan samtidigt.</strong> Identifiera grepp, kort på kant och släpp i samma rutor. Sidovyn visar fingrarna när framsidan skyms.</li>
-        <li><strong>{cardFilm ? "Jämför och förfina det animerade greppet." : "Passa handen mot kortet i 3D."}</strong> Styr handled, fingrar och ett gemensamt kort efter referensfilmen. Lägg till släpp och landning. Rendera samma tagning från stol 4 och stol 1. {cardFilm
-          ? <a href={cardFilm.url}>Se utdraget med den valda modellversionen</a>
-          : <a href="/bordsprov/rum3d?rum=mesh&stol=4&glas=1">Öppna bordsprovet med 08-riggen</a>}</li>
-        <li><strong>Spela upp en hel giv till plats 4.</strong> Låt riggen dra, släppa och återgå till vila medan kortet ligger kvar på filten. Rendera båda kamerorna från samma tidslinje. Jämför hud, hår, tyg och skuggor med referensfilmen.</li>
+        <li><strong>Passa bildserien mot en kropp.</strong> Sittfronten ger grundposen. Sittvinklarna kontrollerar hållningen, och porträtten och handryggarna ger detaljer till fotoytan.</li>
+        <li><strong>Prova ansikte och händer parallellt.</strong> Kontrollera hur ögonlocken täcker iris. Följ samma kort från skon genom handbytet tills det ligger stilla på filten. <a href={proofPage}>Öppna rörelseproven</a></li>
+        <li><strong>Spela upp båda rörelserna på samma rigg vid bordet.</strong> Låt blicken följa kortet och händerna återgå till vila. Rendera samma tagning från stol 4 och stol 1.</li>
+        <li><strong>Bedöm den färdiga filmrutan.</strong> Jämför handkontakt, ansiktsuttryck, hår, tyg och skuggor i båda kamerorna. När en fingerkontakt skyms i referensfilmen behövs en samtidig sidovy för att mäta djupet.</li>
       </ol>
     </details>
 

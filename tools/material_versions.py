@@ -214,10 +214,25 @@ def register_model(store, file, run=None):
                   atlas=atlas)
     if motion_base:
         times = animation_times(document, file)
-        check(SLUG.fullmatch(extras["take"]) and SHA.fullmatch(extras["cardPathSHA256"]), "Rörelsens tagning eller kortbana avviker.")
+        card = extras.get("card")
+        take = extras.get("take")
+        path_hash = extras.get("cardPathSHA256")
+        if card is None:
+            path_hash = extras.get("motionPathSHA256", path_hash)
+        check(isinstance(take, str) and SLUG.fullmatch(take) and isinstance(path_hash, str) and SHA.fullmatch(path_hash),
+              "Rörelsens tagning eller tidslinje avviker.")
         record["motion"] = dict(geometry=extras["geometrySHA256"], appearance=motion_base if motion_base != extras["geometrySHA256"] else None,
-                                take=extras["take"], card=extras["card"], pathSha256=extras["cardPathSHA256"],
+                                take=take, card=card, pathSha256=path_hash,
                                 start=times[0], end=times[-1], keyframes=len(times))
+        if "componentMotionsSHA256" in extras:
+            components = extras["componentMotionsSHA256"]
+            check(isinstance(components, list) and components and all(isinstance(c, str) for c in components)
+                  and len(set(components)) == len(components), "Ogiltiga källtagningar.")
+            for component in components:
+                source = registered_motion(store, component)
+                check(all(source.get(k) == record["motion"][k] for k in ("geometry", "appearance")),
+                      "Källtagningen hör till en annan kropp eller fotoyta.")
+            record["motion"]["components"] = components
     receipt = store / "modeller" / (fingerprint + ".json")
     if receipt.exists():
         # A published receipt remains reproducible when today's installed SAM config changes.
@@ -279,17 +294,27 @@ def activate(store, edition, identifier, name, geometry, appearance):
     put(store / "aktiv.json", data, label, activate=True)
 
 
+def registered_motion(store, fingerprint):
+    check(isinstance(fingerprint, str) and SHA.fullmatch(fingerprint), "Ogiltig animationsversion.")
+    receipt = store / "modeller" / (fingerprint + ".json")
+    check(receipt.is_file(), "Animationsversionens underlag saknas.")
+    record = read_json(receipt)
+    key = sha(receipt)
+    locked = store / "rorelser" / (key + ".json")
+    binary = store / "filer" / (fingerprint + ".glb")
+    check(record["kind"] == "motion" and record["sha256"] == fingerprint and locked.is_file()
+          and sha(locked) == key and binary.is_file() and sha(binary) == fingerprint,
+          "Animationsversionens underlag avviker.")
+    return record["motion"]
+
+
 def register_film(store, movie, capture):
     check(movie.suffix.lower() == ".mp4" and capture.get("videoSha256") == sha(movie), "Filmen avviker från exporten.")
     registered_pair(store, capture["geometry"], capture.get("appearance"))
     motion = capture.get("motion")
     if motion:
-        check(SHA.fullmatch(motion), "Ogiltig animationsversion.")
-        receipt = store / "modeller" / (motion + ".json")
-        animated = read_json(receipt)
-        check(sha(store / "filer" / (motion + ".glb")) == motion and animated["kind"] == "motion" and
-              sha(store / "rorelser" / (sha(receipt) + ".json")) == sha(receipt) and
-              all(animated["motion"].get(k) == capture.get(k) for k in ("geometry", "appearance", "take", "card")),
+        animated = registered_motion(store, motion)
+        check(all(animated.get(k) == capture.get(k) for k in ("geometry", "appearance", "take", "card")),
               "Animationsfilen hör till en annan rigg, fotoyta, tagning eller kort.")
     check(SLUG.fullmatch(capture["take"]) and capture["title"].strip() and capture["cameras"], "Ofullständig tagning.")
     probe = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_frames",

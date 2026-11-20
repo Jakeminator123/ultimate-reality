@@ -22,7 +22,7 @@ export type FilmRecord = {
 };
 export type MotionRecord = ModelRecord & { motion: {
   geometry: string; appearance: string | null; take: string; card: string | null; pathSha256: string;
-  start: number; end: number; keyframes: number;
+  start: number; end: number; keyframes: number; components?: string[];
 } };
 export type FilmReview = { schema: 1; film: string; camera: string; frames: number[]; note: string };
 export type Photo = {

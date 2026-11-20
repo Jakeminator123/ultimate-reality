@@ -35,6 +35,16 @@
 .jsonLink { display: inline-block; margin-top: 5px; }
 .frameMarks { display: flex; flex-wrap: wrap; gap: 5px; }
 .frameMarks button { font-size: 12px; padding: 4px 7px; }
+.proofGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+.proof { min-width: 0; padding: 18px; background: var(--white); border: 1px solid var(--line); border-radius: 13px; scroll-margin-top: 16px; }
+.proof h2 { margin: 0; font-size: 22px; }
+.proof p { margin: 6px 0 12px; font-size: 14px; }
+.proof details { border-top: 1px solid var(--line); padding: 12px 0 0; }
+.proof summary { cursor: pointer; font-weight: 650; }
+.proof video { display: block; width: 100%; margin: 10px 0; }
+.combinedProof { grid-column: 1 / -1; }
+.combinedProof video { max-width: 960px; }
+.proof a { font-size: 14px; }
 .panelHeader, .galleryHeader {
   display: flex;
   align-items: center;

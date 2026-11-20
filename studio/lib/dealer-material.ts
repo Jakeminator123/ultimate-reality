@@ -334,8 +334,9 @@ export function materialMarkdown(project: DealerMaterial) {
   rows.push("", "## Registrerade animationer", "");
   if (!project.motions.length) rows.push("Inga verifierade animationer för modellparet.");
   for (const { sha256, motion } of project.motions) rows.push("- " + motion.take + " · GLB " + sha256 +
-    " · " + motion.keyframes + " samplade tidslägen · " + motion.start + "–" + motion.end + " s · kort " + motion.card +
-    " · kortbana " + motion.pathSha256);
+      " · " + motion.keyframes + " samplade tidslägen · " + motion.start + "–" + motion.end + " s" +
+      (motion.card ? " · kort " + motion.card + " · kortbana " : " · rörelsens tidslinje ") + motion.pathSha256 +
+      (motion.components?.length ? " · källtagningar " + motion.components.join(", ") : ""));
   rows.push("", "## Registrerade filmer", "");
   if (!project.films.length) rows.push("Inga verifierade filmer för modellparet.");
   for (const film of project.films) {
